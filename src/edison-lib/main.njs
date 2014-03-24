@@ -1,4 +1,6 @@
 
+'use strict';
+
 exports.sayhello = function ()
 {
 	return "Hello World!";

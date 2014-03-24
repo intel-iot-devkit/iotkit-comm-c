@@ -82,7 +82,7 @@
 	// == Environments ====================================================
 	//
 	// These options pre-define global variables that are exposed by
-	// popular JavaScript libraries and runtime environments—such as
+	// popular JavaScript libraries and runtime environments such as
 	// browser or node.js.
 	"browser" : false, // Standard browser globals e.g. `window`, `document`.
 	"couch" : false, // Enable globals exposed by CouchDB.
