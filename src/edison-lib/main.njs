@@ -3,7 +3,7 @@
 
 exports.sayhello = function ()
 {
-	return "Hello World!";
+	return "Hello Edison user!";
 };
 
 console.log('Loaded edison api');
