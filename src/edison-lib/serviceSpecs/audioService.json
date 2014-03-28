@@ -1,8 +1,10 @@
 {
-    "display" : "Intel Audio Sink",
-    "name" : "http",
-    "protocol" : "tcp",
-    "port" : 8080,
-    "subtypes" : ["speaker", "amplifier"],
-    "txtRecord" : {"mp3" : 128, "wav" : 256}
+    "name" : "Intel Audio Sink",
+    "type" : {
+        "name": "mqtt",
+        "protocol" : "tcp",
+        "subtypes" : ["cpuTemp"]
+    },
+    "port" : 1888,
+    "properties" : {"dataType" : "float"}
 }

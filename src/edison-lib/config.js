@@ -6,6 +6,9 @@ module.exports =
 	superInterfaceName: "interface-for-interfaces",
 	serviceDir: "serviceSpecs",
 	components: {
-		localDirectory: "edison-mdns.js"
+		localDirectory: "edison-mdns.js",
+		localComm: "",
+		cloudComm: "",
+		cloudDirectory: ""
 	}
 };

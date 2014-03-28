@@ -15,14 +15,15 @@ var validator = new InterfaceValidator();
 
 // local directory component (for discovery etc.)
 var localDirectoryPluginPath = path.join(edisonConfig.libRoot, edisonConfig.interfaceImplDir, edisonConfig.components.localDirectory);
-exports.localDirectory = validator.validate(localDirectoryPluginPath);
-exports.localDirectory.advertiseServices(path.join(edisonConfig.libRoot, edisonConfig.serviceDir));
+var localDirectory = validator.validate(localDirectoryPluginPath);
 
 // other components...
 console.log("Edison is now initialized!");
 
 
 //exports (no real need for this)
+exports.config = edisonConfig;
+exports.localDirectory = localDirectory;
 exports.sayhello = function ()
 {
 	return "Hello Edison user!";
