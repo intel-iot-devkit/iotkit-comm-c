@@ -4,19 +4,21 @@ var edison = require('../edison-lib');
 var path = require('path');
 var fs = require('fs');
 
+var edisonMdns = edison.localDirectory.edisonMdns;
+var edisonMqtt = edison.localComm.edisonMqtt;
+
 var serviceSpec = JSON.parse(fs.readFileSync(path.join(edison.config.libRoot, edison.config.serviceDir, "audioService.json")));
 
 var client;
 
-edison.localDirectory.discoverServices(serviceSpec.type, onDiscovery);
-
-
+edisonMdns.discoverServices(serviceSpec.type, onDiscovery);
+	
 function onDiscovery(service){
 	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
 	
-	client = edison.localComm.createClient(service.port, service.addresses[service.addresses.length-1]);
+	client = edisonMqtt.createClient(service.addresses[service.addresses.length-1], service.port);
 	
-	client.subscribe('temperature');
+	client.subscribe('/Intel/temperature');
 	
 	console.log('waiting for messages !!');
 	

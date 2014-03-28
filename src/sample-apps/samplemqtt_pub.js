@@ -3,21 +3,21 @@ var edison = require('../edison-lib');
 // create the MDNS record for advertising
 var path = require('path');
 
+var edisonMdns = edison.localDirectory.edisonMdns;
+var edisonMqtt = edison.localComm.edisonMqtt;
 
-console.log('let us advertize');
-edison.localDirectory.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
-console.log('OK advertised now');
+edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 
-console.log('let me create publisher client');
-var client = edison.localComm.createClient('localhost', 1883);
-console.log('OK created');
+var client = edisonMqtt.createClient('10.24.113.6', 1883);
+setInterval(publishData, 4000);
 
-console.log('let me subscribe to a topic');
-client.subscribe('/intel/temperature');
-console.log('OK subscribed');
 
-console.log('let me publish some message');
-client.publish('/intel/temperature', '{\"cpuTemp\":32.4}');
-console.log('OK published');
+var i = 0;
+function publishData(){
+	i = i + 1;
+	client.publish('/Intel/temperature', '{\"cpuTemp\":' + i + '}');
+	
+	console.log('published message:'+i);
+}
 
-client.end();
+//client.end();

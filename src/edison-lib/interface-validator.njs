@@ -42,38 +42,46 @@ function validateFunctions(plugin, interfaceSpec) {
 	}
 }
 
+function getPluginFilePath(pluginDescriptor) {
+	// todo: will need to add code for non-core plugins at some point
+	return path.join(edisonConfig.libRoot, edisonConfig.pluginDir, pluginDescriptor.fileName);
+}
+
+function getPluginInterfaceFilePath(component, type, core) {
+	// todo: handle non-core plugins
+	return path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, component + "-" + type + ".json");
+}
 // Verifies that a plugin confirms to the interface type it claims to be.
 function InterfaceValidator() {}
 
-// vars
-//InterfaceValidator.prototype.interfaceSpec = {}; // JSON object
-//InterfaceValidator.prototype.interfaceInstance = null; // Object
-//InterfaceValidator.prototype.pluginPath = "";
-
 // methods
-InterfaceValidator.prototype.validate = function(pluginFilePath)
+InterfaceValidator.prototype.validate = function(pluginList, callback)
 {
-	var plugin = require(pluginFilePath);
-	var superInterfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.interfaceDir, edisonConfig.superInterfaceName + ".json");
-	var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
-	
-	// check if interface contains properties and functions that all interfaces are required to have 
-	validateProperties(plugin, superInterfaceSpec, pluginFilePath);
-	validateFunctions(plugin, superInterfaceSpec);
-	
-	// read the correct interface spec to compare our plugin against
-	if (!edisonConfig.components[plugin.component]) {
-		// we know plugin.component exists (see validateProperties() call above)
-		throw("Could not find plugin interface specification for component '" + plugin.component + "'.");
+	for (var i = 0; i < pluginList.length; i++) {
+		// ignoring non-core plugins for now
+		if (pluginList[i].ignored || !pluginList[i].core || !pluginList[i].fileName) {
+			continue;
+		}
+		
+		var pluginFilePath = getPluginFilePath(pluginList[i]);
+		var plugin = require(pluginFilePath);
+		
+		var superInterfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, edisonConfig.superInterfaceName + ".json");
+		var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
+
+		// check if interface contains properties and functions that all interfaces are required to have
+		// need to do this here since plugin.component and plugin.type properties are needed below
+		validateProperties(plugin, superInterfaceSpec, pluginFilePath);
+		validateFunctions(plugin, superInterfaceSpec);
+
+		var pluginInterfaceFilePath = getPluginInterfaceFilePath(plugin.component, plugin.type, pluginList[i].core);
+		var pluginInterfaceSpec = JSON.parse(fs.readFileSync(pluginInterfaceFilePath));
+
+		validateProperties(plugin, pluginInterfaceSpec);
+		validateFunctions(plugin, pluginInterfaceSpec);
+		
+		callback(plugin);
 	}
-	
-	var interfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.interfaceDir, plugin.component + ".json");
-	var interfaceSpec = JSON.parse(fs.readFileSync(interfaceFilePath));
-	
-	validateProperties(plugin, interfaceSpec);
-	validateFunctions(plugin, interfaceSpec);
-	
-	return plugin;
 };
 
 // needed to include like a class

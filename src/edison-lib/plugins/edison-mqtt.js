@@ -1,5 +1,6 @@
 exports.component = "localComm";
-exports.name = "edison-mqtt";
+exports.name = "edisonMqtt";
+exports.type = "pubsub";
 
 var mqtt = require('mqtt');
 var client;
