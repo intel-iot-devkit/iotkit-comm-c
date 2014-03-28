@@ -25,7 +25,6 @@ exports.discoverServices = function (serviceType, callback) {
 	var browser = mdns.createBrowser(serviceType);
 	
 	browser.on('serviceUp', function(service) {
-		console.log("service up: ", service);
 		callback(service);
 	});
 
