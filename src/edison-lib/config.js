@@ -1,14 +1,22 @@
 module.exports =
 {
-	libRoot: __dirname,
-	interfaceDir: "plugin-interfaces",
-	interfaceImplDir: "plugins",
-	superInterfaceName: "interface-for-interfaces",
-	serviceDir: "serviceSpecs",
-	components: {
-		localDirectory: "edison-mdns.js",
-		localComm: "",
-		cloudComm: "",
-		cloudDirectory: ""
-	}
+		libRoot: __dirname,
+		pluginInterfaceDir: "plugin-interfaces",
+		pluginDir: "plugins",
+		superInterfaceName: "interface-for-interfaces",
+		serviceDir: "serviceSpecs",
+		components: {
+			localDirectory: {
+				plugins:
+					[
+					 	{core: true, fileName: "edison-mdns.js"},
+					 	{ignored: true}
+					]
+			},
+			localComm: {
+				plugins:[{}]
+			},
+			cloudComm: [{}],
+			cloudDirectory: [{}]
+		}
 };
