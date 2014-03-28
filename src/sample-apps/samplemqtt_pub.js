@@ -8,7 +8,7 @@ var edisonMqtt = edison.localComm.edisonMqtt;
 
 edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 
-var client = edisonMqtt.createClient('10.24.113.6', 1883);
+var client = edisonMqtt.createClient('localhost', 1883);
 setInterval(publishData, 4000);
 
 
