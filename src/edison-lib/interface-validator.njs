@@ -1,4 +1,5 @@
-var edisonConfig = require("./config.js").config;
+var edisonConfig = require("./config.js");
+var path = require('path');
 var fs = require('fs');
 		
 // functions in local scope
@@ -53,21 +54,21 @@ function InterfaceValidator() {}
 InterfaceValidator.prototype.validate = function(pluginFilePath)
 {
 	var plugin = require(pluginFilePath);
-	var superInterfaceSpec = JSON.parse(fs.readFileSync(edisonConfig.libroot + "/" + edisonConfig.interfaceDir + "/" + edisonConfig.superInterfaceName + ".json"));
+	var superInterfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.interfaceDir, edisonConfig.superInterfaceName + ".json");
+	var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
 	
 	// check if interface contains properties and functions that all interfaces are required to have 
 	validateProperties(plugin, superInterfaceSpec, pluginFilePath);
 	validateFunctions(plugin, superInterfaceSpec);
 	
 	// read the correct interface spec to compare our plugin against
-	var interfaceSpec;
-	switch(plugin.type) { // we know plugin.type exists (see validateProperties() call above)
-	case "localdiscovery":
-		interfaceSpec = JSON.parse(fs.readFileSync(edisonConfig.libroot + "/" + edisonConfig.interfaceDir + "/" + plugin.type + ".json"));
-		break;
-	default:
-		throw("Interface specification '" + plugin.type + "' is not supported.");
+	if (!edisonConfig.components[plugin.component]) {
+		// we know plugin.component exists (see validateProperties() call above)
+		throw("Could not find plugin interface specification for component '" + plugin.component + "'.");
 	}
+	
+	var interfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.interfaceDir, plugin.component + ".json");
+	var interfaceSpec = JSON.parse(fs.readFileSync(interfaceFilePath));
 	
 	validateProperties(plugin, interfaceSpec);
 	validateFunctions(plugin, interfaceSpec);

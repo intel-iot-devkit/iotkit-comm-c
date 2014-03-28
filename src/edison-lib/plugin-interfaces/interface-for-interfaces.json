@@ -1,3 +1,3 @@
 {
-	"properties": ["name", "type"]
+	"properties": ["name", "component"]
 }

@@ -4,4 +4,3 @@
 var edison = require('../edison-lib');
 
 edison.localDirectory.discoverServices();
-

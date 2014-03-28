@@ -1,10 +1,10 @@
-exports.config =
+module.exports =
 {
-	libroot: "/Users/adua/Development/edison-api/src/edison-lib",
+	libRoot: __dirname,
 	interfaceDir: "plugin-interfaces",
 	interfaceImplDir: "plugins",
 	superInterfaceName: "interface-for-interfaces",
-	serviceDir: "services",
+	serviceDir: "serviceSpecs",
 	components: {
 		localDirectory: "edison-mdns.js"
 	}
