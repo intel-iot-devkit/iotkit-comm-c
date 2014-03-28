@@ -7,10 +7,17 @@
 var edisonConfig = require("./config.js").config;
 var InterfaceValidator = require("./interface-validator.njs");
 
-// load plugin for local discovery
+// init edison plugin validator
 var validator = new InterfaceValidator();
-validator.validate(edisonConfig.libroot + "/" + edisonConfig.interfaceImplDir + "/" + edisonConfig.localDiscovery);
-console.log("Validated discovery plugin.");
+
+// load plugins
+
+// local discovery component
+exports.localDirectory = validator.validate(edisonConfig.libroot + "/" + edisonConfig.interfaceImplDir + "/" + edisonConfig.components.localDirectory);
+
+// other components...
+
+console.log("Edison is now initialized!");
 
 // exports (keep this small for this file)
 exports.sayhello = function ()

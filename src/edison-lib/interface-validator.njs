@@ -71,6 +71,8 @@ InterfaceValidator.prototype.validate = function(pluginFilePath)
 	
 	validateProperties(plugin, interfaceSpec);
 	validateFunctions(plugin, interfaceSpec);
+	
+	return plugin;
 };
 
 // needed to include like a class
