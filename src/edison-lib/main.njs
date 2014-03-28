@@ -14,12 +14,13 @@ var validator = new InterfaceValidator();
 
 // local discovery component
 exports.localDirectory = validator.validate(edisonConfig.libroot + "/" + edisonConfig.interfaceImplDir + "/" + edisonConfig.components.localDirectory);
+exports.localDirectory.advertiseServices(edisonConfig.libroot + '/' + edisonConfig.serviceDir);
 
 // other components...
 
 console.log("Edison is now initialized!");
 
-// exports (keep this small for this file)
+//exports (no real need for this)
 exports.sayhello = function ()
 {
 	return "Hello Edison user!";

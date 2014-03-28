@@ -4,6 +4,7 @@ exports.config =
 	interfaceDir: "plugin-interfaces",
 	interfaceImplDir: "plugins",
 	superInterfaceName: "interface-for-interfaces",
+	serviceDir: "services",
 	components: {
 		localDirectory: "edison-mdns.js"
 	}
