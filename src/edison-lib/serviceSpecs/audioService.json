@@ -1,10 +1,10 @@
 {
-    "name" : "Intel Audio Sink",
+    "name" : "temperature",
     "type" : {
         "name": "mqtt",
         "protocol" : "tcp",
         "subtypes" : ["cpuTemp"]
     },
-    "port" : 1888,
+    "port" : 1883,
     "properties" : {"dataType" : "float"}
 }

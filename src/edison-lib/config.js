@@ -14,7 +14,10 @@ module.exports =
 					]
 			},
 			localComm: {
-				plugins:[{}]
+				plugins:
+					[
+					 	{core: true, fileName: "edison-mqtt.js"}
+					]
 			},
 			cloudComm: [{}],
 			cloudDirectory: [{}]

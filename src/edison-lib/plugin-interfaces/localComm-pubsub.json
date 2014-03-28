@@ -1,0 +1,3 @@
+{
+	"functions": ["createClient", "publish", "subscribe", "close"]
+}
