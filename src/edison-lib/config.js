@@ -7,7 +7,7 @@ module.exports =
 	serviceDir: "serviceSpecs",
 	components: {
 		localDirectory: "edison-mdns.js",
-		localComm: "",
+		localComm: "edison-mqtt.js",
 		cloudComm: "",
 		cloudDirectory: ""
 	}
