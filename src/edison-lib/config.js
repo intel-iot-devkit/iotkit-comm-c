@@ -10,7 +10,7 @@ module.exports =
 				plugins:
 					[
 					 	{core: true, fileName: "edison-mdns.js"},
-					 	{ignored: true}
+					 	{}
 					]
 			},
 			localComm: {
