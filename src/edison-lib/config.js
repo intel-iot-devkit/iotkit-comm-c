@@ -9,8 +9,7 @@ module.exports =
 			localDirectory: {
 				plugins:
 					[
-					 	{core: true, fileName: "edison-mdns.js"},
-					 	{}
+					 	{core: true, fileName: "edison-mdns.js"}
 					]
 			},
 			localComm: {

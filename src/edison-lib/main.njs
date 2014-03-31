@@ -19,12 +19,12 @@ var localComm = {};
 
 // local directory plugins (for discovery etc.)
 validator.validate(edisonConfig.components.localDirectory.plugins, function (plugin) {
-	localDirectory[plugin.name] = plugin;
+	localDirectory[plugin.type] = plugin;
 });
 
 // local communication plugins
 validator.validate(edisonConfig.components.localComm.plugins, function (plugin) {
-	localComm[plugin.name] = plugin;
+	localComm[plugin.type] = plugin;
 });
 
 // load other component plugins ...
