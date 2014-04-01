@@ -14,7 +14,6 @@ var validator = new InterfaceValidator();
 // load component plugins
 var component; // current component being processed
 
-// load specified plugins for all supported components
 function setPluginAccessVariable(plugin) {
 	if (!exports[component]) {
 		exports[component] = {};
@@ -22,6 +21,7 @@ function setPluginAccessVariable(plugin) {
 	exports[component][plugin.type] = plugin;
 }
 
+//load specified plugins for all supported components
 for (component in edisonConfig.components) {
 	if (!edisonConfig.components[component] || !edisonConfig.components[component].plugins) {
 		console.log("INFO: No plugins configured for component '" + component + "'. Skipping...");
@@ -30,7 +30,7 @@ for (component in edisonConfig.components) {
 	validator.validate(component, edisonConfig.components[component].plugins, setPluginAccessVariable);
 }
 
-console.log("Edison is now initialized!");
+console.log("The Edison convenience library is now initialized.");
 
 //exports (no real need for this)
 exports.config = edisonConfig;

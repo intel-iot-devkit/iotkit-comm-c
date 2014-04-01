@@ -30,6 +30,12 @@ function validateFunctions(plugin, interfaceSpec) {
 	// check if all required function names exist
 	for (var j in interfaceSpec.functions) {
 		if (!plugin[interfaceSpec.functions[j]]) {
+			if (this.assumedPrototypeExists) {
+				console.log("WARNING: Since module.exports was set to a function, it is assumed that the " +
+						"plugin is a class defined using the prototype object. If this is not the case, " +
+						"please make sure to use the prototype object, or the exports.<function name>, " +
+						" or module.exports = {<all your functions>} convention to export functions in your plugin.");
+			}
 			throw("Plugin '" + plugin.name + "' does not define required function '" + interfaceSpec.functions[j] + "'.");
 		}
 	}
@@ -80,6 +86,7 @@ function getPluginInterfaceFilePath(pluginComponents, type, configComponent) {
 
 // format: { "type": ["plugin1", "plugin2"]}
 InterfaceValidator.prototype.loadedPlugins = {};
+InterfaceValidator.prototype.assumedPrototypeExists = false;
 
 // methods
 
@@ -93,6 +100,18 @@ InterfaceValidator.prototype.validate = function(component, pluginList, callback
 		
 		var pluginFilePath = getPluginFilePath(pluginList[i]);
 		var plugin = require(pluginFilePath);
+		
+		if (typeof plugin === "function")
+		{ // if plugin is defined as a class with module.exports = <constructor name>
+			if(plugin.prototype) {
+				plugin = plugin.prototype;
+				this.assumedPrototypeExists = true;
+			} else {
+				throw ("Plugin at " + pluginFilePath + "must be defined using the prototype object if it is a class." +
+						" If not, please use the exports.<function name> or module.exports = {<all your functions>}" +
+						" method to export functions in your plugin.");
+			}
+		}
 		
 		var superInterfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, edisonConfig.superInterfaceName + ".json");
 		var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
