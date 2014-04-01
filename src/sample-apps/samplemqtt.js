@@ -4,14 +4,19 @@ var edison = require('../edison-lib');
 var path = require('path');
 var fs = require('fs');
 
-var edisonMdns = edison.localDirectory.edisonMdns;
-var edisonMqtt = edison.localComm.edisonMqtt;
+var edisonMdns = edison.localDirectory.basic;
+var edisonMqtt = edison.localComm.pubsub;
 
-var serviceSpec = JSON.parse(fs.readFileSync(path.join(edison.config.libRoot, edison.config.serviceDir, "audioService.json")));
+var serviceType = {
+		"name": "mqtt",
+		"protocol" : "tcp",
+		"subtypes" : ["cpuTemp"]
+};
+
 
 var client;
 
-edisonMdns.discoverServices(serviceSpec.type, onDiscovery);
+edisonMdns.discoverServices(serviceType, onDiscovery);
 	
 function onDiscovery(service){
 	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);

@@ -1,6 +1,6 @@
 var edison = require('../edison-lib');
 
-var edisonMdns = edison.localDirectory.edisonMdns;
+var discoveryService = edison.localDirectory.basic;
 
 var serviceType = {
 		"name": "mqtt",
@@ -8,6 +8,8 @@ var serviceType = {
 		"subtypes" : ["cpuTemp"]
 };
 
-edisonMdns.discoverServices(serviceType, function(service) {
-	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
+discoveryService.discoverServices(serviceType, function(service) {
+	console.log("found " + service.type.name + " service at " +
+			service.addresses[service.addresses.length-1] + ":" + service.port +
+			" on interface " + service.networkInterface);
 });
