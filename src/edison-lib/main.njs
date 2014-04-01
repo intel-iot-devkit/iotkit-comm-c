@@ -30,8 +30,6 @@ for (component in edisonConfig.components) {
 	validator.validate(component, edisonConfig.components[component].plugins, setPluginAccessVariable);
 }
 
-console.log("The Edison convenience library is now initialized.");
-
 //exports (no real need for this)
 exports.config = edisonConfig;
 
@@ -39,4 +37,18 @@ exports.config = edisonConfig;
 exports.sayhello = function ()
 {
 	return "Hello Edison user!";
+};
+
+exports.getPlugin = function (component, type) {
+	if (!exports[component]) {
+		throw("Component '" + component + "' was not included in the edison library. " +
+				"It is either not defined in the configuration file or has no plugins associated with it.");
+	}
+	
+	if (!exports[component][type]) {
+		throw("No plugin of type '" + type + "' exists for component '" + component + "'. " +
+				"Please ensure that a plugin for this type is included in the configuration of this component.");
+	}
+	
+	return exports[component][type];
 };
