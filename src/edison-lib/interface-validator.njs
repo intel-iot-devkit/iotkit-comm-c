@@ -43,13 +43,39 @@ function validateFunctions(plugin, interfaceSpec) {
 }
 
 function getPluginFilePath(pluginDescriptor) {
-	// todo: will need to add code for non-core plugins at some point
 	return path.join(edisonConfig.libRoot, edisonConfig.pluginDir, pluginDescriptor.fileName);
 }
 
-function getPluginInterfaceFilePath(component, type, core) {
-	// todo: handle non-core plugins
-	return path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, component + "-" + type + ".json");
+function getPluginInterfaceFilePath(pluginComponents, type, configComponent) {
+	var possibleComponents = [];
+
+	// for...in loops should not be used for arrays in javascript.
+	// don't know why, but got 0s instead of array contents
+	for (var i = 0; i < pluginComponents.length; ++i) {
+		var currentPath = path.join(edisonConfig.libRoot,
+				edisonConfig.pluginInterfaceDir,
+				pluginComponents[i] + "-" + type + ".json");
+		
+		if (fs.existsSync(currentPath))
+		{ // interface file exists for this component and plugin type
+			possibleComponents.push(pluginComponents[i]);
+		}
+	}
+	
+	if (possibleComponents.length === 0) {
+		throw ("No interface specification file found for any of the following components '" +
+				pluginComponents + "' and type '" + type + "'.");
+	}
+	
+	if (possibleComponents.indexOf(configComponent) !== -1)
+	{ // currently processed component has a valid interface spec for the plugin type, use it
+		return path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir,
+				configComponent + "-" + type + ".json");
+	}
+
+	// otherwise, just return the one that exists
+	return path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir,
+			possibleComponents[0] + "-" + type + ".json");
 }
 
 // format: { "type": ["plugin1", "plugin2"]}
@@ -61,8 +87,7 @@ InterfaceValidator.prototype.loadedPlugins = {};
 InterfaceValidator.prototype.validate = function(component, pluginList, callback)
 {
 	for (var i = 0; i < pluginList.length; i++) {
-		// ignoring non-core plugins for now
-		if (pluginList[i].ignored || !pluginList[i].core || !pluginList[i].fileName) {
+		if (pluginList[i].ignored || !pluginList[i].fileName) {
 			continue;
 		}
 		
@@ -77,37 +102,45 @@ InterfaceValidator.prototype.validate = function(component, pluginList, callback
 		validateProperties(plugin, superInterfaceSpec, pluginFilePath);
 		validateFunctions(plugin, superInterfaceSpec);
 		
-		if (component !== plugin.component) {
-			throw ("Plugin '" + plugin.name + "' was not written for component '" + component +
-					"'. Please edit config file and make this plugin load for component '" + plugin.component + "'.");
+		if (!Array.isArray(plugin.components)) {
+			throw ("Property 'components' in plugin '" + plugin.name +
+					"' must be an array of valid component names.");
 		}
 		
-		var pluginInterfaceFilePath = getPluginInterfaceFilePath(plugin.component, plugin.type, pluginList[i].core);
+		if (plugin.components.indexOf(component) === -1) {
+			throw ("Plugin '" + plugin.name + "' was not written for component '" + component +
+					"'. Please edit config file and make this plugin load for one of the following components '" +
+					plugin.component + "'.");
+		}
+		
+		var pluginInterfaceFilePath = getPluginInterfaceFilePath(plugin.components, plugin.type, component);
 		var pluginInterfaceSpec = JSON.parse(fs.readFileSync(pluginInterfaceFilePath));
 
 		validateProperties(plugin, pluginInterfaceSpec);
 		validateFunctions(plugin, pluginInterfaceSpec);
 		
-		if (!this.loadedPlugins[plugin.component]) {
-			this.loadedPlugins[plugin.component] = {};
+		
+		
+		if (!this.loadedPlugins[component]) {
+			this.loadedPlugins[component] = {};
 		}
 		
-		if (!this.loadedPlugins[plugin.component][plugin.type]) {	
-			this.loadedPlugins[plugin.component][plugin.type] = [];
+		if (!this.loadedPlugins[component][plugin.type]) {	
+			this.loadedPlugins[component][plugin.type] = [];
 		} else {
-			if (this.loadedPlugins[plugin.component][plugin.type].indexOf(plugin.name) != -1) {
-				console.log("INFO: Plugin '" + plugin.name + "' for component '" + plugin.component + "' already exists. Skipping...");
+			if (this.loadedPlugins[component][plugin.type].indexOf(plugin.name) !== -1) {
+				console.log("INFO: Plugin '" + plugin.name + "' for component '" + component + "' already exists. Skipping...");
 				continue;
 			}
 			
 			console.log("WARNING: Following plugins with type '" + plugin.type +
-					"' already exist for component '" + plugin.component + "'");
-			console.log("(" + this.loadedPlugins[plugin.component][plugin.type] + ")");
+					"' already exist for component '" + component + "'");
+			console.log("(" + this.loadedPlugins[component][plugin.type] + ")");
 			console.log("The plugin that was just loaded is " + plugin.name +
-					", and it is the new active plugin for component '" + plugin.component + 
+					", and it is the new active plugin for component '" + component + 
 					"' and type '" + plugin.type +"'");	
 		}
-		this.loadedPlugins[plugin.component][plugin.type].push(plugin.name);
+		this.loadedPlugins[component][plugin.type].push(plugin.name);
 		
 		callback(plugin);
 	}

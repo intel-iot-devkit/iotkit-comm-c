@@ -1,4 +1,4 @@
-exports.component = "localDirectory";
+exports.components = ["localDirectory"];
 exports.name = "edisonMdns";
 exports.type = "basic";
 

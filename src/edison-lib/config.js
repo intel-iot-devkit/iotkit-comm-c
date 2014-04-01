@@ -9,16 +9,21 @@ module.exports =
 			localDirectory: {
 				plugins:
 					[
-					 	{core: true, fileName: "edison-mdns.js"}
+					 	{fileName: "edison-mdns.js"}
 					]
 			},
 			localComm: {
 				plugins:
 					[
-					 	{core: true, fileName: "edison-mqtt.js"}
+					 	{fileName: "edison-mqtt.js"}
 					]
 			},
-			cloudComm: [{}],
+			cloudComm: {
+				plugins:
+					[
+					 	{fileName: "edison-mqtt.js"}
+					]
+			},
 			cloudDirectory: [{}]
 		}
 };

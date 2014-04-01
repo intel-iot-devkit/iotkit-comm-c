@@ -3,7 +3,7 @@ var os = require('os');
 
 var discoveryService = edison.localDirectory.basic;
 
-console.log(os.networkInterfaces());
+//console.log(os.networkInterfaces());
 
 var serviceType = {
 		"name": "mqtt",

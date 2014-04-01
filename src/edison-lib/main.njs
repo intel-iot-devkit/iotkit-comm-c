@@ -12,16 +12,17 @@ var InterfaceValidator = require("./interface-validator.njs");
 var validator = new InterfaceValidator();
 
 // load component plugins
+var component; // current component being processed
 
 // load specified plugins for all supported components
 function setPluginAccessVariable(plugin) {
-	if (!exports[plugin.component]) {
-		exports[plugin.component] = {};
+	if (!exports[component]) {
+		exports[component] = {};
 	}
-	exports[plugin.component][plugin.type] = plugin;
+	exports[component][plugin.type] = plugin;
 }
 
-for (var component in edisonConfig.components) {
+for (component in edisonConfig.components) {
 	if (!edisonConfig.components[component] || !edisonConfig.components[component].plugins) {
 		console.log("INFO: No plugins configured for component '" + component + "'. Skipping...");
 		continue;
