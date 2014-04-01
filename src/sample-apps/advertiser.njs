@@ -4,6 +4,6 @@
 var edison = require('../edison-lib');
 var path = require('path');
 
-var edisonMdns = edison.localDirectory.edisonMdns;
+var discoveryService = edison.localDirectory.basic;
 
-edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
+discoveryService.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));

@@ -3,14 +3,12 @@ var edison = require('../edison-lib');
 // create the MDNS record for advertising
 var path = require('path');
 
-var edisonMdns = edison.localDirectory.edisonMdns;
-var edisonMqtt = edison.localComm.edisonMqtt;
+var edisonMdns = edison.localDirectory.basic;
+var edisonMqtt = edison.localComm.pubsub;
 
 edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 
 var client = edisonMqtt.createClient('localhost', 1883);
-setInterval(publishData, 4000);
-
 
 var i = 0;
 function publishData(){
@@ -19,5 +17,7 @@ function publishData(){
 	
 	console.log('published message:'+i);
 }
+
+setInterval(publishData, 4000);
 
 //client.end();

@@ -37,7 +37,7 @@ function validateFunctions(plugin, interfaceSpec) {
 	// check that type is indeed a function
 	for (var i in interfaceSpec.functions) {
 		if ((typeof plugin[interfaceSpec.functions[i]]) !== "function") {
-			throw("Plugin '" + plugin.name + "' does not define required function '" + interfaceSpec.functions[i] + "'.");
+			throw("Plugin '" + plugin.name + "' does not define '" + interfaceSpec.functions[i] + "' as a function.");
 		}
 	}
 }
@@ -52,12 +52,13 @@ function getPluginInterfaceFilePath(component, type, core) {
 	return path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, component + "-" + type + ".json");
 }
 
-InterfaceValidator.prototype.loadedPlugins;
+// format: { "type": ["plugin1", "plugin2"]}
+InterfaceValidator.prototype.loadedPlugins = {};
 
 // methods
 
 //Verifies that a plugin confirms to the interface type it claims to be.
-InterfaceValidator.prototype.validate = function(pluginList, callback)
+InterfaceValidator.prototype.validate = function(component, pluginList, callback)
 {
 	for (var i = 0; i < pluginList.length; i++) {
 		// ignoring non-core plugins for now
@@ -75,6 +76,11 @@ InterfaceValidator.prototype.validate = function(pluginList, callback)
 		// need to do this here since plugin.component and plugin.type properties are needed below
 		validateProperties(plugin, superInterfaceSpec, pluginFilePath);
 		validateFunctions(plugin, superInterfaceSpec);
+		
+		if (component !== plugin.component) {
+			throw ("Plugin '" + plugin.name + "' was not written for component '" + component +
+					"'. Please edit config file and make this plugin load for component '" + plugin.component + "'.");
+		}
 		
 		var pluginInterfaceFilePath = getPluginInterfaceFilePath(plugin.component, plugin.type, pluginList[i].core);
 		var pluginInterfaceSpec = JSON.parse(fs.readFileSync(pluginInterfaceFilePath));
@@ -108,8 +114,7 @@ InterfaceValidator.prototype.validate = function(pluginList, callback)
 };
 
 function InterfaceValidator() {
-	// example: loadedPlugins = { "type": ["plugin1", "plugin2"]}
-	this.loadedPlugins = {};
+	
 }
 
 // needed to include like a class
