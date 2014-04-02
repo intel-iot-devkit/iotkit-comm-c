@@ -6,24 +6,17 @@ module.exports =
 		superInterfaceName: "interface-for-interfaces",
 		serviceDir: "serviceSpecs",
 		components: {
-			localDirectory: {
+			discovery: {
 				plugins:
 					[
 					 	{fileName: "edison-mdns.js"}
 					]
 			},
-			localComm: {
+			communication: {
 				plugins:
 					[
 					 	{fileName: "edison-mqtt.js"}
 					]
-			},
-			cloudComm: {
-				plugins:
-					[
-					 	{fileName: "edison-mqtt.js"}
-					]
-			},
-			cloudDirectory: [{}]
+			}
 		}
 };

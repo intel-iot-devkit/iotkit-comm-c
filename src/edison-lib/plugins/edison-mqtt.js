@@ -1,4 +1,4 @@
-exports.components = ["localComm", "cloudComm"];
+exports.components = ["communication"];
 exports.name = "edisonMqtt";
 exports.type = "pubsub";
 

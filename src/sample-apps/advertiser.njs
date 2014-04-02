@@ -1,9 +1,9 @@
 /**
  * New node file
  */
-var edison = require('../edison-lib');
+var edisonLib = require('../edison-lib');
 var path = require('path');
 
-var discoveryService = edison.localDirectory.basic;
+var discoveryService = edisonLib.getPlugin("discovery", "local");
 
-discoveryService.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
+discoveryService.advertiseServices(path.join(edisonLib.config.libRoot, edisonLib.config.serviceDir));

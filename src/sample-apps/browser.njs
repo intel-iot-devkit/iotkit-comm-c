@@ -1,7 +1,7 @@
 var edisonlib = require('../edison-lib');
 var os = require('os');
 
-var discoveryService = edisonlib.getPlugin("localDirectory", "basic");
+var discoveryService = edisonlib.getPlugin("discovery", "local");
 
 //console.log(os.networkInterfaces());
 

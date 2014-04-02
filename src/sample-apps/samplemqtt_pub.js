@@ -3,8 +3,8 @@ var edison = require('../edison-lib');
 // create the MDNS record for advertising
 var path = require('path');
 
-var edisonMdns = edison.localDirectory.basic;
-var edisonMqtt = edison.localComm.pubsub;
+var edisonMdns = edison.getPlugin("discovery", "local");
+var edisonMqtt = edison.getPlugin("communication", "pubsub");
 
 edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 

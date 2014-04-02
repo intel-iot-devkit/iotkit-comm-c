@@ -4,8 +4,8 @@ var edison = require('../edison-lib');
 var path = require('path');
 var fs = require('fs');
 
-var edisonMdns = edison.localDirectory.basic;
-var edisonMqtt = edison.localComm.pubsub;
+var edisonMdns = edison.discovery.local;
+var edisonMqtt = edison.getPlugin("communication", "pubsub");
 
 var serviceType = {
 		"name": "mqtt",

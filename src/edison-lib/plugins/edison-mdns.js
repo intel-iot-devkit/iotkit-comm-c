@@ -1,6 +1,6 @@
-exports.components = ["localDirectory"];
+exports.components = ["discovery"];
 exports.name = "edisonMdns";
-exports.type = "basic";
+exports.type = "local";
 
 var mdns = require('mdns2');
 var fs = require('fs');
