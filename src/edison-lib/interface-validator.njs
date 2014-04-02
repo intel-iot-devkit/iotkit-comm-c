@@ -34,7 +34,7 @@ function validateFunctions(plugin, interfaceSpec) {
 				console.log("WARNING: Since module.exports was set to a function, it is assumed that the " +
 						"plugin is a class defined using the prototype object. If this is not the case, " +
 						"please make sure to use the prototype object, or the exports.<function name>, " +
-						" or module.exports = {<all your functions>} convention to export functions in your plugin.");
+						"or module.exports = {<all your functions>} convention to export functions in your plugin.");
 			}
 			throw("Plugin '" + plugin.name + "' does not define required function '" + interfaceSpec.functions[j] + "'.");
 		}
@@ -129,7 +129,7 @@ InterfaceValidator.prototype.validate = function(component, pluginList, callback
 		if (plugin.components.indexOf(component) === -1) {
 			throw ("Plugin '" + plugin.name + "' was not written for component '" + component +
 					"'. Please edit config file and make this plugin load for one of the following components '" +
-					plugin.component + "'.");
+					plugin.components + "'.");
 		}
 		
 		var pluginInterfaceFilePath = getPluginInterfaceFilePath(plugin.components, plugin.type, component);
