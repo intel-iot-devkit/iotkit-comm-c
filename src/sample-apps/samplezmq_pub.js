@@ -9,8 +9,8 @@ var PubSubClient = edison.getPlugin("communication", "pubsub");
 var mdns = new LocalDiscoveryService();
 mdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 
-var client = new PubSubClient();
-client.publishTo('localhost', 1883);
+var client = new PubSubClient('localhost', 1883, 'pub');
+//client.publishTo('localhost', 1883);
 
 var i = 0;
 function publishData(){
