@@ -1,26 +1,36 @@
 var mqtt = require('mqtt');
 
-var client;
+var publishDest;
+var subscriptionSource;
 
-function EdisonMQTT(brokerip, brokerport) {
+function EdisonMQTT() {
   "use strict";
-
-  console.log(__filename + ":IP:" + brokerip + ":port:"+brokerport);
-  client = mqtt.createClient(brokerport, brokerip);
 }
 
 EdisonMQTT.prototype.components = ["communication"];
 EdisonMQTT.prototype.name = "edisonMqtt";
 EdisonMQTT.prototype.type = "pubsub";
 
+EdisonMQTT.prototype.publishTo = function (brokerip, brokerport) {
+  "use strict";
+  console.log(__filename + ":IP:" + brokerip + ":port:"+brokerport);
+  publishDest = mqtt.createClient(brokerip, brokerport);
+}
+
+EdisonMQTT.prototype.subscribeFrom = function (brokerip, brokerport) {
+  "use strict";
+  subscriptionSource = mqtt.createClient(brokerip, brokerport);
+}
+
 EdisonMQTT.prototype.publish = function (topic, message) {
-	client.publish(topic, message);
+	publishDest.publish(topic, message);
 };
 
 EdisonMQTT.prototype.subscribe = function (topic, callback) {
-	client.subscribe(topic);
+  console.log(topic);
+	subscriptionSource.subscribe(topic);
 	
-	client.on('message', function (topic, message) {
+	subscriptionSource.on('message', function (topic, message) {
 		  callback(topic, message);
 		});
 };
