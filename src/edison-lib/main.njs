@@ -18,7 +18,7 @@ function setPluginAccessVariable(plugin) {
 	if (!exports[component]) {
 		exports[component] = {};
 	}
-	exports[component][plugin.type] = plugin;
+	exports[component][plugin.prototype.type] = plugin;
 }
 
 //load specified plugins for all supported components

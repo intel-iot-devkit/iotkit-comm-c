@@ -1,23 +1,23 @@
-exports.components = ["communication"];
-exports.name = "edisonMqtt";
-exports.type = "pubsub";
-
 var mqtt = require('mqtt');
+
 var client;
 
-exports.createClient = function (brokerip, brokerport) {
-	
-	console.log(__filename + ":IP:" + brokerip + ":port:"+brokerport);
-	client = mqtt.createClient(brokerport, brokerip);
-	
-	return client;
-};
+function EdisonMQTT(brokerip, brokerport) {
+  "use strict";
 
-exports.publish = function (topic, message) {
+  console.log(__filename + ":IP:" + brokerip + ":port:"+brokerport);
+  client = mqtt.createClient(brokerport, brokerip);
+}
+
+EdisonMQTT.prototype.components = ["communication"];
+EdisonMQTT.prototype.name = "edisonMqtt";
+EdisonMQTT.prototype.type = "pubsub";
+
+EdisonMQTT.prototype.publish = function (topic, message) {
 	client.publish(topic, message);
 };
 
-exports.subscribe = function (topic, callback) {
+EdisonMQTT.prototype.subscribe = function (topic, callback) {
 	client.subscribe(topic);
 	
 	client.on('message', function (topic, message) {
@@ -25,6 +25,8 @@ exports.subscribe = function (topic, callback) {
 		});
 };
 
-exports.close = function () {
+EdisonMQTT.prototype.close = function () {
 	client.end();
 };
+
+module.exports = EdisonMQTT;

@@ -1,47 +1,40 @@
-exports.components = ["communication"];
-exports.name = "edisonZmq";
-exports.type = "pubsub";
-
 var zeromq = require('zmq');
-var client;
 
-exports.createPubClient = function (ip, port, callback) {
+var pubsocket, subsocket;
 
-    console.log(__filename + ":IP:" + ip + ":port:" + port);
+function ZeroMQ(ip, port, type) {
+  "use strict";
 
-    client = zeromq.socket('pub');
-    client.bind('tcp://*:' + port, function (error) {
-        if (error) {
-            console.log(__filename + " Error: " + error);
-        }
-        console.log(__filename + "Bind done");
-        callback(client);
-    });
+  if (type === 'pub') {
+    pubsocket = zeromq.socket('pub');
+    pubsocket.bindSync('tcp://*:' + port);
+  } else if (type === 'sub' ) {
+    subsocket = zeromq.socket('sub');
+    subsocket.connect('tcp://' + ip + ':' + port);
+  } else {
+    throw ("Possible types are 'pub' or 'sub'");
+  }
+}
+
+ZeroMQ.prototype.components = ["communication"];
+ZeroMQ.prototype.name = "edisonZmq";
+ZeroMQ.prototype.type = "pubsub";
+
+ZeroMQ.prototype.publish = function (topic, message) {
+    pubsocket.send(topic + ' ' + message);
 };
 
-exports.createClient = function (ip, port) {
+ZeroMQ.prototype.subscribe = function (topic, callback) {
+    subsocket.subscribe(topic);
 
-    console.log(__filename + ":IP:" + ip + ":port:" + port);
-
-    client = zeromq.socket('sub');
-    client.connect('tcp://' + ip + ':' + port);
-
-    return client;
-};
-
-exports.publish = function (topic, message) {
-    client.send(topic + ' ' + message);
-};
-
-exports.subscribe = function (topic, callback) {
-    client.subscribe(topic);
-
-    client.on('message', function (message) {
+    subsocket.on('message', function (message) {
         console.log(__filename, "sub received:" + topic + message);
         callback(topic, message);
     });
 };
 
-exports.close = function () {
-    client.close();
+ZeroMQ.prototype.close = function () {
+    subsocket.close();
 };
+
+module.exports = ZeroMQ;

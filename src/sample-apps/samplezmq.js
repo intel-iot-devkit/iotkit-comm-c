@@ -1,11 +1,11 @@
 //'use strict';
 
-var edison = require('../edison-lib');
-var path = require('path');
-var fs = require('fs');
+var edisonLib = require('../edison-lib');
 
-var edisonMdns = edison.discovery.local;
-var edisonZmq = edison.getPlugin("communication", "pubsub");
+var LocalDiscoveryService = edisonLib.getPlugin("discovery", "local");
+var PubSubComm = edisonLib.getPlugin("communication", "pubsub");
+
+var mdns = new LocalDiscoveryService();
 
 var serviceType = {
 		"name": "zmq",
@@ -13,21 +13,17 @@ var serviceType = {
 		"subtypes" : ["cpuTemp"]
 };
 
+var pubsubclient;
 
-var client;
-
-edisonMdns.discoverServices(serviceType, onDiscovery);
-	
+mdns.discoverServices(serviceType, onDiscovery);
 function onDiscovery(service){
 	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
-	
-	client = edisonZmq.createClient(service.addresses[service.addresses.length-1], service.port);
-	
-	client.subscribe('/Intel/temperature');
+
+  pubsubclient = new PubSubComm(service.addresses[service.addresses.length-1], service.port, 'sub');
+	pubsubclient.subscribe('/Intel/temperature', function (topic, message) {
+    console.log('msg ' + message);
+    console.log('topic ' + topic);
+  });
 	
 	console.log('waiting for messages !!');
-	
-	client.on('message', function (message) {
-	  console.log('msg' + message);
-	});
 }

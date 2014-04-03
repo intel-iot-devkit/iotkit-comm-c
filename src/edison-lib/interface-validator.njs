@@ -2,7 +2,8 @@ var edisonConfig = require("./config.js");
 var path = require('path');
 var fs = require('fs');
 		
-// functions in local scope
+// private functions and variables
+var assumedPrototypeExists;
 
 // if pluginFilePath is not supplied, it is assumed that property plugin.name exists
 function validateProperties(plugin, interfaceSpec, pluginFilePath) {
@@ -30,7 +31,7 @@ function validateFunctions(plugin, interfaceSpec) {
 	// check if all required function names exist
 	for (var j in interfaceSpec.functions) {
 		if (!plugin[interfaceSpec.functions[j]]) {
-			if (this.assumedPrototypeExists) {
+			if (assumedPrototypeExists) {
 				console.log("WARNING: Since module.exports was set to a function, it is assumed that the " +
 						"plugin is a class defined using the prototype object. If this is not the case, " +
 						"please make sure to use the prototype object, or the exports.<function name>, " +
@@ -86,7 +87,6 @@ function getPluginInterfaceFilePath(pluginComponents, type, configComponent) {
 
 // format: { "type": ["plugin1", "plugin2"]}
 InterfaceValidator.prototype.loadedPlugins = {};
-InterfaceValidator.prototype.assumedPrototypeExists = false;
 
 // methods
 
@@ -101,42 +101,38 @@ InterfaceValidator.prototype.validate = function(component, pluginList, callback
 		var pluginFilePath = getPluginFilePath(pluginList[i]);
 		var plugin = require(pluginFilePath);
 		
-		if (typeof plugin === "function")
-		{ // if plugin is defined as a class with module.exports = <constructor name>
-			if(plugin.prototype) {
-				plugin = plugin.prototype;
-				this.assumedPrototypeExists = true;
-			} else {
-				throw ("Plugin at " + pluginFilePath + "must be defined using the prototype object if it is a class." +
-						" If not, please use the exports.<function name> or module.exports = {<all your functions>}" +
-						" method to export functions in your plugin.");
-			}
-		}
+		if (typeof plugin === "function" && plugin.prototype)
+		{ // if pluginPrototype is defined as a class with module.exports = <constructor name>
+				pluginPrototype = plugin.prototype;
+		} else {
+      throw ("Plugin at " + pluginFilePath + "must be defined like a class using the prototype object. " +
+         "Its functionality should be exported using the module.exports = Constructor() convention.");
+    }
 		
 		var superInterfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, edisonConfig.superInterfaceName + ".json");
 		var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
 
 		// check if interface contains properties and functions that all interfaces are required to have
-		// need to do this here since plugin.component and plugin.type properties are needed below
-		validateProperties(plugin, superInterfaceSpec, pluginFilePath);
-		validateFunctions(plugin, superInterfaceSpec);
+		// need to do this here since pluginPrototype.component and pluginPrototype.type properties are needed below
+		validateProperties(pluginPrototype, superInterfaceSpec, pluginFilePath);
+		validateFunctions(pluginPrototype, superInterfaceSpec);
 		
-		if (!Array.isArray(plugin.components)) {
-			throw ("Property 'components' in plugin '" + plugin.name +
+		if (!Array.isArray(pluginPrototype.components)) {
+			throw ("Property 'components' in pluginPrototype '" + pluginPrototype.name +
 					"' must be an array of valid component names.");
 		}
 		
-		if (plugin.components.indexOf(component) === -1) {
-			throw ("Plugin '" + plugin.name + "' was not written for component '" + component +
-					"'. Please edit config file and make this plugin load for one of the following components '" +
-					plugin.components + "'.");
+		if (pluginPrototype.components.indexOf(component) === -1) {
+			throw ("Plugin '" + pluginPrototype.name + "' was not written for component '" + component +
+					"'. Please edit config file and make this pluginPrototype load for one of the following components '" +
+					pluginPrototype.components + "'.");
 		}
 		
-		var pluginInterfaceFilePath = getPluginInterfaceFilePath(plugin.components, plugin.type, component);
+		var pluginInterfaceFilePath = getPluginInterfaceFilePath(pluginPrototype.components, pluginPrototype.type, component);
 		var pluginInterfaceSpec = JSON.parse(fs.readFileSync(pluginInterfaceFilePath));
 
-		validateProperties(plugin, pluginInterfaceSpec);
-		validateFunctions(plugin, pluginInterfaceSpec);
+		validateProperties(pluginPrototype, pluginInterfaceSpec);
+		validateFunctions(pluginPrototype, pluginInterfaceSpec);
 		
 		
 		
@@ -144,22 +140,22 @@ InterfaceValidator.prototype.validate = function(component, pluginList, callback
 			this.loadedPlugins[component] = {};
 		}
 		
-		if (!this.loadedPlugins[component][plugin.type]) {	
-			this.loadedPlugins[component][plugin.type] = [];
+		if (!this.loadedPlugins[component][pluginPrototype.type]) {
+			this.loadedPlugins[component][pluginPrototype.type] = [];
 		} else {
-			if (this.loadedPlugins[component][plugin.type].indexOf(plugin.name) !== -1) {
-				console.log("INFO: Plugin '" + plugin.name + "' for component '" + component + "' already exists. Skipping...");
+			if (this.loadedPlugins[component][pluginPrototype.type].indexOf(pluginPrototype.name) !== -1) {
+				console.log("INFO: Plugin '" + pluginPrototype.name + "' for component '" + component + "' already exists. Skipping...");
 				continue;
 			}
 			
-			console.log("WARNING: Following plugins with type '" + plugin.type +
+			console.log("WARNING: Following plugins with type '" + pluginPrototype.type +
 					"' already exist for component '" + component + "'");
-			console.log("(" + this.loadedPlugins[component][plugin.type] + ")");
-			console.log("The plugin that was just loaded is " + plugin.name +
-					", and it is the new active plugin for component '" + component + 
-					"' and type '" + plugin.type +"'");	
+			console.log("(" + this.loadedPlugins[component][pluginPrototype.type] + ")");
+			console.log("The pluginPrototype that was just loaded is " + pluginPrototype.name +
+					", and it is the new active pluginPrototype for component '" + component +
+					"' and type '" + pluginPrototype.type +"'");
 		}
-		this.loadedPlugins[component][plugin.type].push(plugin.name);
+		this.loadedPlugins[component][pluginPrototype.type].push(pluginPrototype.name);
 		
 		callback(plugin);
 	}

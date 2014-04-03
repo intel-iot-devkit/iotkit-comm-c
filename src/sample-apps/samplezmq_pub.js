@@ -3,20 +3,17 @@ var edison = require('../edison-lib');
 // create the MDNS record for advertising
 var path = require('path');
 
-var edisonMdns = edison.getPlugin("discovery", "local");
-var edisonZmq = edison.getPlugin("communication", "pubsub");
-var client;
+var LocalDiscoveryService = edison.getPlugin("discovery", "local");
+var PubSubClient = edison.getPlugin("communication", "pubsub");
 
-edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
+var mdns = new LocalDiscoveryService();
+mdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 
-edisonZmq.createPubClient('localhost', 1883, function(clientD) {
-    client = clientD;
-});
-
+var client = new PubSubClient('localhost', 1883);
 var i = 0;
 function publishData(){
     i = i + 1;
-    client.send('/Intel/temperature ' + '{\"cpuTemp\":' + i + '}');
+    client.publish('/Intel/temperature ', '{\"cpuTemp\":' + i + '}');
 
     console.log('published message:'+i);
 }

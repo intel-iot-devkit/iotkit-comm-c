@@ -4,8 +4,8 @@ var edison = require('../edison-lib');
 var path = require('path');
 var fs = require('fs');
 
-var edisonMdns = edison.discovery.local;
-var edisonMqtt = edison.getPlugin("communication", "pubsub");
+var EdisonMdns = edison.discovery.local;
+var EdisonMqtt = edison.getPlugin("communication", "pubsub");
 
 var serviceType = {
 		"name": "mqtt",
@@ -13,21 +13,20 @@ var serviceType = {
 		"subtypes" : ["cpuTemp"]
 };
 
+var edisonMdns = new EdisonMdns();
+edisonMdns.discoverServices(serviceType, onDiscovery);
 
 var client;
 
-edisonMdns.discoverServices(serviceType, onDiscovery);
-	
 function onDiscovery(service){
 	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
 	
-	client = edisonMqtt.createClient(service.addresses[service.addresses.length-1], service.port);
+	client = new EdisonMqtt(service.addresses[service.addresses.length-1], service.port);
 	
-	client.subscribe('/Intel/temperature');
-	
+	client.subscribe('/Intel/temperature', function (topic, message) {
+    "use strict";
+    console.log(message);
+  });
+
 	console.log('waiting for messages !!');
-	
-	client.on('message', function (topic, message) {
-	  console.log(message);
-	});
 }

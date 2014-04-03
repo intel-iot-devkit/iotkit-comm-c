@@ -15,7 +15,7 @@ module.exports =
 			communication: {
 				plugins:
 					[
-					 	{fileName: "edison-mqtt.js"}
+					 	{fileName: "edison-zmq.js"}
 					]
 			}
 		}

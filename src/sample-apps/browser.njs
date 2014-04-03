@@ -1,7 +1,8 @@
 var edisonlib = require('../edison-lib');
 var os = require('os');
 
-var discoveryService = edisonlib.getPlugin("discovery", "local");
+var DiscoveryService = edisonlib.getPlugin("discovery", "local");
+var discovery = new DiscoveryService();
 
 //console.log(os.networkInterfaces());
 
@@ -11,8 +12,7 @@ var serviceType = {
 		"subtypes" : ["cpuTemp"]
 };
 
-
-discoveryService.discoverServices(serviceType, function(service) {
+discovery.discoverServices(serviceType, function(service) {
 	console.log("found " + service.type.name + " service at " +
 			service.addresses[service.addresses.length-1] + ":" + service.port +
 			" on interface " + service.networkInterface);
