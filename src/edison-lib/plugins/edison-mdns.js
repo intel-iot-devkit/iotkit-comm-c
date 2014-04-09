@@ -5,6 +5,12 @@ var os = require('os');
 
 // private functions and variables
 var addresses = [];
+// controls how service names are resolved to ip addresses
+// see mdns2
+var mdnsResolverSequence = [
+  mdns.rst.DNSServiceResolve(),
+  mdns.rst.getaddrinfo({ families: [4] })
+];
 
 //credits: http://stackoverflow.com/questions/10750303/how-can-i-get-the-local-ip-address-in-node-js
 function setMyAddresses() {
@@ -46,7 +52,7 @@ EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {
 EdisonMDNS.prototype.discoverServices = function (serviceType, callback) {
 	// todo: needs fix: multiple subtypes in the serviceType causes errors.
 	// make sure your serviceType contains only *one* subtype
-	var browser = mdns.createBrowser(serviceType);
+	var browser = mdns.createBrowser(serviceType, { resolverSequence: mdnsResolverSequence });
 	
 	browser.on('serviceUp', function(service) {
 		
