@@ -2,9 +2,16 @@ var mdns = require('mdns2');
 var fs = require('fs');
 var path = require('path');
 var os = require('os');
+var net = require('net');
+
+var LOCAL_IP_STRING = "local";
 
 // private functions and variables
-var addresses = [];
+var myaddresses = [];
+
+// service cache to remove duplicate services
+var serviceCache = {};
+
 // controls how service names are resolved to ip addresses
 // see mdns2
 var mdnsResolverSequence = [
@@ -19,10 +26,33 @@ function setMyAddresses() {
     for (var k2 in interfaces[k]) {
       var address = interfaces[k][k2];
       if (address.family === 'IPv4' && !address.internal) {
-        addresses.push(address.address);
+        myaddresses.push(address.address);
       }
     }
   }
+}
+
+function resolveToLocal(address) {
+  "use strict";
+
+  if (!address) {
+    return address;
+  }
+
+  var isLocal = myaddresses.some(function (myaddress) {
+    if (address === myaddress) {
+      return true;
+    }
+
+    return false;
+
+  });
+
+  if (isLocal) {
+    return LOCAL_IP_STRING;
+  }
+
+  return address;
 }
 
 // class
@@ -50,16 +80,60 @@ EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {
 };
 
 EdisonMDNS.prototype.discoverServices = function (serviceType, callback) {
+  setMyAddresses();
+  console.log(myaddresses);
+
 	// todo: needs fix: multiple subtypes in the serviceType causes errors.
 	// make sure your serviceType contains only *one* subtype
 	var browser = mdns.createBrowser(serviceType, { resolverSequence: mdnsResolverSequence });
-	
-	browser.on('serviceUp', function(service) {
-		
-		callback(service);
-	});
+
+  browser.on('serviceUp', function(service) {
+
+    if (!service.addresses) {
+      return;
+    }
+
+    var address = service.addresses[0];
+    var ip = resolveToLocal(address);
+
+    console.log(address);
+    console.log(ip);
+
+    if (!serviceCache[service.name + ip + service.port]) {
+      if (service.type.protocol === "tcp") {
+        net.createConnection(service.port, address).on("connect", function() {
+          serviceCache[service.name + ip + service.port] = {};
+          callback(service);
+          console.log("success");
+        }).on("error", function(e) {
+            // do nothing
+            console.log(e);
+          });
+      } else {
+        serviceCache[service.name + address + service.port] = {};
+        callback(service);
+      }
+    }
+
+  });
+
+  browser.on('serviceDown', function(service) {
+    "use strict";
+
+    if (!service.addresses) {
+      return;
+    }
+
+    service.addresses.forEach(function (address, i, thisArray) {
+      "use strict";
+      var ip = resolveToLocal(address);
+      delete serviceCache[service.name + ip + service.port];
+    });
+
+  });
 
 	browser.start();
+
 };
 
 EdisonMDNS.prototype.findService = function () {
