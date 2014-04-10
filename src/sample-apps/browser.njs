@@ -12,8 +12,7 @@ var serviceType = {
 		"subtypes" : ["cpuTemp"]
 };
 
-discovery.discoverServices(serviceType, function(service) {
+discovery.discoverServices(serviceType, function(service, bestAddresses) {
 	console.log("found " + service.type.name + " service at " +
-			service.addresses[service.addresses.length-1] + ":" + service.port +
-			" on interface " + service.networkInterface);
+			bestAddresses[0] + ":" + service.port);
 });

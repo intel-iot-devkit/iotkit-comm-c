@@ -4,7 +4,7 @@ var path = require('path');
 var os = require('os');
 var net = require('net');
 
-var LOCAL_IP_STRING = "local";
+var LOCAL_ADDR = "127.0.0.1";
 
 // private functions and variables
 var myaddresses = [];
@@ -32,15 +32,33 @@ function setMyAddresses() {
   }
 }
 
-function resolveToLocal(address) {
+// todo: handle if service.name is undefined
+function removeServiceFromCache(service) {
+  "use strict";
+  if (!service.name) {
+    console.log("WARN: Cannot remove service. No name in service record. " +
+      "The service originally intended to be removed will remain in cache.");
+    return;
+  }
+  delete serviceCache[service.name];
+}
+
+function serviceIsLocal(serviceAddresses) {
   "use strict";
 
-  if (!address) {
-    return address;
+  if (!serviceAddresses || serviceAddresses.length == 0) {
+    return false;
   }
 
-  var isLocal = myaddresses.some(function (myaddress) {
-    if (address === myaddress) {
+  var done = serviceAddresses.some(function (serviceAddress) {
+    var isLocal = myaddresses.some(function (myaddress) {
+      if (serviceAddress === myaddress) {
+        return true;
+      }
+      return false;
+    });
+
+    if (isLocal) {
       return true;
     }
 
@@ -48,11 +66,39 @@ function resolveToLocal(address) {
 
   });
 
-  if (isLocal) {
-    return LOCAL_IP_STRING;
+  return done;
+}
+
+function getMatchingPrefixLen(serviceAddress, myaddress) {
+  "use strict";
+  var i = 0;
+  while(i < serviceAddress.length && i < myaddress.length && serviceAddress[i] == myaddress[i]) {
+    i++;
   }
 
-  return address;
+  return i;
+}
+
+function getAddressesWithLongestPrefixMatch(serviceAddresses) {
+  "use strict";
+  var resultStore = {};
+
+  serviceAddresses.forEach(function (serviceAddress) {
+    myaddresses.forEach(function (myaddress) {
+      var matchingPrefixLen = getMatchingPrefixLen(serviceAddress, myaddress);
+      if (!resultStore[matchingPrefixLen]) {
+        resultStore[matchingPrefixLen] = {};
+      }
+      resultStore[matchingPrefixLen][serviceAddress] = "";
+    });
+  });
+
+  var allPrefixLengths = Object.keys(resultStore);
+  if (allPrefixLengths.length == 0) {
+    return [];
+  }
+  allPrefixLengths.sort();
+  return resultStore[allPrefixLengths[allPrefixLengths.length-1]];
 }
 
 // class
@@ -81,7 +127,6 @@ EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {
 
 EdisonMDNS.prototype.discoverServices = function (serviceType, callback) {
   setMyAddresses();
-  console.log(myaddresses);
 
 	// todo: needs fix: multiple subtypes in the serviceType causes errors.
 	// make sure your serviceType contains only *one* subtype
@@ -89,47 +134,42 @@ EdisonMDNS.prototype.discoverServices = function (serviceType, callback) {
 
   browser.on('serviceUp', function(service) {
 
-    if (!service.addresses) {
+    if (!service.addresses || !service.name) {
+      if (!service.name) {
+        console.log("WARN: Discovered a service without a name. Dropping.");
+      } else {
+        console.log("WARN: Discovered a service without addresses. Dropping.");
+      }
       return;
     }
 
-    var address = service.addresses[0];
-    var ip = resolveToLocal(address);
-
-    console.log(address);
-    console.log(ip);
-
-    if (!serviceCache[service.name + ip + service.port]) {
-      if (service.type.protocol === "tcp") {
-        net.createConnection(service.port, address).on("connect", function() {
-          serviceCache[service.name + ip + service.port] = {};
-          callback(service);
-          console.log("success");
-        }).on("error", function(e) {
-            // do nothing
-            console.log(e);
-          });
-      } else {
-        serviceCache[service.name + address + service.port] = {};
-        callback(service);
+    var notSeenBefore = [];
+    service.addresses.forEach(function (address) {
+      "use strict";
+      if (!serviceCache[service.name]) {
+        serviceCache[service.name] = true;
+        notSeenBefore.push(address);
       }
+    });
+
+    if (notSeenBefore.length == 0) {
+      return;
     }
 
+    if (serviceIsLocal(notSeenBefore)) {
+      callback(service, [ LOCAL_ADDR ]);
+      return;
+    }
+
+    var longestPrefixMatches = getAddressesWithLongestPrefixMatch(notSeenBefore);
+    longestPrefixMatches.sort(); // so we can return addresses in the same order for the same service. Necessary?
+
+    callback(service, longestPrefixMatches);
   });
 
   browser.on('serviceDown', function(service) {
     "use strict";
-
-    if (!service.addresses) {
-      return;
-    }
-
-    service.addresses.forEach(function (address, i, thisArray) {
-      "use strict";
-      var ip = resolveToLocal(address);
-      delete serviceCache[service.name + ip + service.port];
-    });
-
+    removeServiceFromCache(service);
   });
 
 	browser.start();
