@@ -16,15 +16,15 @@ var serviceCache = {};
 // see mdns2
 var mdnsResolverSequence = [
   mdns.rst.DNSServiceResolve(),
-  mdns.rst.getaddrinfo({ families: [4] })
+  mdns.rst.getaddrinfo({ families: [4] }),
+  mdns.rst.makeAddressesUnique()
 ];
 
-//credits: http://stackoverflow.com/questions/10750303/how-can-i-get-the-local-ip-address-in-node-js
 function setMyAddresses() {
-  var interfaces = os.networkInterfaces();
-  for (var k in interfaces) {
-    for (var k2 in interfaces[k]) {
-      var address = interfaces[k][k2];
+  var ifs = os.networkInterfaces();
+  for (var i in ifs) {
+    for (var j in ifs[i]) {
+      var address = ifs[i][j];
       if (address.family === 'IPv4' && !address.internal) {
         myaddresses.push(address.address);
       }
@@ -86,10 +86,13 @@ function getAddressesWithLongestPrefixMatch(serviceAddresses) {
   serviceAddresses.forEach(function (serviceAddress) {
     myaddresses.forEach(function (myaddress) {
       var matchingPrefixLen = getMatchingPrefixLen(serviceAddress, myaddress);
-      if (!resultStore[matchingPrefixLen]) {
+      if (typeof resultStore[matchingPrefixLen] === 'undefined') {
         resultStore[matchingPrefixLen] = {};
       }
-      resultStore[matchingPrefixLen][serviceAddress] = "";
+      if (typeof resultStore[matchingPrefixLen] === 'undefined') {
+        resultStore[matchingPrefixLen] = {};
+      }
+      resultStore[matchingPrefixLen][serviceAddress] = true;
     });
   });
 
@@ -97,8 +100,9 @@ function getAddressesWithLongestPrefixMatch(serviceAddresses) {
   if (allPrefixLengths.length == 0) {
     return [];
   }
-  allPrefixLengths.sort();
-  return resultStore[allPrefixLengths[allPrefixLengths.length-1]];
+  allPrefixLengths = allPrefixLengths.map(Math.round);
+  allPrefixLengths.sort(function(n1,n2){return n1 - n2});
+  return Object.keys(resultStore[allPrefixLengths[allPrefixLengths.length-1]]);
 }
 
 // class
@@ -118,7 +122,6 @@ EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {
 			var serviceSpec = JSON.parse(fs.readFileSync(path.join(serviceDirPath, serviceSpecs[i])));
 			var ad = mdns.createAdvertisement(serviceSpec.type, serviceSpec.port,
 					{txtRecord: serviceSpec.properties, name: serviceSpec.name});
-			//var ad = mdns.createAdvertisement(mdns.tcp('http'), 4321);
 			ad.start();
 			console.log("Advertised service specified in " + serviceSpecs[i]);
 		}
@@ -158,6 +161,11 @@ EdisonMDNS.prototype.discoverServices = function (serviceType, callback) {
 
     if (serviceIsLocal(notSeenBefore)) {
       callback(service, [ LOCAL_ADDR ]);
+      return;
+    }
+
+    if (notSeenBefore.length == 1) {
+      callback(service, [ notSeenBefore[0] ]);
       return;
     }
 
