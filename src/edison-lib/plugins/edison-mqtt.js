@@ -2,13 +2,15 @@ var mqtt = require('mqtt');
 
 var client;
 
-function EdisonMQTT(brokerip, brokerport, type) {
+function EdisonMQTT(brokerip, brokerport, type, args) {
   "use strict";
-    console.log(__filename + ":IP:" + brokerip + ":port:"+brokerport);
-    if (type == 'pub') {
-        client = mqtt.createClient(brokerip, brokerport);
+    console.log(":IP:" + brokerip + ":port:"+brokerport+":type:"+type);
+    if (type != 'undefined' && type == 'ssl') {
+        console.log('going to create secure client');
+        client = mqtt.createSecureClient(brokerport, brokerip, args);
     } else {
-        client = mqtt.createClient(brokerip, brokerport);
+        console.log('going to create public client');
+        client = mqtt.createClient(brokerport, brokerip);
     }
 }
 
