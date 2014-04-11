@@ -14,11 +14,11 @@ var serviceType = {
 
 var client;
 
-mdns.discoverServices(serviceType, onDiscovery);
-function onDiscovery(service){
-    console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
+mdns.discoverServices(serviceType, null, onDiscovery);
+function onDiscovery(service, bestAddresses){
+    console.log("found " + service.type.name + " service at " + bestAddresses[0] + ":" + service.port);
 
-    client = new Comm(service.addresses[service.addresses.length-1], service.port, 'req');
+    client = new Comm(bestAddresses[0], service.port, 'req');
 
     var i = 0;
     setInterval(function() {

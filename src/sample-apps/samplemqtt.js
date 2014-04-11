@@ -14,14 +14,14 @@ var serviceType = {
 };
 
 var edisonMdns = new EdisonMdns();
-edisonMdns.discoverServices(serviceType, onDiscovery);
+edisonMdns.discoverServices(serviceType, null, onDiscovery);
 
 var client;
 
-function onDiscovery(service){
-	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
+function onDiscovery(service, bestAddresses){
+	console.log("found " + service.type.name + " service at " + bestAddresses[0] + ":" + service.port);
 	
-	client = new EdisonMqtt(service.addresses[service.addresses.length-1], service.port);
+	client = new EdisonMqtt(bestAddresses[0], service.port);
 	client.subscribe('/Intel/temperature', function (topic, message) {
     "use strict";
     console.log(message);
