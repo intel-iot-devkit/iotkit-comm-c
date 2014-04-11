@@ -32,7 +32,6 @@ function setMyAddresses() {
   }
 }
 
-// todo: handle if service.name is undefined
 function removeServiceFromCache(service) {
   "use strict";
   if (!service.name) {
@@ -105,6 +104,45 @@ function getAddressesWithLongestPrefixMatch(serviceAddresses) {
   return Object.keys(resultStore[allPrefixLengths[allPrefixLengths.length-1]]);
 }
 
+function defaultServiceAddressFilter(service) {
+  "use strict";
+
+  if (!service.addresses || !service.name) {
+    if (!service.name) {
+      console.log("WARN: Discovered a service without a name. Dropping.");
+    } else {
+      console.log("WARN: Discovered a service without addresses. Dropping.");
+    }
+    return;
+  }
+
+  var notSeenBefore = [];
+  service.addresses.forEach(function (address) {
+    "use strict";
+    if (!serviceCache[service.name]) {
+      serviceCache[service.name] = true;
+      notSeenBefore.push(address);
+    }
+  });
+
+  if (notSeenBefore.length == 0) {
+    return [];
+  }
+
+  if (serviceIsLocal(notSeenBefore)) {
+    return [ LOCAL_ADDR ];
+  }
+
+  if (notSeenBefore.length == 1) {
+    return [ notSeenBefore[0] ];
+  }
+
+  var longestPrefixMatches = getAddressesWithLongestPrefixMatch(notSeenBefore);
+  longestPrefixMatches.sort(); // so we can return addresses in the same order for the same service. Necessary?
+
+  return longestPrefixMatches;
+}
+
 // class
 function EdisonMDNS() {
   "use strict";
@@ -128,51 +166,20 @@ EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {
 	});
 };
 
-EdisonMDNS.prototype.discoverServices = function (serviceType, callback) {
+EdisonMDNS.prototype.discoverServices = function (serviceType, serviceAddressFilter, callback) {
+
   setMyAddresses();
+  var filterFunc = serviceAddressFilter ? serviceAddressFilter : defaultServiceAddressFilter;
 
 	// todo: needs fix: multiple subtypes in the serviceType causes errors.
 	// make sure your serviceType contains only *one* subtype
 	var browser = mdns.createBrowser(serviceType, { resolverSequence: mdnsResolverSequence });
 
   browser.on('serviceUp', function(service) {
-
-    if (!service.addresses || !service.name) {
-      if (!service.name) {
-        console.log("WARN: Discovered a service without a name. Dropping.");
-      } else {
-        console.log("WARN: Discovered a service without addresses. Dropping.");
-      }
-      return;
+    var filteredServiceAddresses = filterFunc(service);
+    if (filteredServiceAddresses.length != 0) {
+      callback(service, filteredServiceAddresses);
     }
-
-    var notSeenBefore = [];
-    service.addresses.forEach(function (address) {
-      "use strict";
-      if (!serviceCache[service.name]) {
-        serviceCache[service.name] = true;
-        notSeenBefore.push(address);
-      }
-    });
-
-    if (notSeenBefore.length == 0) {
-      return;
-    }
-
-    if (serviceIsLocal(notSeenBefore)) {
-      callback(service, [ LOCAL_ADDR ]);
-      return;
-    }
-
-    if (notSeenBefore.length == 1) {
-      callback(service, [ notSeenBefore[0] ]);
-      return;
-    }
-
-    var longestPrefixMatches = getAddressesWithLongestPrefixMatch(notSeenBefore);
-    longestPrefixMatches.sort(); // so we can return addresses in the same order for the same service. Necessary?
-
-    callback(service, longestPrefixMatches);
   });
 
   browser.on('serviceDown', function(service) {
