@@ -9,7 +9,7 @@ var EdisonMqtt = edison.getPlugin("communication", "pubsub");
 var edisonMdns = new EdisonMdns();
 edisonMdns.advertiseServices(path.join(edison.config.libRoot, edison.config.serviceDir));
 
-var client = new EdisonMqtt('localhost', 1883, 'pub');
+var client = new EdisonMqtt('localhost', 1883);
 
 var i = 0;
 function publishData(){
