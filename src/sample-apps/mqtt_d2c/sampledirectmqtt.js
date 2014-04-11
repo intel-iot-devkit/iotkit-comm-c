@@ -1,14 +1,14 @@
 //'use strict';
 
-var edison = require('../edison-lib');
+var edison = require('../../edison-lib');
 var path = require('path');
 var fs = require('fs');
 
 var EdisonMqtt = edison.getPlugin("communication", "pubsub");
 
 var args = {
-    keyPath: __dirname + '/certs/client.key',
-    certPath: __dirname + '/certs/client.crt',
+    keyPath: __dirname + '/../certs/client.key',
+    certPath: __dirname + '/../certs/client.crt',
     keepalive: 59000
 };
 

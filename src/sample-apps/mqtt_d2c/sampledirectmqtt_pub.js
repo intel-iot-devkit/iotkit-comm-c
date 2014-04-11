@@ -1,4 +1,4 @@
-var edison = require('../edison-lib');
+var edison = require('../../edison-lib');
 
 // create the MDNS record for advertising
 var path = require('path');
@@ -6,8 +6,8 @@ var path = require('path');
 var EdisonMqtt = edison.getPlugin("communication", "pubsub");
 
 var args = {
-    keyPath: __dirname + '/certs/client.key',
-    certPath: __dirname + '/certs/client.crt',
+    keyPath: __dirname + '/../certs/client.key',
+    certPath: __dirname + '/../certs/client.crt',
     keepalive: 59000
 };
 
