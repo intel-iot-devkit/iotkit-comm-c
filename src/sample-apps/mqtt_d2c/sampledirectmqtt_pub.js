@@ -13,7 +13,7 @@ var args = {
 
 var client = new EdisonMqtt('broker.enableiot.com', 8884, 'ssl', args);
 
-client.publish('/server/metric/pradeeptmp/98-4f-ee-00-6c-02', '{\"s\":\"mysensor2\",\"v\":122.1132}');
+client.publish('/server/metric/pradeeptmp/98-4f-ee-00-6c-02', '{\"s\":\"led\",\"v\":1}');
 
 /*var i = 0;
 function publishData(){
