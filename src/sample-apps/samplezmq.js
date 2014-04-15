@@ -15,12 +15,11 @@ var serviceType = {
 
 var pubsubclient;
 
-mdns.discoverServices(serviceType, onDiscovery);
-function onDiscovery(service){
+mdns.discoverServices(serviceType, null, onDiscovery);
+function onDiscovery(service, bestAddresses){
 	console.log("found " + service.type.name + " service at " + service.addresses[service.addresses.length-1] + ":" + service.port);
 
-  pubsubclient = new PubSubComm();
-  pubsubclient.subscribeFrom(service.addresses[service.addresses.length-1], service.port);
+    pubsubclient = new PubSubComm(bestAddresses[0], service.port, 'sub');
 
 	pubsubclient.subscribe('/Intel/temperature', function (topic, message) {
     console.log('msg ' + message);

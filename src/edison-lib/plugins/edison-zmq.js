@@ -1,40 +1,38 @@
 var zeromq = require('zmq');
 
-var pubsocket, subsocket;
+var socket;
 
 function ZeroMQ(ip, port, type) {
-  "use strict";
+    "use strict";
+    if (type == 'pub') {
+        socket = zeromq.socket('pub');
+        console.log('pub ' + ip + ':' + port);
+        socket.bindSync('tcp://*:' + port);
+    } else {
+        socket = zeromq.socket('sub');
+        console.log('sub ' + ip + ':' + port);
+        socket.connect('tcp://' + ip + ':' + port);
+    }
 }
 
 ZeroMQ.prototype.components = ["communication"];
 ZeroMQ.prototype.name = "edisonZmq";
 ZeroMQ.prototype.type = "pubsub";
 
-ZeroMQ.prototype.publishTo = function (ip, port) {
-  pubsocket = zeromq.socket('pub');
-  pubsocket.bindSync('tcp://*:' + port);
-}
-
-ZeroMQ.prototype.subscribeFrom = function (ip, port) {
-  "use strict";
-  subsocket = zeromq.socket('sub');
-  subsocket.connect('tcp://' + ip + ':' + port);
-}
-
 ZeroMQ.prototype.publish = function (topic, message) {
-    pubsocket.send(topic + ' ' + message);
+    socket.send(topic + ' ' + message);
 };
 
 ZeroMQ.prototype.subscribe = function (topic, callback) {
-    subsocket.subscribe(topic);
+    socket.subscribe(topic);
 
-    subsocket.on('message', function (message) {
+    socket.on('message', function (message) {
         callback(topic, message);
     });
 };
 
 ZeroMQ.prototype.close = function () {
-    subsocket.close();
+    socket.close();
 };
 
 module.exports = ZeroMQ;
