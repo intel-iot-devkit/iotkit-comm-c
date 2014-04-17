@@ -149,9 +149,8 @@ function EdisonMDNS() {
 }
 
 // public variables
-EdisonMDNS.prototype.components = ["discovery"];
-EdisonMDNS.prototype.name = "edisonMdns";
-EdisonMDNS.prototype.type = "local";
+EdisonMDNS.prototype.name = "mdns";
+EdisonMDNS.prototype.component = "discovery";
 
 // public functions
 EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {

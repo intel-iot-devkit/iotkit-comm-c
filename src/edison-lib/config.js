@@ -11,12 +11,12 @@ module.exports =
 					[
 					 	{fileName: "edison-mdns.js"}
 					]
-			},
-			communication: {
-				plugins:
-					[
-					 	{fileName: "edison-zmq.js"}
-					]
-			}
+			}//,
+//			communication: {
+//				plugins:
+//					[
+//					 	{fileName: "edison-zmq.js"}
+//					]
+//			}
 		}
 };

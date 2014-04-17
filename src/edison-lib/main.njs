@@ -6,13 +6,17 @@
 var path = require('path');
 
 var edisonConfig = require("./config.js");
-var InterfaceValidator = require("./interface-validator.njs");
+var InterfaceValidator = require("./core/plugin-validator.njs");
 
 // init edison plugin validator
 var validator = new InterfaceValidator();
 
 // load component plugins
 var component; // current component being processed
+
+var essentialComponents = ["discovery", "communication"];
+
+exports.serviceLib = require("./core/service-lib.js");
 
 function setPluginAccessVariable(plugin) {
 	if (!exports[component]) {
