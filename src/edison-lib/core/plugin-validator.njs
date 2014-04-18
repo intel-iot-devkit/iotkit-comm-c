@@ -12,9 +12,9 @@ function validateProperties(plugin, interfaceSpec, pluginFilePath) {
 	for (var i in interfaceSpec.properties) {
 		if (!plugin[interfaceSpec.properties[i]]) {
 			if(pluginFilePath) {
-				throw("Plugin at '" + pluginFilePath + "' does not define required property '" + interfaceSpec.properties[i] + "'.");
+				throw new Error("Plugin at '" + pluginFilePath + "' does not define required property '" + interfaceSpec.properties[i] + "'.");
 			} else {
-				throw("Plugin '" + plugin.name + "' does not define required property '" + interfaceSpec.properties[i] + "'.");
+				throw new Error("Plugin '" + plugin.name + "' does not define required property '" + interfaceSpec.properties[i] + "'.");
 			}
 		}
 	}
@@ -28,14 +28,14 @@ function validateFunctions(plugin, interfaceSpec) {
 	// check if all required function names exist
 	for (var j in interfaceSpec.functions) {
 		if (!plugin[interfaceSpec.functions[j]]) {
-			throw("Plugin '" + plugin.name + "' does not define required function '" + interfaceSpec.functions[j] + "'.");
+			throw new Error("Plugin '" + plugin.name + "' does not define required function '" + interfaceSpec.functions[j] + "'.");
 		}
 	}
 	
 	// check that type is indeed a function
 	for (var i in interfaceSpec.functions) {
 		if ((typeof plugin[interfaceSpec.functions[i]]) !== "function") {
-			throw("Plugin '" + plugin.name + "' does not define '" + interfaceSpec.functions[i] + "' as a function.");
+			throw new Error("Plugin '" + plugin.name + "' does not define '" + interfaceSpec.functions[i] + "' as a function.");
 		}
 	}
 }
@@ -112,7 +112,7 @@ InterfaceValidator.prototype.validate = function(component, pluginList, callback
 
     this.loadedPlugins[component].push(pluginPrototype.name);
 
-    callback(plugin);
+    callback(component, plugin);
 	}
 };
 

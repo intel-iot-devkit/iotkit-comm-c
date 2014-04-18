@@ -1,10 +1,10 @@
 {
     "name" : "temperature",
     "type" : {
-        "name": "mqtt",
+        "name": "zmqpubsub",
         "protocol" : "tcp",
         "subtypes" : ["cpuTemp"]
     },
-    "port" : "1883",
-    "properties" : {"dataType": "float"}
+    "port" : 1883,
+    "properties" : {"dataType" : "float"}
 }

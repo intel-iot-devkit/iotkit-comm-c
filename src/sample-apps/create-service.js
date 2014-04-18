@@ -1,5 +1,8 @@
-var edisonLib = require('../edison-lib');
+var Service = require('../edison-lib').Service;
 
-var serviceDescription = '{"desc": "service description"}';
-
-var myservice = edisonLib.serviceLib.createService("../edison-lib/serviceSpecs/temperatureService.json");
+var myservice = new Service("./serviceSpecs/temperatureServiceZMQ.json");
+myservice.comm.setReceivedMessageHandler(function(message) {
+  "use strict";
+  console.log(message);
+});
+myservice.advertise();

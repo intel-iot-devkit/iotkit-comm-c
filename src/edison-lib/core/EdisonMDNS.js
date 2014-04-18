@@ -153,16 +153,10 @@ EdisonMDNS.prototype.name = "mdns";
 EdisonMDNS.prototype.component = "discovery";
 
 // public functions
-EdisonMDNS.prototype.advertiseServices = function (serviceDirPath) {
-	fs.readdir(serviceDirPath, function (err, serviceSpecs) {
-		for (var i in serviceSpecs) {
-			var serviceSpec = JSON.parse(fs.readFileSync(path.join(serviceDirPath, serviceSpecs[i])));
-			var ad = mdns.createAdvertisement(serviceSpec.type, serviceSpec.port,
-					{txtRecord: serviceSpec.properties, name: serviceSpec.name});
-			ad.start();
-			console.log("Advertised service specified in " + serviceSpecs[i]);
-		}
-	});
+EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
+  var ad = mdns.createAdvertisement(serviceSpec.type, serviceSpec.port,
+    {txtRecord: serviceSpec.properties, name: serviceSpec.name});
+  ad.start();
 };
 
 EdisonMDNS.prototype.discoverServices = function (serviceType, serviceAddressFilter, callback) {

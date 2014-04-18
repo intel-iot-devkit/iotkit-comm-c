@@ -14,24 +14,31 @@ function EdisonMQTT(brokerip, brokerport, type, args) {
     }
 }
 
-EdisonMQTT.prototype.components = ["communication"];
-EdisonMQTT.prototype.name = "edisonMqtt";
-EdisonMQTT.prototype.type = "pubsub";
+EdisonMQTT.prototype.component = "communication";
+EdisonMQTT.prototype.name = "mqtt";
 
-EdisonMQTT.prototype.publish = function (topic, message) {
+EdisonMQTT.prototype.send = function (topic, message) {
     client.publish(topic, message);
 };
 
-EdisonMQTT.prototype.subscribe = function (topic, callback) {
+EdisonMQTT.prototype.subscribe = function (topic) {
     console.log(topic);
     client.subscribe(topic);
-
-    client.on('message', function (topic, message) {
-		  callback(topic, message);
-		});
 };
 
-EdisonMQTT.prototype.close = function () {
+EdisonMQTT.prototype.unsubscribe = function (topic) {
+  "use strict";
+  console.log("unsubscribe mqtt.");
+}
+
+EdisonMQTT.prototype.setReceivedMessageHandler = function(callback) {
+  "use strict";
+  client.on('message', function (topic, message) {
+    callback(topic, message);
+  });
+};
+
+EdisonMQTT.prototype.done = function () {
 	client.close();
 };
 

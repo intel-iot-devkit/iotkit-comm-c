@@ -6,17 +6,11 @@ module.exports =
 		superInterfaceName: "interface-for-interfaces",
 		serviceDir: "serviceSpecs",
 		components: {
-			discovery: {
+			communication: {
 				plugins:
 					[
-					 	{fileName: "edison-mdns.js"}
+					 	{fileName: "edison-zmq.js"}
 					]
-			}//,
-//			communication: {
-//				plugins:
-//					[
-//					 	{fileName: "edison-zmq.js"}
-//					]
-//			}
+			}
 		}
 };
