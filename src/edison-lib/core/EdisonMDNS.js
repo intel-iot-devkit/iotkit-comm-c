@@ -2,8 +2,7 @@ var mdns = require('mdns2');
 var path = require('path');
 var os = require('os');
 
-// NOTE: any variable in 'exports' becomes private static if module.exports is used as well.
-
+// private static
 // service cache to remove duplicate services
 exports.serviceCache = {};
 
@@ -20,6 +19,65 @@ exports.mdnsResolverSequence = [
   mdns.rst.makeAddressesUnique()
 ];
 
+// singleton class
+function EdisonMDNS() {
+  "use strict";
+  setMyAddresses();
+}
+
+// public variables
+EdisonMDNS.prototype.name = "mdns";
+EdisonMDNS.prototype.component = "discovery";
+
+// public functions
+EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
+  var ad = mdns.createAdvertisement(serviceSpec.type, serviceSpec.port,
+    {txtRecord: serviceSpec.properties, name: serviceSpec.name});
+  ad.start();
+};
+
+EdisonMDNS.prototype.discoverServices = function (serviceType, serviceFilter, callback) {
+
+  // todo: needs fix: multiple subtypes in the serviceType causes errors.
+  // make sure your serviceType contains only *one* subtype
+  var browser = mdns.createBrowser(serviceType, { resolverSequence: exports.mdnsResolverSequence });
+
+  browser.on('serviceUp', function(service) {
+    var filteredServiceAddresses = serviceAddressFilter(service);
+    if (filteredServiceAddresses.length != 0) {
+      if (!serviceFilter) {
+        callback(service, filteredServiceAddresses);
+      }
+
+      var contactAddress = serviceFilter(service, filteredServiceAddresses);
+
+      if (typeof contactAddress !== 'string') {
+        throw new Error("Address for filtered service is not of type 'String'.");
+      }
+
+      if (contactAddress) {
+        callback(service, contactAddress);
+      }
+    }
+  });
+
+  browser.on('serviceDown', function(service) {
+    "use strict";
+    removeServiceFromCache(service);
+  });
+
+  browser.on('serviceChanged', function(service) {
+    "use strict";
+    // todo: correctly handle service changed. Check if address has changed. Deleting is not the answer since service changed is raised even when serviceup happens.
+    //removeServiceFromCache(service);
+  });
+
+  browser.start();
+
+};
+
+// private functions
+// NOTE: any variable in 'exports' becomes private static if module.exports is used as well.
 function setMyAddresses() {
   var ifs = os.networkInterfaces();
   for (var i in ifs) {
@@ -143,63 +201,6 @@ function serviceAddressFilter(service) {
 
   return longestPrefixMatches;
 }
-
-// singleton class
-function EdisonMDNS() {
-  "use strict";
-  setMyAddresses();
-}
-
-// public variables
-EdisonMDNS.prototype.name = "mdns";
-EdisonMDNS.prototype.component = "discovery";
-
-// public functions
-EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
-  var ad = mdns.createAdvertisement(serviceSpec.type, serviceSpec.port,
-    {txtRecord: serviceSpec.properties, name: serviceSpec.name});
-  ad.start();
-};
-
-EdisonMDNS.prototype.discoverServices = function (serviceType, serviceFilter, callback) {
-
-	// todo: needs fix: multiple subtypes in the serviceType causes errors.
-	// make sure your serviceType contains only *one* subtype
-	var browser = mdns.createBrowser(serviceType, { resolverSequence: exports.mdnsResolverSequence });
-
-  browser.on('serviceUp', function(service) {
-    var filteredServiceAddresses = serviceAddressFilter(service);
-    if (filteredServiceAddresses.length != 0) {
-      if (!serviceFilter) {
-        callback(service, filteredServiceAddresses);
-      }
-
-      var contactAddress = serviceFilter(service, filteredServiceAddresses);
-
-      if (typeof contactAddress !== 'string') {
-        throw new Error("Address for filtered service is not of type 'String'.");
-      }
-
-      if (contactAddress) {
-        callback(service, contactAddress);
-      }
-    }
-  });
-
-  browser.on('serviceDown', function(service) {
-    "use strict";
-    removeServiceFromCache(service);
-  });
-
-  browser.on('serviceChanged', function(service) {
-    "use strict";
-    // todo: correctly handle service changed. Check if address has changed. Deleting is not the answer since service changed is raised even when serviceup happens.
-    //removeServiceFromCache(service);
-  });
-
-	browser.start();
-
-};
 
 // export the class
 module.exports = new EdisonMDNS(); // must be at the end
