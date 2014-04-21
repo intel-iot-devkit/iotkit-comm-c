@@ -4,7 +4,6 @@ module.exports =
 		pluginInterfaceDir: "plugin-interfaces",
 		pluginDir: "plugins",
 		superInterfaceName: "interface-for-interfaces",
-		serviceDir: "serviceSpecs",
 		components: {
 			communication: {
 				plugins:

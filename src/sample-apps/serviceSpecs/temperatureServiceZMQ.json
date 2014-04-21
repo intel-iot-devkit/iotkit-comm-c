@@ -1,9 +1,8 @@
 {
-  "name" : "temperature",
+  "name" : "/ndg/temperature/cpuTemp",
   "type" : {
     "name": "zmqpubsub",
-    "protocol" : "tcp",
-    "subtypes" : ["cpuTemp"]
+    "protocol" : "tcp"
   },
   "port" : 1883,
   "properties" : {"dataType" : "float"},

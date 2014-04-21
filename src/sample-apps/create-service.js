@@ -11,7 +11,7 @@ edisonLib.createService("./serviceSpecs/temperatureServiceZMQ.json", function (s
 
   setInterval(function () {
     "use strict";
-    service.comm.send("mytopic", "my message");
+    service.comm.send({topic: "mytopic", text: "my message"});
   }, 1000);
 
 });

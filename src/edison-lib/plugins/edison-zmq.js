@@ -15,8 +15,8 @@ function ZeroMQ(port, type, ip) {
 ZeroMQ.prototype.component = "communication";
 ZeroMQ.prototype.name = "zmqpubsub";
 
-ZeroMQ.prototype.send = function (topic, message) {
-    socket.send(topic + ' ' + message);
+ZeroMQ.prototype.send = function (msg) {
+    socket.send(msg.topic + ' ' + msg.text);
 };
 
 ZeroMQ.prototype.subscribe = function (topic) {
