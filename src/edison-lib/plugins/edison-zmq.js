@@ -3,7 +3,7 @@ var socket;
 
 function ZeroMQ(port, type, ip) {
     "use strict";
-    if (type == 'pub') {
+    if (type == 'server') {
         socket = zeromq.socket('pub');
         socket.bindSync('tcp://*:' + port);
     } else {
@@ -29,7 +29,7 @@ ZeroMQ.prototype.setReceivedMessageHandler = function (handler) {
   socket.on('message', function (message) {
     handler(message);
   });
-}
+};
 
 ZeroMQ.prototype.unsubscribe = function () {
   "use strict";

@@ -1,20 +1,20 @@
 var mdns = require('mdns2');
-var fs = require('fs');
 var path = require('path');
 var os = require('os');
-var net = require('net');
 
-var LOCAL_ADDR = "127.0.0.1";
-
-// private functions and variables
-var myaddresses = [];
+// NOTE: any variable in 'exports' becomes private static if module.exports is used as well.
 
 // service cache to remove duplicate services
-var serviceCache = {};
+exports.serviceCache = {};
+
+exports.LOCAL_ADDR = "127.0.0.1";
+
+// private functions and variables
+exports.myaddresses = [];
 
 // controls how service names are resolved to ip addresses
 // see mdns2
-var mdnsResolverSequence = [
+exports.mdnsResolverSequence = [
   mdns.rst.DNSServiceResolve(),
   mdns.rst.getaddrinfo({ families: [4] }),
   mdns.rst.makeAddressesUnique()
@@ -26,7 +26,7 @@ function setMyAddresses() {
     for (var j in ifs[i]) {
       var address = ifs[i][j];
       if (address.family === 'IPv4' && !address.internal) {
-        myaddresses.push(address.address);
+        exports.myaddresses.push(address.address);
       }
     }
   }
@@ -39,7 +39,7 @@ function removeServiceFromCache(service) {
       "The service originally intended to be removed will remain in cache.");
     return;
   }
-  delete serviceCache[service.name];
+  delete exports.serviceCache[service.name];
 }
 
 function serviceIsLocal(serviceAddresses) {
@@ -49,8 +49,8 @@ function serviceIsLocal(serviceAddresses) {
     return false;
   }
 
-  var done = serviceAddresses.some(function (serviceAddress) {
-    var isLocal = myaddresses.some(function (myaddress) {
+  return serviceAddresses.some(function (serviceAddress) {
+    var isLocal = exports.myaddresses.some(function (myaddress) {
       if (serviceAddress === myaddress) {
         return true;
       }
@@ -64,8 +64,6 @@ function serviceIsLocal(serviceAddresses) {
     return false;
 
   });
-
-  return done;
 }
 
 function getMatchingPrefixLen(serviceAddress, myaddress) {
@@ -83,7 +81,7 @@ function getAddressesWithLongestPrefixMatch(serviceAddresses) {
   var resultStore = {};
 
   serviceAddresses.forEach(function (serviceAddress) {
-    myaddresses.forEach(function (myaddress) {
+    exports.myaddresses.forEach(function (myaddress) {
       var matchingPrefixLen = getMatchingPrefixLen(serviceAddress, myaddress);
       if (typeof resultStore[matchingPrefixLen] === 'undefined') {
         resultStore[matchingPrefixLen] = {};
@@ -104,7 +102,7 @@ function getAddressesWithLongestPrefixMatch(serviceAddresses) {
   return Object.keys(resultStore[allPrefixLengths[allPrefixLengths.length-1]]);
 }
 
-function defaultServiceAddressFilter(service) {
+function serviceAddressFilter(service) {
   "use strict";
 
   if (!service.addresses || !service.name) {
@@ -113,14 +111,17 @@ function defaultServiceAddressFilter(service) {
     } else {
       console.log("WARN: Discovered a service without addresses. Dropping.");
     }
-    return;
+    return [];
   }
 
   var notSeenBefore = [];
   service.addresses.forEach(function (address) {
     "use strict";
-    if (!serviceCache[service.name]) {
-      serviceCache[service.name] = true;
+    if (typeof exports.serviceCache[service.name] === 'undefined') {
+      exports.serviceCache[service.name] = {};
+    }
+    if (!exports.serviceCache[service.name][address]) {
+      exports.serviceCache[service.name][address] = true;
       notSeenBefore.push(address);
     }
   });
@@ -129,8 +130,8 @@ function defaultServiceAddressFilter(service) {
     return [];
   }
 
-  if (serviceIsLocal(notSeenBefore)) {
-    return [ LOCAL_ADDR ];
+  if (serviceIsLocal(Object.keys(exports.serviceCache[service.name]))) {
+    return [ exports.LOCAL_ADDR ];
   }
 
   if (notSeenBefore.length == 1) {
@@ -143,9 +144,10 @@ function defaultServiceAddressFilter(service) {
   return longestPrefixMatches;
 }
 
-// class
+// singleton class
 function EdisonMDNS() {
   "use strict";
+  setMyAddresses();
 }
 
 // public variables
@@ -159,19 +161,28 @@ EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
   ad.start();
 };
 
-EdisonMDNS.prototype.discoverServices = function (serviceType, serviceAddressFilter, callback) {
-
-  setMyAddresses();
-  var filterFunc = serviceAddressFilter ? serviceAddressFilter : defaultServiceAddressFilter;
+EdisonMDNS.prototype.discoverServices = function (serviceType, serviceFilter, callback) {
 
 	// todo: needs fix: multiple subtypes in the serviceType causes errors.
 	// make sure your serviceType contains only *one* subtype
-	var browser = mdns.createBrowser(serviceType, { resolverSequence: mdnsResolverSequence });
+	var browser = mdns.createBrowser(serviceType, { resolverSequence: exports.mdnsResolverSequence });
 
   browser.on('serviceUp', function(service) {
-    var filteredServiceAddresses = filterFunc(service);
+    var filteredServiceAddresses = serviceAddressFilter(service);
     if (filteredServiceAddresses.length != 0) {
-      callback(service, filteredServiceAddresses);
+      if (!serviceFilter) {
+        callback(service, filteredServiceAddresses);
+      }
+
+      var contactAddress = serviceFilter(service, filteredServiceAddresses);
+
+      if (typeof contactAddress !== 'string') {
+        throw new Error("Address for filtered service is not of type 'String'.");
+      }
+
+      if (contactAddress) {
+        callback(service, contactAddress);
+      }
     }
   });
 
@@ -180,13 +191,15 @@ EdisonMDNS.prototype.discoverServices = function (serviceType, serviceAddressFil
     removeServiceFromCache(service);
   });
 
+  browser.on('serviceChanged', function(service) {
+    "use strict";
+    // todo: correctly handle service changed. Check if address has changed. Deleting is not the answer since service changed is raised even when serviceup happens.
+    //removeServiceFromCache(service);
+  });
+
 	browser.start();
 
 };
 
-EdisonMDNS.prototype.findService = function () {
-	
-};
-
 // export the class
-module.exports = EdisonMDNS;
+module.exports = new EdisonMDNS(); // must be at the end

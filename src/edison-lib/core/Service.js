@@ -1,5 +1,4 @@
 var main = require("../main.njs");
-var EdisonMDNS = require("./EdisonMDNS.js");
 var ServiceDescriptionValidator = require("./ServiceDescriptionValidator.js");
 
 function Service(serviceSpecFilePath) {
@@ -17,14 +16,8 @@ function Service(serviceSpecFilePath) {
     throw err;
   }
 
-  this.comm = new commplugin(this.description.port, 'pub');
-  this.discovery = new EdisonMDNS();
+  this.comm = new commplugin(this.description.port, "server");
 }
-
-Service.prototype.advertise = function () {
-  "use strict";
-  this.discovery.advertiseService(this.description);
-};
 
 Service.prototype.comm = null;
 Service.prototype.description = null;

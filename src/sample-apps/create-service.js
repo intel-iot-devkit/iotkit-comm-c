@@ -1,8 +1,17 @@
-var Service = require('../edison-lib').Service;
+var edisonLib = require('../edison-lib');
 
-var myservice = new Service("./serviceSpecs/temperatureServiceZMQ.json");
-myservice.comm.setReceivedMessageHandler(function(message) {
+edisonLib.createService("./serviceSpecs/temperatureServiceZMQ.json", function (service) {
   "use strict";
-  console.log(message);
+
+  service.comm.setReceivedMessageHandler(function(message) {
+    "use strict";
+    console.log(message);
+    service.comm.send(message); // echo server
+  });
+
+  setInterval(function () {
+    "use strict";
+    service.comm.send("mytopic", "my message");
+  }, 1000);
+
 });
-myservice.advertise();

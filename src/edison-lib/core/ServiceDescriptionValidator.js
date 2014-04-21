@@ -40,6 +40,26 @@ ServiceDescriptionValidator.prototype.validate = function () {
     }
   }
 
+  if (typeof this.description.advertise === 'undefined') {
+    throw new Error("Service must specify if it needs to advertised locally or in the cloud.");
+  }
+
+  if (typeof this.description.advertise.locally === 'undefined') {
+    throw new Error("Missing boolean property 'advertise.locally. " +
+      "Service needs to state if it must be locally advertised or not.");
+  }
+  if (typeof this.description.advertise.locally !== 'boolean') {
+    throw new Error("advertise.locally must be a Boolean property.");
+  }
+
+  if (typeof this.description.advertise.cloud === 'undefined') {
+    throw new Error("Missing boolean property 'advertise.cloud. " +
+      "Service needs to state if it must be advertised in the cloud or not.");
+  }
+  if (typeof this.description.advertise.locally !== 'boolean') {
+    throw new Error("advertise.cloud must be a Boolean property.");
+  }
+
   return this.description;
 };
 

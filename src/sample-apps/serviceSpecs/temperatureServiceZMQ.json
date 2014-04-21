@@ -1,10 +1,11 @@
 {
-    "name" : "temperature",
-    "type" : {
-        "name": "zmqpubsub",
-        "protocol" : "tcp",
-        "subtypes" : ["cpuTemp"]
-    },
-    "port" : 1883,
-    "properties" : {"dataType" : "float"}
+  "name" : "temperature",
+  "type" : {
+    "name": "zmqpubsub",
+    "protocol" : "tcp",
+    "subtypes" : ["cpuTemp"]
+  },
+  "port" : 1883,
+  "properties" : {"dataType" : "float"},
+  "advertise": {"locally": true, "cloud": false}
 }

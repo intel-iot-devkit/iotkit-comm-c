@@ -4,9 +4,13 @@
  * initialize the edison library based on its configuration file.
  */
 var path = require('path');
+var InterfaceValidator = require("./core/plugin-validator.njs");
 
 var edisonConfig = require("./config.js");
-var InterfaceValidator = require("./core/plugin-validator.njs");
+var Service = require("./core/Service.js");
+var ServiceDescriptionValidator = require("./core/ServiceDescriptionValidator.js");
+var Client = require("./core/Client.js");
+var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
 
 function setPluginAccessVariable(component, plugin) {
   if (!exports.plugins) {
@@ -51,3 +55,20 @@ exports.getPlugin = function (component, name) {
 	
 	return exports.plugins[component][name];
 };
+
+exports.createService = function (serviceSpecFilePath, serviceCreatedCallback) {
+  var service = new Service(serviceSpecFilePath)
+  if (service.description.advertise.locally) {
+    EdisonMDNS.advertiseService(service.description);
+  }
+  serviceCreatedCallback(service);
+}
+
+exports.createClient = function (serviceQueryFilePath, serviceFilter, clientCreatedCallback) {
+  // todo: change to ServiceQueryValidator
+  var validator = new ServiceDescriptionValidator(serviceQueryFilePath);
+  var serviceQuery = validator.validate();
+  EdisonMDNS.discoverServices(serviceQuery.type, serviceFilter, function(serviceRecord, bestKnownAddress) {
+    clientCreatedCallback(new Client(serviceQuery, bestKnownAddress, serviceRecord.port));
+  });
+}

@@ -29,7 +29,7 @@ EdisonMQTT.prototype.subscribe = function (topic) {
 EdisonMQTT.prototype.unsubscribe = function (topic) {
   "use strict";
   console.log("unsubscribe mqtt.");
-}
+};
 
 EdisonMQTT.prototype.setReceivedMessageHandler = function(callback) {
   "use strict";
