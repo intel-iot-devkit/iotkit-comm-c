@@ -1,0 +1,10 @@
+{
+        "pluginInterfaceDir": "plugin-interfaces",
+        "pluginDir": "plugins",
+        "superInterfaceName": "interface-for-interfaces",
+        "serviceDir": "serviceSpecs",
+        "plugins":
+            [
+                 {"fileName": "libpubsubstub.so"}
+            ]
+}

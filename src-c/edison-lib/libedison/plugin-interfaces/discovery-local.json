@@ -1,0 +1,3 @@
+{
+    "functions": ["advertiseServices", "discoverServices", "findService"]
+}
