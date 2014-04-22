@@ -1,11 +1,13 @@
 var main = require("../main.njs");
-var ServiceDescriptionValidator = require("./ServiceDescriptionValidator.js");
 
-function Service(serviceSpecFilePath) {
+
+Service.prototype.comm = null;
+Service.prototype.description = null;
+
+function Service(serviceDescription) {
   "use strict";
 
-  var validator = new ServiceDescriptionValidator(serviceSpecFilePath);
-  this.description = validator.validate();
+  this.description = serviceDescription;
 
   var commplugin;
   try {
@@ -16,11 +18,9 @@ function Service(serviceSpecFilePath) {
     throw err;
   }
 
-  this.comm = new commplugin(this.description.port, "server");
+  this.comm = new commplugin();
+  this.comm.createService(serviceDescription);
 }
-
-Service.prototype.comm = null;
-Service.prototype.description = null;
 
 // export the class
 module.exports = Service;

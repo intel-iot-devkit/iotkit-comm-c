@@ -1,6 +1,9 @@
 var edisonLib = require('../edison-lib');
 
-edisonLib.createService("./serviceSpecs/temperatureServiceZMQ.json", function (service) {
+var validator = new edisonLib.ServiceDescriptionValidator();
+validator.readServiceDescriptionFromFile("./serviceSpecs/temperatureServiceZMQ.json");
+
+edisonLib.createService(validator.getValidatedDescription(), function (service) {
   "use strict";
 
   service.comm.setReceivedMessageHandler(function(message) {

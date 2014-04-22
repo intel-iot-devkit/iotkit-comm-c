@@ -4,16 +4,25 @@ ZeroMQ.prototype.socket = null;
 ZeroMQ.prototype.component = "communication";
 ZeroMQ.prototype.name = "zmqpubsub";
 
-function ZeroMQ(port, type, ip) {
+function ZeroMQ() {
     "use strict";
-    if (type == 'server') {
-        this.socket = zeromq.socket('pub');
-        this.socket.bindSync('tcp://*:' + port);
-    } else {
-        this.socket = zeromq.socket('sub');
-        this.socket.connect('tcp://' + ip + ':' + port);
-    }
 }
+
+ZeroMQ.prototype.createService = function (serviceDescription) {
+  "use strict";
+  this.socket = zeromq.socket('pub');
+  if (serviceDescription.address) {
+    this.socket.bindSync('tcp://' + serviceDescription.address + ':' + serviceDescription.port);
+  } else {
+    this.socket.bindSync('tcp://*:' + serviceDescription.port);
+  }
+};
+
+ZeroMQ.prototype.createClient = function (serviceDescription) {
+  "use strict";
+  this.socket = zeromq.socket('sub');
+  this.socket.connect('tcp://' + serviceDescription.address + ':' + serviceDescription.port);
+};
 
 ZeroMQ.prototype.send = function (msg) {
     this.socket.send(msg.topic + ' ' + msg.text);

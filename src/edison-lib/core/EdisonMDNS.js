@@ -2,6 +2,8 @@ var mdns = require('mdns2');
 var path = require('path');
 var os = require('os');
 
+var ServiceRecord = require("./ServiceRecord.js");
+
 // private static
 // service cache to remove duplicate services
 exports.serviceCache = {};
@@ -30,33 +32,65 @@ EdisonMDNS.prototype.name = "mdns";
 EdisonMDNS.prototype.component = "discovery";
 
 // public functions
-EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
-  var ad = mdns.createAdvertisement(serviceSpec.type, serviceSpec.port,
-    {txtRecord: serviceSpec.properties, name: serviceSpec.name});
+EdisonMDNS.prototype.advertiseService = function (serviceDescription) {
+  var serviceRecord = new ServiceRecord(serviceDescription);
+  var ad = mdns.createAdvertisement(serviceRecord.rawRecord.type, serviceRecord.rawRecord.port,
+    {txtRecord: serviceRecord.rawRecord.properties, name: serviceRecord.rawRecord.name});
   ad.start();
 };
 
-EdisonMDNS.prototype.discoverServices = function (serviceType, serviceFilter, callback) {
+EdisonMDNS.prototype.discoverServices = function (serviceQuery, serviceFilter, callback) {
 
   // todo: needs fix: multiple subtypes in the serviceType causes errors.
   // make sure your serviceType contains only *one* subtype
-  var browser = mdns.createBrowser(serviceType, { resolverSequence: exports.mdnsResolverSequence });
+  var browser = mdns.createBrowser(serviceQuery.type, { resolverSequence: exports.mdnsResolverSequence });
 
   browser.on('serviceUp', function(service) {
     var filteredServiceAddresses = serviceAddressFilter(service);
+
     if (filteredServiceAddresses.length != 0) {
+
+      var serviceRecord = new ServiceRecord();
+      serviceRecord.initFromRawServiceRecord(service);
+      serviceRecord.setSuggestedAddresses(filteredServiceAddresses);
+      serviceRecord.setSuggestedAddress(filteredServiceAddresses[0]);
+
       if (!serviceFilter) {
-        callback(service, filteredServiceAddresses);
+        try {
+          callback(serviceRecord.getSuggestedServiceDescription());
+        } catch (err) {
+          console.log("ERROR: No valid service description available. Skipping.");
+          console.log(err);
+          return;
+        }
       }
 
-      var contactAddress = serviceFilter(service, filteredServiceAddresses);
-
-      if (typeof contactAddress !== 'string') {
-        throw new Error("Address for filtered service is not of type 'String'.");
-      }
-
+      var contactAddress = serviceFilter(serviceRecord);
       if (contactAddress) {
-        callback(service, contactAddress);
+        if (typeof contactAddress !== 'string') {
+          console.log("ERROR: Address returned for filtered service is not of type 'string'. Skipping.");
+          return;
+        }
+
+        serviceRecord.setSuggestedAddress(contactAddress);
+
+        try {
+          callback(serviceRecord.getSuggestedServiceDescription());
+        } catch (err) {
+          console.log("ERROR: No valid service description available. Skipping.");
+          console.log(err);
+          return;
+        }
+      } else {
+        if (serviceRecord.getSuggestedAddress()) {
+          try {
+            callback(serviceRecord.getSuggestedServiceDescription());
+          } catch (err) {
+            console.log("ERROR: No valid service description available. Skipping.");
+            console.log(err);
+            return;
+          }
+        }
       }
     }
   });

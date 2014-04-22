@@ -64,7 +64,7 @@ InterfaceValidator.prototype.loadedPlugins = {};
 // methods
 
 //Verifies that a plugin confirms to the interface type it claims to be.
-InterfaceValidator.prototype.validate = function(component, pluginList, callback)
+InterfaceValidator.prototype.getValidatedDescription = function(component, pluginList, callback)
 {
 	for (var i = 0; i < pluginList.length; i++) {
 		if (pluginList[i].ignored || !pluginList[i].fileName) {

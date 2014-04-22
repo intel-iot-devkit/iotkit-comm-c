@@ -7,8 +7,8 @@ var path = require('path');
 var InterfaceValidator = require("./core/plugin-validator.njs");
 
 var edisonConfig = require("./config.js");
-var Service = require("./core/Service.js");
 var ServiceDescriptionValidator = require("./core/ServiceDescriptionValidator.js");
+var Service = require("./core/Service.js");
 var Client = require("./core/Client.js");
 var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
 
@@ -30,12 +30,12 @@ for (var component in edisonConfig.components) {
 		console.log("INFO: No plugins configured for component '" + component + "'. Skipping...");
 		continue;
 	}
-	validator.validate(component, edisonConfig.components[component].plugins, setPluginAccessVariable);
+	validator.getValidatedDescription(component, edisonConfig.components[component].plugins, setPluginAccessVariable);
 }
 
 exports.config = edisonConfig;
 
-exports.Service = require("./core/Service.js");
+exports.ServiceDescriptionValidator = ServiceDescriptionValidator;
 
 exports.sayhello = function ()
 {
@@ -56,19 +56,16 @@ exports.getPlugin = function (component, name) {
 	return exports.plugins[component][name];
 };
 
-exports.createService = function (serviceSpecFilePath, serviceCreatedCallback) {
-  var service = new Service(serviceSpecFilePath)
-  if (service.description.advertise.locally) {
+exports.createService = function (serviceDescription, serviceCreatedCallback) {
+  var service = new Service(serviceDescription)
+  if (!service.description.advertise || service.description.advertise.locally) {
     EdisonMDNS.advertiseService(service.description);
   }
   serviceCreatedCallback(service);
 }
 
-exports.createClient = function (serviceQueryFilePath, serviceFilter, clientCreatedCallback) {
-  // todo: change to ServiceQueryValidator
-  var validator = new ServiceDescriptionValidator(serviceQueryFilePath);
-  var serviceQuery = validator.validate();
-  EdisonMDNS.discoverServices(serviceQuery.type, serviceFilter, function(serviceRecord, bestKnownAddress) {
-    clientCreatedCallback(new Client(serviceQuery, bestKnownAddress, serviceRecord.port));
+exports.createClient = function (serviceQuery, serviceFilter, clientCreatedCallback) {
+  EdisonMDNS.discoverServices(serviceQuery, serviceFilter, function(serviceDescription) {
+    clientCreatedCallback(new Client(serviceDescription));
   });
 }
