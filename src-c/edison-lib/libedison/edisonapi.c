@@ -120,7 +120,7 @@ bool parseConfigFile(char *config_file)
                 }
             }
             else 
-	    {
+	        {
                 fprintf(stderr,"invalid JSON format for %s file\n", config_file);
                 status = false;
             }
@@ -128,6 +128,7 @@ bool parseConfigFile(char *config_file)
             cJSON_Delete(json);
         }
 
+        fclose(fp);
 	// free buffers
         free(buffer);
     }
@@ -234,6 +235,7 @@ bool parsePluginInterfaces(char *inf_file)
             cJSON_Delete(json);
         }
 
+        fclose(fp);
         // free buffers
         free(buffer);
     }
