@@ -69,3 +69,11 @@ exports.createClient = function (serviceQuery, serviceFilter, clientCreatedCallb
     clientCreatedCallback(new Client(serviceDescription));
   });
 }
+
+exports.discoverServices = function (serviceQuery, serviceFoundCallback) {
+  EdisonMDNS.discoverServices(serviceQuery, null, serviceFoundCallback);
+};
+
+exports.createClientForGivenService = function (serviceDescription, clientCreatedCallback) {
+  clientCreatedCallback(new Client(serviceDescription));
+};

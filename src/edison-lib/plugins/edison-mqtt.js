@@ -1,29 +1,34 @@
 var mqtt = require('mqtt');
 
-var client;
-
-function EdisonMQTT(brokerip, brokerport, type, args) {
-  "use strict";
-    console.log(":IP:" + brokerip + ":port:"+brokerport+":type:"+type);
-    if (type != 'undefined' && type == 'ssl') {
-        console.log('going to create secure client');
-        client = mqtt.createSecureClient(brokerport, brokerip, args);
-    } else {
-        console.log('going to create public client');
-        client = mqtt.createClient(brokerport, brokerip);
-    }
-}
-
+EdisonMQTT.prototype.client = null;
 EdisonMQTT.prototype.component = "communication";
 EdisonMQTT.prototype.name = "mqtt";
 
-EdisonMQTT.prototype.send = function (topic, message) {
-    client.publish(topic, message);
+function EdisonMQTT() {
+  "use strict";
+}
+
+EdisonMQTT.prototype.createService = function (serviceDescription) {
+  "use strict";
+
+};
+
+EdisonMQTT.prototype.createClient = function (serviceDescription) {
+  "use strict";
+  if (serviceDescription.comm_params && serviceDescription.comm_params['ssl']) {
+    this.client = mqtt.createSecureClient(serviceDescription.port, serviceDescription.address,
+      serviceDescription.comm_params);
+  } else {
+    this.client = mqtt.createClient(serviceDescription.port, serviceDescription.address);
+  }
+};
+
+EdisonMQTT.prototype.send = function (msg) {
+    this.client.publish(msg.topic, msg.text);
 };
 
 EdisonMQTT.prototype.subscribe = function (topic) {
-    console.log(topic);
-    client.subscribe(topic);
+    this.client.subscribe(topic);
 };
 
 EdisonMQTT.prototype.unsubscribe = function (topic) {
@@ -33,13 +38,13 @@ EdisonMQTT.prototype.unsubscribe = function (topic) {
 
 EdisonMQTT.prototype.setReceivedMessageHandler = function(callback) {
   "use strict";
-  client.on('message', function (topic, message) {
-    callback(topic, message);
+  this.client.on('message', function (topic, message) {
+    callback({topic: topic, text: message});
   });
 };
 
 EdisonMQTT.prototype.done = function () {
-	client.close();
+	this.client.close();
 };
 
 module.exports = EdisonMQTT;

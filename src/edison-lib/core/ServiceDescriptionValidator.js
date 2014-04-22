@@ -37,6 +37,10 @@ ServiceDescriptionValidator.validate = function (serviceDescription) {
     if (!Array.isArray(serviceDescription.type.subtypes)) {
       throw new Error("Subtypes of a service type must be in an array.");
     }
+
+    if (serviceDescription.type.subtypes.length > 1) {
+      throw new Error("More than one subtype is not supported at this time. This is a known issue.");
+    }
   }
 
   if (typeof serviceDescription.port === 'undefined') {
@@ -66,6 +70,7 @@ ServiceDescriptionValidator.validate = function (serviceDescription) {
       throw new Error("Missing boolean property 'advertise.cloud. " +
         "Service needs to state if it must be advertised in the cloud or not.");
     }
+
     if (typeof serviceDescription.advertise.locally !== 'boolean') {
       throw new Error("advertise.cloud must be a Boolean property.");
     }

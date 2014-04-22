@@ -15,10 +15,12 @@ function ServiceRecord (serviceDescription) {
 
 ServiceRecord.prototype.getSuggestedServiceDescription = function () {
   "use strict";
-  if (!this.serviceDescription.address) {
-    this.serviceDescription.address = this.getSuggestedAddress();
+
+  if (this.serviceDescription.address) {
+    return this.serviceDescription;
   }
 
+  this.serviceDescription.address = this.getSuggestedAddress();
   if (!this.serviceDescription.address) {
     throw new Error("No valid address found for this service.");
   }
@@ -101,6 +103,10 @@ function makeServiceRecord () {
   this.rawRecord = this.serviceDescription;
 
   if (!this.serviceDescription) {
+    return;
+  }
+
+  if (!this.serviceDescription.comm_params) {
     return;
   }
 

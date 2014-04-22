@@ -8,7 +8,8 @@ module.exports =
 			communication: {
 				plugins:
 					[
-					 	{fileName: "edison-zmqpubsub.js"}
+					 	{fileName: "edison-zmqpubsub.js"},
+            {fileName: "edison-mqtt.js"}
 					]
 			}
 		}

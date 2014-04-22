@@ -55,41 +55,13 @@ EdisonMDNS.prototype.discoverServices = function (serviceQuery, serviceFilter, c
       serviceRecord.setSuggestedAddresses(filteredServiceAddresses);
       serviceRecord.setSuggestedAddress(filteredServiceAddresses[0]);
 
-      if (!serviceFilter) {
+      if (!serviceFilter || serviceFilter(serviceRecord)) {
         try {
           callback(serviceRecord.getSuggestedServiceDescription());
         } catch (err) {
           console.log("ERROR: No valid service description available. Skipping.");
           console.log(err);
           return;
-        }
-      }
-
-      var contactAddress = serviceFilter(serviceRecord);
-      if (contactAddress) {
-        if (typeof contactAddress !== 'string') {
-          console.log("ERROR: Address returned for filtered service is not of type 'string'. Skipping.");
-          return;
-        }
-
-        serviceRecord.setSuggestedAddress(contactAddress);
-
-        try {
-          callback(serviceRecord.getSuggestedServiceDescription());
-        } catch (err) {
-          console.log("ERROR: No valid service description available. Skipping.");
-          console.log(err);
-          return;
-        }
-      } else {
-        if (serviceRecord.getSuggestedAddress()) {
-          try {
-            callback(serviceRecord.getSuggestedServiceDescription());
-          } catch (err) {
-            console.log("ERROR: No valid service description available. Skipping.");
-            console.log(err);
-            return;
-          }
         }
       }
     }
