@@ -39,7 +39,7 @@ int unsubscribe(char *topic);
 int setReceivedMessageHandler();
 //values for type --> open, ssl
 int createClient(char *host, int port, char *type, void *sslargs);
-int createService;
+int createService();
 int done();
 
 
