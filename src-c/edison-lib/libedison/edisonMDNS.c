@@ -149,6 +149,6 @@ endParseSrvFile:
 #if DEBUG
 int main(int argc, char *argv[])
 {
-    advertiseServices("../serviceSpecs/temperatureService.json");
+    advertiseServices("./serviceSpecs/temperatureService.json");
 }
 #endif

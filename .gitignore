@@ -4,3 +4,6 @@
 
 *.iml
 .DS_Store
+
+a.out
+*.swp

@@ -1,10 +1,12 @@
 {
-        "name" : "temperature",
-        "type" : {
-                "name": "zmq",
-                "protocol" : "tcp",
-                "subtypes" : ["cpuTemp"]
-        },
-        "port" : 1883,
-        "properties" : {"dataType" : "float"}
+  "name": "/ndg/temperature/cpuTemp",
+  "type": {
+    "name": "zmqpubsub",
+    "protocol": "tcp"
+  },
+  "address": "*",
+  "port": 1884,
+  "properties": {"dataType": "float", "unit": "F"},
+  "advertise": {"locally": true, "cloud": false},
+  "comm_params": {"name": "value", "name1": "value1"}
 }
