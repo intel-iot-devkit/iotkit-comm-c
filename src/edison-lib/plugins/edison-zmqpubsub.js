@@ -1,14 +1,14 @@
 var zeromq = require('zmq');
 
-ZeroMQ.prototype.socket = null;
-ZeroMQ.prototype.component = "communication";
-ZeroMQ.prototype.name = "zmqpubsub";
+EdisonZMQPubSub.prototype.socket = null;
+EdisonZMQPubSub.prototype.component = "communication";
+EdisonZMQPubSub.prototype.name = "zmqpubsub";
 
-function ZeroMQ() {
+function EdisonZMQPubSub() {
     "use strict";
 }
 
-ZeroMQ.prototype.createService = function (serviceDescription) {
+EdisonZMQPubSub.prototype.createService = function (serviceDescription) {
   "use strict";
   this.socket = zeromq.socket('pub');
   if (serviceDescription.address) {
@@ -18,34 +18,38 @@ ZeroMQ.prototype.createService = function (serviceDescription) {
   }
 };
 
-ZeroMQ.prototype.createClient = function (serviceDescription) {
+EdisonZMQPubSub.prototype.createClient = function (serviceDescription) {
   "use strict";
   this.socket = zeromq.socket('sub');
   this.socket.connect('tcp://' + serviceDescription.address + ':' + serviceDescription.port);
 };
 
-ZeroMQ.prototype.send = function (msg) {
+EdisonZMQPubSub.prototype.send = function (msg) {
     this.socket.send(msg.topic + ' ' + msg.text);
 };
 
-ZeroMQ.prototype.subscribe = function (topic) {
+EdisonZMQPubSub.prototype.subscribe = function (topic) {
     this.socket.subscribe(topic);
 };
 
-ZeroMQ.prototype.setReceivedMessageHandler = function (handler) {
+EdisonZMQPubSub.prototype.setReceivedMessageHandler = function (handler) {
   "use strict";
 
   this.socket.on('message', function (message) {
-    handler(message);
+    if (handler) {
+      handler(message);
+    } else {
+      console.log("WARNING: No receive message handler set. Dropping message.");
+    }
   });
 };
 
-ZeroMQ.prototype.unsubscribe = function () {
+EdisonZMQPubSub.prototype.unsubscribe = function () {
   "use strict";
 };
 
-ZeroMQ.prototype.done = function () {
+EdisonZMQPubSub.prototype.done = function () {
     this.socket.close();
 };
 
-module.exports = ZeroMQ;
+module.exports = EdisonZMQPubSub;

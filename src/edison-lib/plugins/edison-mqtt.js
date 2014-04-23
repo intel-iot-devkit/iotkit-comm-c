@@ -36,10 +36,14 @@ EdisonMQTT.prototype.unsubscribe = function (topic) {
   console.log("unsubscribe mqtt.");
 };
 
-EdisonMQTT.prototype.setReceivedMessageHandler = function(callback) {
+EdisonMQTT.prototype.setReceivedMessageHandler = function(handler) {
   "use strict";
   this.client.on('message', function (topic, message) {
-    callback({topic: topic, text: message});
+    if (handler) {
+      handler({topic: topic, text: message});
+    } else {
+      console.log("WARNING: No receive message handler set. Dropping message.");
+    }
   });
 };
 

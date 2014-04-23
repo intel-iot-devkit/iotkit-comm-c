@@ -16,8 +16,7 @@ function ZeroMQ(ip, port, type) {
 }
 
 ZeroMQ.prototype.components = ["communication"];
-ZeroMQ.prototype.name = "edisonZmq";
-ZeroMQ.prototype.type = "reqrep";
+ZeroMQ.prototype.name = "zmqreqrep";
 
 ZeroMQ.prototype.request = function (message) {
     socket.send(message);

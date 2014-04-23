@@ -3,18 +3,15 @@ var edisonLib = require("../edison-lib");
 var validator = new edisonLib.ServiceDescriptionValidator();
 validator.readServiceDescriptionFromFile("./serviceSpecs/temperatureServiceMQTT.json");
 
-edisonLib.createClientForGivenService(validator.getValidatedDescription(), function (client) {
+var serviceDescription = validator.getValidatedDescription();
 
-  client.comm.subscribe("mytopic");
+edisonLib.createClientForGivenService(serviceDescription, function (client) {
+
+  client.comm.subscribe(serviceDescription.name);
 
   client.comm.setReceivedMessageHandler(function(message) {
     "use strict";
     console.log(message);
   });
-
-  setInterval(function () {
-    "use strict";
-    client.comm.send({topic: "mytopic", text: "my message"});
-  }, 1000);
 
 });
