@@ -22,27 +22,30 @@ MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
 void handleSignal(int sig)
  {
+    #if DEBUG
+  	    printf("got interruption signal");
+  	#endif
+
  	toStop = 1;
- 	printf("got interruption signal");
  }
 
  int messageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message)
  {
  	int i;
  	char* payloadptr;
- 	if((sent++ % 1000) == 0)
- 		printf("%d messages received\n", sent++);
 
- 	printf("Message arrived\n");
- 	printf("topic: %s\n", topicName);
- 	printf("message:");
+    #if DEBUG
+        printf("Message arrived\n");
+        printf("topic: %s\n", topicName);
+        printf("message:");
 
- 	payloadptr = message->payload;
- 	for(i=0; i<message->payloadlen; i++)
- 	{
- 		putchar(*payloadptr++);
- 	}
- 	putchar('\n');
+        payloadptr = message->payload;
+        for(i=0; i<message->payloadlen; i++)
+        {
+            putchar(*payloadptr++);
+        }
+        putchar('\n');
+ 	#endif
 
  	MQTTAsync_freeMessage(&message);
  	MQTTAsync_free(topicName);
@@ -51,25 +54,35 @@ void handleSignal(int sig)
 
  void onSubscribe(void* context, MQTTAsync_successData* response)
  {
- 	printf("Subscribe succeeded\n");
+    #if DEBUG
+ 	    printf("Subscribe succeeded\n");
+ 	#endif
  }
 
  void onSubscribeFailure(void* context, MQTTAsync_failureData* response)
  {
- 	printf("Subscribe failed\n");
+    #if DEBUG
+ 	    printf("Subscribe failed\n");
+ 	#endif
+
  	finished = 1;
  }
 
  void onDisconnect(void* context, MQTTAsync_successData* response)
  {
- 	printf("Successful disconnection\n");
+    #if DEBUG
+ 	    printf("Successful disconnection\n");
+ 	#endif
+
  	finished = 1;
  }
 
 
  void onSendFailure(void* context, MQTTAsync_failureData* response)
  {
-	printf("onSendFailure: message with token value %d delivery failed\n", response->token);
+    #if DEBUG
+        printf("onSendFailure: message with token value %d delivery failed\n", response->token);
+	#endif
  }
 
 
@@ -107,7 +120,10 @@ void handleSignal(int sig)
 
  void onConnect(void* context, MQTTAsync_successData* response)
  {
- 	printf("Connected\n");
+    #if DEBUG
+ 	    printf("Connected\n");
+ 	#endif
+
  	connected=1;
  }
 
@@ -117,10 +133,14 @@ void handleSignal(int sig)
  	MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
  	int rc;
 
- 	printf("\nConnection lost\n");
- 	printf("     cause: %s\n", cause);
+    #if DEBUG
+ 	    printf("\nConnection lost\n");
+ 	    printf("     cause: %s\n", cause);
 
- 	printf("Reconnecting\n");
+
+ 	    printf("Reconnecting\n");
+ 	#endif
+
  	conn_opts.keepAliveInterval = 20;
  	conn_opts.cleansession = 1;
  	conn_opts.onSuccess = onConnect;
@@ -145,7 +165,10 @@ void handleSignal(int sig)
  	unsigned long i;
  	 		struct timeval tv;
  	 		gettimeofday(&tv,NULL);
- 	 		printf("start seconds : %ld\n",tv.tv_sec);
+
+ 	 		#if DEBUG
+ 	 		    printf("start seconds : %ld\n",tv.tv_sec);
+ 	 		#endif
 
  	 			opts.onSuccess = onSend;
  				opts.onFailure = onSendFailure;
@@ -167,7 +190,10 @@ void handleSignal(int sig)
 
  	 		gettimeofday(&tv,NULL);
 
- 	 		printf("end seconds : %ld\n",tv.tv_sec);
+
+            #if DEBUG
+ 	 		    printf("end seconds : %ld\n",tv.tv_sec);
+ 	 		#endif
 
  	return rc;
  }
@@ -194,7 +220,10 @@ void handleSignal(int sig)
  	 	if (toStop == 1)
  	 	{
  	 		close();
- 	 		printf("I think it is disconnected\n");
+
+ 	 		#if DEBUG
+ 	 		    printf("I think it is disconnected\n");
+ 	 		#endif
  	 	}
  	}
 
@@ -224,11 +253,17 @@ void handleSignal(int sig)
  }
 
 int unsubscribe(char *topic){
-    printf("Invoked MQTT: unsubscribe()\n");
+
+    #if DEBUG
+        printf("Invoked MQTT: unsubscribe()\n");
+    #endif
 }
 
 int setReceivedMessageHandler(){
-    printf("Invoked MQTT: setReceivedMessageHandler()\n");
+
+    #if DEBUG
+        printf("Invoked MQTT: setReceivedMessageHandler()\n");
+    #endif
 }
 
 
@@ -280,19 +315,25 @@ int setReceivedMessageHandler(){
 	 		printf("Failed to start connect, return code %d\n", rc);
 	 		exit(1);
 	 	}
-	 	printf("Waiting for connect\n");
+
+	 	#if DEBUG
+	 	    printf("Waiting for connect\n");
+	 	#endif
+
 	 	while (connected == 0 && finished == 0 && toStop == 0) {
-	 		printf("Waiting for connect123: %d %d %d\n", connected, finished, toStop);
+
+	 	    #if DEBUG
+	 		    printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
+	 		#endif
+
 	 		usleep(10000L);
 	 	}
-
-	 		printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
-
-	 	printf("Successful connection\n");
 
     return rc;
 }
 
 int createService(){
-    printf("Invoked MQTT: createService()\n");
+    #if DEBUG
+        printf("Invoked MQTT: createService()\n");
+    #endif
 }

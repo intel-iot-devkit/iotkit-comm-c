@@ -1,4 +1,4 @@
-#include "edison_pubsub.h"
+#include "edison-mqtt_async.h"
 
 int main(void) {
 	puts("Sample program to test the Edison MQTT pub/sub plugin !!");

@@ -20,6 +20,9 @@
 volatile MQTTAsync_token deliveredtoken;
 
 
+#ifndef DEBUG
+    #define DEBUG 0
+#endif
 
 volatile int toStop = 0;
  volatile int finished = 0;
