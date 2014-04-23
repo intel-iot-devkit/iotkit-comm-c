@@ -28,12 +28,3 @@ static inline bool isJsonArray(cJSON *item) {
 	return false;
     return true;
 }
-
-static inline bool checkDLError() {
-    char *error = dlerror();
-    if (error != NULL) {
-	fprintf(stderr, "DL error %s\n", error);
-	return false;
-    }
-    return true;
-}

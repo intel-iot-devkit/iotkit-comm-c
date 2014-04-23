@@ -14,6 +14,15 @@
 #define DEBUG 0
 #endif
 
+static inline bool checkDLError() {
+    char *error = dlerror();
+    if (error != NULL) {
+        fprintf(stderr, "DL error %s\n", error);
+        return false;
+    }
+    return true;
+}
+
 // current working dir
 char *g_cwd;
 
@@ -28,6 +37,14 @@ ConfigFileData g_configData;
 
 // function signatures
 char **g_funcSignatures;
+
+// helper define
+#define handleParseConfigError() \
+{\
+    status = false;\
+    fprintf(stderr,"invalid JSON format for %s file\n", config_file);\
+    goto endParseConfig;\
+}
 
 /* Parse config file */
 bool parseConfigFile(char *config_file)
@@ -67,73 +84,61 @@ bool parseConfigFile(char *config_file)
             free(out);
             #endif
 
-            if (isJsonObject(json)) 
-	    {
-                jitem = cJSON_GetObjectItem(json, "pluginInterfaceDir");
-                if (isJsonString(jitem)) 
-		{
-                    g_configData.pluginInterfaceDir = strdup(jitem->valuestring);
-                    #if DEBUG
-                    printf("pluginInterfaceDir = %s\n", g_configData.pluginInterfaceDir);
-                    #endif
-                }    
+            if (!isJsonObject(json)) handleParseConfigError();
+
+            jitem = cJSON_GetObjectItem(json, "pluginInterfaceDir");
+            if (!isJsonString(jitem)) handleParseConfigError();
+
+            g_configData.pluginInterfaceDir = strdup(jitem->valuestring);
+            #if DEBUG
+            printf("pluginInterfaceDir = %s\n", g_configData.pluginInterfaceDir);
+            #endif
                                                                 
-                jitem = cJSON_GetObjectItem(json, "pluginDir");
-                if (isJsonString(jitem)) {
-                    g_configData.pluginDir = strdup(jitem->valuestring);
-                    #if DEBUG
-                    printf("pluginDir = %s\n", g_configData.pluginDir);
-                    #endif
-                }    
+            jitem = cJSON_GetObjectItem(json, "pluginDir");
+            if (!isJsonString(jitem)) handleParseConfigError();
 
-                jitem = cJSON_GetObjectItem(json, "plugins");
-                if (isJsonArray(jitem)) 
-		{
-		    child=jitem->child;
-                    while (child) 
-		    {
-			jitem = child;
-                        child=child->next;
-                    }
+            g_configData.pluginDir = strdup(jitem->valuestring);
+            #if DEBUG
+            printf("pluginDir = %s\n", g_configData.pluginDir);
+            #endif
 
-		    if (jitem) 
-		    {
-			jitem = cJSON_GetObjectItem(jitem, "fileName");
-			if (isJsonString(jitem)) 
-			{
-			    g_configData.plugin = strdup(jitem->valuestring);
-			    #if DEBUG
-			    printf("plugin = %s\n", g_configData.plugin);
-			    #endif
-			}
-			else 
-			{
-			    fprintf(stderr,"invalid plugin\n");
-			    status = false;
-			}
-		    }
-		    else 
-		    {
-			fprintf(stderr,"invalid %s file\n", config_file);
-			status = false;
-		    }
-                }
-            }
-            else 
-	        {
-                fprintf(stderr,"invalid JSON format for %s file\n", config_file);
-                status = false;
+            jitem = cJSON_GetObjectItem(json, "plugins");
+            if (!isJsonArray(jitem)) handleParseConfigError();
+
+            child=jitem->child;
+            while (child) 
+	    {
+		jitem = child;
+                child=child->next;
             }
 
+	    if (!jitem) handleParseConfigError();
+
+            jitem = cJSON_GetObjectItem(jitem, "fileName");
+	    if (!isJsonString(jitem)) handleParseConfigError();
+
+	    g_configData.plugin = strdup(jitem->valuestring);
+	    #if DEBUG
+	    printf("plugin = %s\n", g_configData.plugin);
+	    #endif
+
+endParseConfig:
             cJSON_Delete(json);
         }
 
-        fclose(fp);
 	// free buffers
         free(buffer);
     }
 
     return status;
+}
+
+// helper define
+#define handleParseInterfacesError() \
+{\
+    status = false;\
+    fprintf(stderr,"invalid JSON format for %s file\n", inf_file);\
+    goto endParseInterfaces;\
 }
 
 // parse the plugin interfaces
@@ -175,67 +180,37 @@ bool parsePluginInterfaces(char *inf_file)
             free(out);
             #endif
 
-            if (isJsonObject(json)) 
-	    {
-                jitem = cJSON_GetObjectItem(json, "functions");
-                if (isJsonArray(jitem)) 
-		{
-                    child = jitem->child;
-                    /* How many entries in the array? */
-                    while (child) numentries++,child=child->next; 
-                    if (numentries) 
-                    {
-                        g_funcSignatures = (char **)malloc(numentries*sizeof(char*));
-                        if (g_funcSignatures) 
-			{
-                            memset(g_funcSignatures,0,numentries*sizeof(char*));
-                            child=jitem->child;
-                            while (child)
-                            {
-                                if (isJsonString(child)) 
-				{
-                                    g_funcSignatures[i] = strdup(child->valuestring);    
-                                    child = child->next;
-                                    #if DEBUG
-                                    printf("g_funcSignature = %s\n", g_funcSignatures[i]);
-                                    #endif
-                                    i++;
-                                }
-                                else 
-				{
-                                    fprintf(stderr,"invalid JSON format for %s file\n", inf_file);
-                                    status = false;
-                                    break;
-                                }
-                            }
-                        } 
-                        else 
-			{
-                            fprintf(stderr,"can't allocate memory\n");
-                            status = false;
-                        }
-                    }
-                    else 
-		    {
-                        fprintf(stderr,"invalid JSON format for %s file\n", inf_file);
-                        status = false;
-                    }
-                }    
-		else
-		{
-                    fprintf(stderr,"invalid JSON format for %s file\n", inf_file);
-                    status = false;
-                } 
-            }
-            else {
-                fprintf(stderr,"invalid JSON format for %s file\n", inf_file);
-                status = false;
+            if (!isJsonObject(json)) handleParseInterfacesError();
+
+            jitem = cJSON_GetObjectItem(json, "functions");
+            if (!isJsonArray(jitem)) handleParseInterfacesError();
+
+            child = jitem->child;
+            /* How many entries in the array? */
+            while (child) numentries++,child=child->next; 
+            if (!numentries) handleParseInterfacesError();
+
+            g_funcSignatures = (char **)malloc(numentries*sizeof(char*));
+            if (!g_funcSignatures) handleParseInterfacesError();
+
+            memset(g_funcSignatures,0,numentries*sizeof(char*));
+            child=jitem->child;
+            while (child)
+            {
+		if (!isJsonString(child)) handleParseInterfacesError();
+
+                g_funcSignatures[i] = strdup(child->valuestring);    
+                child = child->next;
+                #if DEBUG
+                printf("g_funcSignature = %s\n", g_funcSignatures[i]);
+                #endif
+                i++;
             }
 
+endParseInterfaces:
             cJSON_Delete(json);
         }
 
-        fclose(fp);
         // free buffers
         free(buffer);
     }
