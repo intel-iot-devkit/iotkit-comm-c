@@ -4,7 +4,7 @@
  * initialize the edison library based on its configuration file.
  */
 var path = require('path');
-var InterfaceValidator = require("./core/plugin-validator.njs");
+var PluginLoader = require("./core/plugin-loader.njs");
 
 var edisonConfig = require("./config.js");
 var ServiceDescriptionValidator = require("./core/ServiceDescriptionValidator.js");
@@ -12,26 +12,20 @@ var Service = require("./core/Service.js");
 var Client = require("./core/Client.js");
 var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
 
-function setPluginAccessVariable(component, plugin) {
-  if (!exports.plugins) {
-    exports.plugins = {};
-  }
-
-	if (!exports.plugins[component]) {
-		exports.plugins[component] = {};
-	}
-	exports.plugins[component][plugin.prototype.name] = plugin;
-}
-
 //load specified plugins for all supported components
-var validator = new InterfaceValidator();
-for (var component in edisonConfig.components) {
-	if (!edisonConfig.components[component] || !edisonConfig.components[component].plugins) {
-		console.log("INFO: No plugins configured for component '" + component + "'. Skipping...");
-		continue;
-	}
-	validator.getValidatedDescription(component, edisonConfig.components[component].plugins, setPluginAccessVariable);
+var pluginLoader = new PluginLoader();
+if (!edisonConfig.communicationPlugins || edisonConfig.communicationPlugins.length == 0) {
+  throw new Error("At least one communication plugin must be configured.");
 }
+
+for (var i = 0; i < edisonConfig.communicationPlugins.length; i++) {
+  if (edisonConfig.communicationPlugins[i].ignored || !edisonConfig.communicationPlugins[i].pluginName) {
+    continue;
+  }
+  pluginLoader.loadPlugin(edisonConfig.communicationPlugins[i].pluginName);
+}
+
+exports.plugins = pluginLoader.loadedPlugins;
 
 exports.config = edisonConfig;
 
@@ -42,22 +36,26 @@ exports.sayhello = function ()
 	return "Hello Edison user!";
 };
 
-exports.getPlugin = function (component, name) {
-	if (!exports.plugins[component]) {
-		throw new Error("Component '" + component + "' was not included in the edison library. " +
-				"It is either not defined in the configuration file or has no plugins associated with it.");
+exports.getClientPlugin = function (name) {
+	if (!exports.plugins[name]) {
+		throw new Error("No plugin with name '" + name + "' exists." +
+				"Please ensure that this plugin is included in the configuration file.");
 	}
 	
-	if (!exports.plugins[component][name]) {
-		throw new Error("No plugin with name '" + name + "' exists for component '" + component + "'. " +
-				"Please ensure that this plugin is included in the configuration of the respective component.");
-	}
-	
-	return exports.plugins[component][name];
+	return exports.plugins[name][edisonConfig.pluginFileSuffixes.clientFileSuffix];
+};
+
+exports.getServicePlugin = function (name) {
+  if (!exports.plugins[name]) {
+    throw new Error("No plugin with name '" + name + "' exists." +
+      "Please ensure that this plugin is included in the configuration file.");
+  }
+
+  return exports.plugins[name][edisonConfig.pluginFileSuffixes.serverFileSuffix];
 };
 
 exports.createService = function (serviceDescription, serviceCreatedCallback) {
-  var service = new Service(serviceDescription)
+  var service = new Service(serviceDescription);
   if (!service.description.advertise || service.description.advertise.locally) {
     EdisonMDNS.advertiseService(service.description);
   }

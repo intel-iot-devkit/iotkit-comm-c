@@ -59,8 +59,6 @@ EdisonMDNS.prototype.discoverServices = function (serviceQuery, serviceFilter, c
         try {
           callback(serviceRecord.getSuggestedServiceDescription());
         } catch (err) {
-          console.log("ERROR: No valid service description available. Skipping.");
-          console.log(err);
           return;
         }
       }

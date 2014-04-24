@@ -11,16 +11,16 @@ function Client(serviceDescription) {
 
   var commplugin;
   try {
-    commplugin =  main.getPlugin("communication", serviceDescription.type.name);
+    commplugin =  main.getClientPlugin(serviceDescription.type.name);
   } catch (err) {
     console.log("ERROR: An appropriate communication plugin could not be found for service at '" +
-      serviceDescription.address + "'. To interact with this service, the '" + serviceDescription.type.name +
-      "' communication plugin is required.");
+      serviceDescription.address + "'. To interact with this service the '" + serviceDescription.type.name +
+      "' plugin is required.");
+    console.log(err);
     throw err;
   }
 
-  this.comm = new commplugin();
-  this.comm.createClient(serviceDescription);
+  this.comm = new commplugin(serviceDescription);
 }
 
 // export the class

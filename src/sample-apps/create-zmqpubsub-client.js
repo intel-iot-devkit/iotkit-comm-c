@@ -8,8 +8,9 @@ edisonLib.createClient(validator.getValidatedDescription(), serviceFilter, funct
 
   client.comm.subscribe("mytopic");
 
-  client.comm.setReceivedMessageHandler(function(message) {
+  client.comm.setReceivedMessageHandler(function(message, context) {
     "use strict";
+    console.log(context);
     console.log(message.toString());
   });
 });

@@ -6,15 +6,9 @@ validator.readServiceDescriptionFromFile("./serviceSpecs/temperatureServiceZMQPU
 edisonLib.createService(validator.getValidatedDescription(), function (service) {
   "use strict";
 
-  service.comm.setReceivedMessageHandler(function(message) {
-    "use strict";
-    console.log(message);
-    service.comm.send(message); // echo server
-  });
-
   setInterval(function () {
     "use strict";
-    service.comm.send({topic: "mytopic", text: "my message"});
+    service.comm.publish("mytopic: my message");
   }, 1000);
 
 });

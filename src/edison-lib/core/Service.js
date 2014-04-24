@@ -11,15 +11,14 @@ function Service(serviceDescription) {
 
   var commplugin;
   try {
-    commplugin =  main.getPlugin("communication", this.description.type.name);
+    commplugin =  main.getServicePlugin(this.description.type.name);
   } catch (err) {
     console.log("ERROR: An appropriate communication plugin could not be found for service '" + this.description.name +
       "'. Service needs communication plugin '" + this.description.type.name + "'.");
     throw err;
   }
 
-  this.comm = new commplugin();
-  this.comm.createService(serviceDescription);
+  this.comm = new commplugin(serviceDescription);
 }
 
 // export the class
