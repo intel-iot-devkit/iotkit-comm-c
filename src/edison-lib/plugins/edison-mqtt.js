@@ -1,6 +1,8 @@
 var mqtt = require('mqtt');
 
-EdisonMQTT.prototype.client = null;
+EdisonMQTT.prototype.client = {};
+EdisonMQTT.prototype.service = {};
+EdisonMQTT.prototype.receivedMsgHandler = null;
 EdisonMQTT.prototype.component = "communication";
 EdisonMQTT.prototype.name = "mqtt";
 
@@ -11,6 +13,53 @@ function EdisonMQTT() {
 EdisonMQTT.prototype.createService = function (serviceDescription) {
   "use strict";
 
+  this.service = mqtt.createServer(function(client) {
+    var self = this;
+
+    client.on('connect', function(packet) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('connect', client, packet);
+      }
+    });
+
+    client.on('publish', function(packet) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('publish', client, packet);
+      }
+    });
+
+    client.on('subscribe', function(packet) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('subscribe', client, packet);
+      }
+    });
+
+    client.on('pingreq', function(packet) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('pingreq', client, packet);
+      }
+    });
+
+    client.on('disconnect', function(packet) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('disconnect', client, packet);
+      }
+    });
+
+    client.on('close', function(err) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('close', client, err);
+      }
+    });
+
+    client.on('error', function(err) {
+      if (self.receivedMsgHandler) {
+        self.receivedMsgHandler('error', client, err);
+      }
+    });
+  });
+
+  this.service.listen(serviceDescription.port);
 };
 
 EdisonMQTT.prototype.createClient = function (serviceDescription) {
@@ -21,14 +70,23 @@ EdisonMQTT.prototype.createClient = function (serviceDescription) {
   } else {
     this.client = mqtt.createClient(serviceDescription.port, serviceDescription.address);
   }
+
+  var self = this;
+  this.client.on('message', function (topic, message) {
+    if (self.receivedMsgHandler) {
+      self.receivedMsgHandler('message', this.client, {topic: topic, text: message});
+    }
+  });
 };
 
-EdisonMQTT.prototype.send = function (msg) {
-    this.client.publish(msg.topic, msg.text);
+EdisonMQTT.prototype.send = function (channel, msg, context) {
+    channel.publish(msg.topic, msg.text);
 };
 
 EdisonMQTT.prototype.subscribe = function (topic) {
+  if (this.client) {
     this.client.subscribe(topic);
+  }
 };
 
 EdisonMQTT.prototype.unsubscribe = function (topic) {
@@ -38,17 +96,30 @@ EdisonMQTT.prototype.unsubscribe = function (topic) {
 
 EdisonMQTT.prototype.setReceivedMessageHandler = function(handler) {
   "use strict";
-  this.client.on('message', function (topic, message) {
-    if (handler) {
-      handler({topic: topic, text: message});
-    } else {
-      console.log("WARNING: No receive message handler set. Dropping message.");
-    }
-  });
+  this.receivedMsgHandler = handler;
 };
 
 EdisonMQTT.prototype.done = function () {
-	this.client.close();
+  if (this.client) {
+    this.client.end();
+  }
+};
+
+EdisonMQTT.prototype.manageChannel = function (channel, actions) {
+  "use strict";
+  if (actions.kill) {
+    channel.stream.end;
+  }
+};
+
+EdisonMQTT.prototype.getDefaultChannel = function () {
+  "use strict";
+
+  if (this.client) {
+    return this.client;
+  }
+
+  return null;
 };
 
 module.exports = EdisonMQTT;
