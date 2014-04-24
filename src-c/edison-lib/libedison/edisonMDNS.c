@@ -243,7 +243,7 @@ void *handleEvents(void *c)
 }
 
 // Advertise the serivce
-void *advertiseService( ServiceRecord *record, 
+void *advertiseService( char *serviceDescFile,
 		       void (*callback)(void *, bool, char *) ) 
 {		
     DNSServiceRef client;
@@ -253,6 +253,10 @@ void *advertiseService( ServiceRecord *record,
     char msg[128];
     char regtype[128];
     static const char TXT[] = "\xC" "First String" "\xD" "Second String" "\xC" "Third String";
+
+    ServiceRecord *record = parseServiceRecord(serviceDescFile);
+    if (!record) 
+	return NULL;
 
     // register type
     strcpy(regtype, "_");
@@ -308,9 +312,7 @@ void callback(void *handle, bool status, char *msg)
 int main(void) 
 {
     void *handle;
-    ServiceRecord *record = parseServiceRecord("./serviceSpecs/temperatureService.json");
-    if (record)
-	handle = advertiseService(record, callback);    
+    handle = advertiseService("./serviceSpecs/temperatureService.json", callback);    
 
     printf ("Done advertise\n");
     while(1);
