@@ -17,7 +17,7 @@ typedef struct _ServiceDescription {
     } type;
     int port;
     char *properties;
-} ServiceDescription;
+} ServiceDescription, ServiceQuery;
      
 
 // Create client which returns a CommHandle

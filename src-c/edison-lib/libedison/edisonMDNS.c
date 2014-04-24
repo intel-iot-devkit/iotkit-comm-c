@@ -242,8 +242,96 @@ void *handleEvents(void *c)
     }
 }
 
+// handle query reply
+static void DNSSD_API queryReply(DNSServiceRef client, 
+				DNSServiceFlags flags, 
+				uint32_t interfaceIndex,
+				DNSServiceErrorType errorCode,
+				const char *name, 
+				const char *regtype, 
+				const char *domain, 
+				void *context)
+{
+    (void)flags;    // Unused
 
-// Advertise the serivce
+#if DEBUG
+    printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
+#endif
+    // get error callback
+    void (*callback)(void *, bool, ServiceDescription *) 
+	= (void (*)(void *, bool,  ServiceDescription *))context;
+
+#if DEBUG
+    printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
+#endif
+    if (errorCode == kDNSServiceErr_NoError)
+    {
+        sprintf(message, "Name now registered and active %s.%s.%s", name, regtype, domain);
+	callback(client, true, message);
+    }
+    else if (errorCode == kDNSServiceErr_NameConflict)
+    {
+        sprintf(message, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
+	callback(client, false, message);
+    }
+}
+
+// Discover the service from MDNS. Filtered by the filterCB
+void *discoverServicesFiltered(ServiceQuery *queryDesc, bool (*filterCB)(char *), void (*callback)(void *, bool, char *) )
+{
+    
+    DNSServiceRef client;
+    DNSServiceErrorType err;
+    pthread_t tid;	    // thread to handle events from DNS server
+    char msg[128];
+    char regtype[128];
+
+    // register type
+    strcpy(regtype, "_");
+    strcat(regtype, queryDesc->type.name);
+    strcat(regtype, "._");
+    strcat(regtype, queryDesc->type.protocol); 
+
+    err = DNSServiceBrowse
+		(&client, 
+		0, 
+		opinterface, 
+		regtype,		// registration type
+		"",			// domain (null = pick sensible default = local)
+		queryReply,		// callback
+		callback);
+
+    if (!client || err != kDNSServiceErr_NoError) 
+    {
+	sprintf(msg, "DNSServiceBrowse call failed %ld\n", (long int)err);
+	callback(client, false, msg);
+	if (client) 
+	    DNSServiceRefDeallocate(client);
+	client = NULL;
+    }
+    else 
+    {
+	// Create a thread to handle events
+        if (pthread_create(&tid, NULL, &handleEvents, (void *)client) != 0)
+	{
+	    strcpy(msg, "Can't create thread to handle events from DNS server");
+	    callback(client, false, msg);
+	    if (client ) DNSServiceRefDeallocate(client );
+	    client = NULL;
+	}
+    }
+
+    return client;
+}
+
+// Discover the service from MDNS
+void *discoverServices(ServiceQuery *queryDesc, void (*callback)(void *, bool, char *) )
+{
+    return discoverServicesFiltered(queryDesc, NULL, callback);
+}
+
+// Advertise the service. Return an opaque object which is passed along to
+// callback
 void *advertiseService(ServiceDescription *description,
 		       void (*callback)(void *, bool, char *) ) 
 {		
@@ -309,11 +397,17 @@ void callback(void *handle, bool status, char *msg)
 int main(void) 
 {
     void *handle;
+/*
     ServiceDescription *description = parseServiceDescription("./serviceSpecs/temperatureService.json");
     if (description)
 	handle = advertiseService(description, callback);    
 
     printf ("Done advertise\n");
+*/
+    ServiceQuery *query = parseServiceDescription("./serviceSpecs/temperatureService.json");
+    if (query)
+	handle = discoverServices(query, callback);    
+    printf("Done discover\n");
     while(1);
 }
 
