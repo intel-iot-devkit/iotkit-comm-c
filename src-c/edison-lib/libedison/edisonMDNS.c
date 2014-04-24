@@ -29,16 +29,16 @@ static volatile int timeOut = LONG_TIME;
 // helper define
 #define handleParseError() \
 {\
-    if (record) free(record);\
-    record = NULL;\
+    if (description) free(description);\
+    description = NULL;\
     fprintf(stderr,"invalid JSON format for %s file\n", service_desc_file);\
     goto endParseSrvFile;\
 }
 
-// parse the service record
-ServiceRecord *parseServiceRecord(char *service_desc_file) 
+// parse the service description
+ServiceDescription *parseServiceDescription(char *service_desc_file) 
 {
-    ServiceRecord *record = NULL;
+    ServiceDescription *description = NULL;
     char *out;
     int numentries=0, i=0;
     cJSON *json, *jitem, *child;
@@ -73,18 +73,18 @@ ServiceRecord *parseServiceRecord(char *service_desc_file)
 
             if (!isJsonObject(json)) handleParseError();
 
-	    record = (ServiceRecord *)malloc(sizeof(ServiceRecord));
-	    if (record == NULL) {
-		fprintf(stderr, "Can't alloc memory for service record\n");
+	    description = (ServiceDescription *)malloc(sizeof(ServiceDescription));
+	    if (description == NULL) {
+		fprintf(stderr, "Can't alloc memory for service description\n");
 		goto endParseSrvFile;
 	    }
 
             jitem = cJSON_GetObjectItem(json, "name");
 	    if (!isJsonString(jitem)) handleParseError();
 		    
-            record->service_name = strdup(jitem->valuestring);
+            description->service_name = strdup(jitem->valuestring);
 	    #if DEBUG
-	    printf("service name %s\n", record->service_name);
+	    printf("service name %s\n", description->service_name);
 	    #endif
 
             child = cJSON_GetObjectItem(json, "type");
@@ -93,17 +93,17 @@ ServiceRecord *parseServiceRecord(char *service_desc_file)
 	    jitem = cJSON_GetObjectItem(child, "name");
 	    if (!isJsonString(jitem)) handleParseError();
 
-	    record->type.name = strdup(jitem->valuestring);
+	    description->type.name = strdup(jitem->valuestring);
 	    #if DEBUG
-	    printf("type name %s\n", record->type.name);
+	    printf("type name %s\n", description->type.name);
 	    #endif
 
             jitem = cJSON_GetObjectItem(child, "protocol");
 	    if (!isJsonString(jitem)) handleParseError();
 		    
-            record->type.protocol = strdup(jitem->valuestring);
+            description->type.protocol = strdup(jitem->valuestring);
 	    #if DEBUG
-	    printf("protocol %s\n", record->type.protocol);
+	    printf("protocol %s\n", description->type.protocol);
 	    #endif
 
             jitem = cJSON_GetObjectItem(child, "subtypes");
@@ -111,13 +111,13 @@ ServiceRecord *parseServiceRecord(char *service_desc_file)
 		    
 	    child = jitem->child;
 	    while (child) numentries++, child=child->next;
-	    record->type.subTypes = (char **)malloc(numentries*sizeof(char*));
+	    description->type.subTypes = (char **)malloc(numentries*sizeof(char*));
 
 	    child = jitem->child;
 	    while (child) {
-		record->type.subTypes[i] = strdup(child->valuestring);
+		description->type.subTypes[i] = strdup(child->valuestring);
 	        #if DEBUG
-	        printf("subType %s\n", record->type.subTypes[i]);
+	        printf("subType %s\n", description->type.subTypes[i]);
 	        #endif
 		i++;
 		child=child->next;
@@ -126,17 +126,17 @@ ServiceRecord *parseServiceRecord(char *service_desc_file)
 	    jitem = cJSON_GetObjectItem(json, "port");
 	    if (!isJsonNumber(jitem)) handleParseError();
 
-	    record->port = jitem->valueint;
+	    description->port = jitem->valueint;
 	    #if DEBUG
-	    printf("port %d\n", record->port);
+	    printf("port %d\n", description->port);
 	    #endif
 
 	    jitem = cJSON_GetObjectItem(json, "properties");
 	    if (!isJsonObject(jitem)) handleParseError();
 
-            record->properties = cJSON_Print(jitem, 0);
+            description->properties = cJSON_Print(jitem, 0);
 	    #if DEBUG
-	    printf("properties %s\n", record->properties);
+	    printf("properties %s\n", description->properties);
 	    #endif
 
 endParseSrvFile:
@@ -148,7 +148,7 @@ endParseSrvFile:
         free(buffer);
     }
 
-    return record;
+    return description;
 }
 
 static void DNSSD_API regReply(DNSServiceRef client, 
@@ -242,8 +242,9 @@ void *handleEvents(void *c)
     }
 }
 
+
 // Advertise the serivce
-void *advertiseService( char *serviceDescFile,
+void *advertiseService(ServiceDescription *description,
 		       void (*callback)(void *, bool, char *) ) 
 {		
     DNSServiceRef client;
@@ -254,29 +255,25 @@ void *advertiseService( char *serviceDescFile,
     char regtype[128];
     static const char TXT[] = "\xC" "First String" "\xD" "Second String" "\xC" "Third String";
 
-    ServiceRecord *record = parseServiceRecord(serviceDescFile);
-    if (!record) 
-	return NULL;
-
     // register type
     strcpy(regtype, "_");
-    strcat(regtype, record->type.name);
+    strcat(regtype, description->type.name);
     strcat(regtype, "._");
-    strcat(regtype, record->type.protocol); 
+    strcat(regtype, description->type.protocol); 
 
-    printf("txt record  = %s\n", TXT);
+    printf("txt description  = %s\n", TXT);
 
     err = DNSServiceRegister
 		(&client, 
 		0, 
 		opinterface, 
-		record->service_name,   // service name
+		description->service_name,   // service name
 		regtype,		// registration type
 		"",			// domain (null = pick sensible default = local)
 		NULL,	    // only needed when creating proxy registrations for services
 		registerPort.NotAnInteger, 
-		sizeof(TXT)-1, //	record->properties ? strlen(record->properties) : 0,  // text size
-		TXT, // record->properties,	// text record
+		sizeof(TXT)-1, //	description->properties ? strlen(description->properties) : 0,  // text size
+		TXT, // description->properties,	// text description
 		regReply,		// callback
 		callback);
 
@@ -312,7 +309,9 @@ void callback(void *handle, bool status, char *msg)
 int main(void) 
 {
     void *handle;
-    handle = advertiseService("./serviceSpecs/temperatureService.json", callback);    
+    ServiceDescription *description = parseServiceDescription("./serviceSpecs/temperatureService.json");
+    if (description)
+	handle = advertiseService(description, callback);    
 
     printf ("Done advertise\n");
     while(1);

@@ -7,8 +7,8 @@ typedef struct _CommHandle {
     void *handle;	// handle to the dll
 } CommHandle;
 
-// service record
-typedef struct _ServiceRecord {
+// service description
+typedef struct _ServiceDescription {
     char *service_name;	    // name of the service
     struct Type {
 	char *name;
@@ -17,7 +17,7 @@ typedef struct _ServiceRecord {
     } type;
     int port;
     char *properties;
-} ServiceRecord;
+} ServiceDescription;
      
 
 // Create client which returns a CommHandle
