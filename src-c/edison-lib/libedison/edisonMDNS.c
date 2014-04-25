@@ -19,9 +19,7 @@
 #define DEBUG 0
 #endif
 
-typedef union { unsigned char b[2]; unsigned short NotAnInteger; } Opaque16;
 static uint32_t opinterface = kDNSServiceInterfaceIndexAny;
-static int operation = 'R';
 #define LONG_TIME 100000000
 #define SHORT_TIME 10000
 static volatile int timeOut = LONG_TIME;
@@ -130,9 +128,9 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 		child=child->next;
 	    }
 
+	    // must have a port
 	    jitem = cJSON_GetObjectItem(json, "port");
-	    if (!isJsonNumber(jitem)) handleParseError();
-
+	    if (!jitem || !isJsonNumber(jitem)) handleParseError();
 	    description->port = jitem->valueint;
 	    #if DEBUG
 	    printf("port %d\n", description->port);
@@ -140,8 +138,8 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
 	    jitem = cJSON_GetObjectItem(json, "properties");
 	    if (!isJsonObject(jitem)) handleParseError();
-
-            description->properties = cJSON_Print(jitem, 0);
+	    if (jitem)
+		description->properties = cJSON_Print(jitem, 0);
 	    #if DEBUG
 	    printf("properties %s\n", description->properties);
 	    #endif
@@ -332,13 +330,13 @@ void *discoverServicesFiltered(ServiceQuery *queryDesc,
     strcat(regtype, queryDesc->type.protocol); 
 
     err = DNSServiceBrowse
-		(&client, 
-		0, 
-		opinterface, 
-		regtype,		// registration type
-		"",			// domain (null = pick sensible default = local)
-		queryReply,		// callback
-		context);
+	    (&client, 
+	    0, 
+	    opinterface, 
+	    regtype,    // registration type
+	    "",		// domain (null = pick sensible default = local)
+	    queryReply, // callback
+	    context);	// param to pass as context into queryReply
 
     if (!client || err != kDNSServiceErr_NoError) 
     {
@@ -357,7 +355,7 @@ void *discoverServicesFiltered(ServiceQuery *queryDesc,
 	    // Create a thread to handle events
 	    if (pthread_create(&tid, NULL, &handleEvents, (void *)params) != 0)
 	    {
-		sprintf(lastError, "Can't create thread to handle events from DNS server");
+		sprintf(lastError, "Thread failure to handle events from DNS server");
 		callback(client, kDNSServiceErr_NotInitialized, NULL);
 		if (client ) DNSServiceRefDeallocate(client );
 		client = NULL;
@@ -381,7 +379,6 @@ void *advertiseService(ServiceDescription *description,
 	void (*callback)(void *, int32_t, ServiceDescription *)) 
 {		
     DNSServiceRef client;
-    Opaque16 registerPort = { { 0x7, 0x5B } };
     DNSServiceErrorType err;
     pthread_t tid;	    // thread to handle events from DNS server
     char regtype[128];
@@ -394,18 +391,18 @@ void *advertiseService(ServiceDescription *description,
     strcat(regtype, description->type.protocol); 
 
     err = DNSServiceRegister
-		(&client, 
-		0, 
-		opinterface, 
-		description->service_name,   // service name
-		regtype,		// registration type
-		"",			// domain (null = pick sensible default = local)
-		NULL,	    // only needed when creating proxy registrations for services
-		registerPort.NotAnInteger, 
-		sizeof(TXT)-1, //	description->properties ? strlen(description->properties) : 0,  // text size
-		TXT, // description->properties,	// text description
-		regReply,		// callback
-		callback);
+	    (&client, 
+	    0, 
+	    opinterface, 
+	    description->service_name,  // service name
+	    regtype,			// registration type
+	    "",				// default = local
+	    NULL,	    // only needed when creating proxy registrations
+	    htons(description->port),   // Must have a port
+	    sizeof(TXT)-1, //	description->properties ? strlen(description->properties) : 0,  // text size
+	    TXT, // description->properties,	// text description
+	    regReply,			// callback
+	    callback);	    // param to pass as context into regReply
 
     if (!client || err != kDNSServiceErr_NoError) 
     {
@@ -424,7 +421,7 @@ void *advertiseService(ServiceDescription *description,
 	    // Create a thread to handle events
 	    if (pthread_create(&tid, NULL, &handleEvents, (void *)params) != 0)
 	    {
-		sprintf(lastError, "Can't create thread to handle events from DNS server");
+		sprintf(lastError, "Thread failure to handle events from DNS server");
 		callback(client, kDNSServiceErr_NotInitialized, NULL);
 		if (client ) DNSServiceRefDeallocate(client );
 		client = NULL;
@@ -473,8 +470,8 @@ void testDiscover()
 
 int main(void) 
 {
-    //testAdvertise();
-    testDiscover();
+    testAdvertise();
+    //testDiscover();
 }
 
 #endif
