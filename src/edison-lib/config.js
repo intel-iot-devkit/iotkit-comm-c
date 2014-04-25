@@ -11,6 +11,7 @@ module.exports =
   communicationPlugins:
     [
       {pluginName: "zmqpubsub"},
-      {pluginName: "mqtt"}
+      {pluginName: "mqtt"},
+      {pluginName: "zmqreqrep"}
     ]
 };

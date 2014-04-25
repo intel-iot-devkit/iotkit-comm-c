@@ -1,6 +1,6 @@
 //'use strict';
 
-var edison = require('../../edison-lib');
+var edison = require('../.');
 var path = require('path');
 var fs = require('fs');
 

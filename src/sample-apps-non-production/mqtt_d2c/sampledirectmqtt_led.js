@@ -3,7 +3,7 @@
 var edison = require('/home/root/edison-api/src/edison-lib');
 var path = require('path');
 var fs = require('fs');
-var PIA = require('../');
+var PIA = require('.');
 
 var EdisonMqtt = edison.getPlugin("communication", "pubsub");
 

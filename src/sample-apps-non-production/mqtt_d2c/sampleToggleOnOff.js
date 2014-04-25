@@ -1,4 +1,4 @@
-var edison = require('../../edison-lib');
+var edison = require('../.');
 
 // create the MDNS record for advertising
 var path = require('path');

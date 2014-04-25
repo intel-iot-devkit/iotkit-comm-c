@@ -1,9 +1,9 @@
 //'use strict';
 
-var edison = require('../../edison-lib');
+var edison = require('../.');
 var path = require('path');
 var fs = require('fs');
-var PIA = require('../');
+var PIA = require('.');
 
 var EdisonMqtt = edison.getPlugin("communication", "pubsub");
 
