@@ -8,7 +8,7 @@ edisonLib.createService(validator.getValidatedDescription(), function (service) 
 
   setInterval(function () {
     "use strict";
-    service.comm.publish("mytopic: my message");
+    service.comm.publish("mytopic: my message", {});
   }, 1000);
 
 });

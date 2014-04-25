@@ -9,7 +9,7 @@ edisonLib.createClientForGivenService(serviceDescription, function (client) {
 
   setInterval(function () {
     "use strict";
-    client.comm.send({topic: serviceDescription.name, text: "my message"});
+    client.comm.send("my message", {topic: serviceDescription.name});
   }, 1000);
 
 });

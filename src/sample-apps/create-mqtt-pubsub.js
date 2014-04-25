@@ -7,14 +7,14 @@ edisonLib.createClientForGivenService(validator.getValidatedDescription(), funct
 
   client.comm.subscribe("mytopic");
 
-  client.comm.setReceivedMessageHandler(function(event, source, message) {
+  client.comm.setReceivedMessageHandler(function(message, context) {
     "use strict";
     console.log(message);
   });
 
   setInterval(function () {
     "use strict";
-    client.comm.send(client.comm.getDefaultChannel(), {topic: "mytopic", text: "my message"});
+    client.comm.send("my message", {topic: "mytopic"});
   }, 1000);
 
 });

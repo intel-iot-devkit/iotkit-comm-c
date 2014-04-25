@@ -6,10 +6,11 @@ module.exports =
   superInterfaceName: "interface-for-interfaces",
   pluginFileSuffixes: {
     clientFileSuffix: "client",
-    serverFileSuffix: "server"
+    serverFileSuffix: "service"
   },
   communicationPlugins:
     [
-      {pluginName: "zmqpubsub"}
+      {pluginName: "zmqpubsub"},
+      {pluginName: "mqtt"}
     ]
 };
