@@ -83,6 +83,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 		goto endParseSrvFile;
 	    }
 
+	    // initially set status to UNKNOWN
 	    description->status = UNKNOWN;
 
             jitem = cJSON_GetObjectItem(json, "name");
@@ -171,19 +172,21 @@ static void DNSSD_API regReply(DNSServiceRef client,
     void (*callback)(void *, int32_t, ServiceDescription *) 
 	= (void (*)(void *, int32_t, ServiceDescription *))context;
     ServiceDescription desc;
+    desc.service_name = (char *)name;
 
 #if DEBUG
     printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
 #endif
     if (errorCode == kDNSServiceErr_NoError)
     {
-	desc.service_name = (char *)name;
-	callback(client, errorCode, NULL);
+	desc.status = REGISTERED;
+	callback(client, errorCode, &desc);
     }
     else if (errorCode == kDNSServiceErr_NameConflict)
     {
         sprintf(lastError, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
-	callback(client, errorCode, NULL);
+	desc.status = IN_USE;
+	callback(client, errorCode, &desc);
     }
     else 
     {
@@ -200,9 +203,9 @@ typedef struct _EventThreadParams {
 } EventThreadParams;
 
 // Handle events from DNS server
-void *handleEvents(void *c)
+void *handleEvents(void *p)
 {
-    EventThreadParams *params = (EventThreadParams *)c;
+    EventThreadParams *params = (EventThreadParams *)p;
     DNSServiceRef client = params->client;
     int dns_sd_fd  = client  ? DNSServiceRefSockFD(client) : -1;
 
@@ -280,7 +283,6 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 				const char *domain, 
 				void *context)
 {
-    (void)flags;    // Unused
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceDescription desc;
 
@@ -289,7 +291,15 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 #endif
     if (errorCode == kDNSServiceErr_NoError)
     {
+	if (flags & kDNSServiceFlagsAdd)
+	    desc.status = ADDED;
+	else
+	    desc.status = REMOVED;
 	desc.service_name = (char *)name;
+
+	// there is a filterCB, so calls it. If it returns false then donothing
+	if (discContext->filterCB && discContext->filterCB(&desc) == false)
+	    return;
 	discContext->callback(client, errorCode, &desc);
     }
     else 
@@ -426,27 +436,45 @@ void *advertiseService(ServiceDescription *description,
 }
 
 #if DEBUG
-void callback(void *handle, int32_t status, ServiceDescription *desc)
+void callback(void *handle, int32_t error_code, ServiceDescription *desc)
 {
-    printf("message %d %s\n", status, getLastError());
+    printf("message error=%d error_string=%s\nservice status=%d service name=%s\n", 
+	    error_code, 
+	    getLastError(),
+	    desc ? desc->status : -1, 
+	    desc ? desc->service_name : "");
 }
 
-int main(void) 
+// Test code for advertisement
+void testAdvertise() 
 {
     void *handle;
-/*
+
     ServiceDescription *description = parseServiceDescription("./serviceSpecs/temperatureService.json");
     if (description)
 	handle = advertiseService(description, callback);
 
     printf ("Done advertise\n");
     while(1);
-*/
+}
+
+// Test code for discover
+void testDiscover()
+{
+    void *handle;
+
     ServiceQuery *query = parseServiceDescription("./serviceSpecs/temperatureService.json");
     if (query)
 	handle = discoverServices(query, callback);
     printf("Done discover\n");
+
     while(1);
+}
+
+int main(void) 
+{
+    //testAdvertise();
+    testDiscover();
 }
 
 #endif

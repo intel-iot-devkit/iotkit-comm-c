@@ -7,11 +7,11 @@ typedef struct _CommHandle {
     void *handle;	// handle to the dll
 } CommHandle;
 
-typedef enum { ADDED, REMOVED, UNKNOWN } ServiceStatus;
+//typedef enum { ADDED, REMOVED, UNKNOWN } ServiceStatus;
 
 // service description
 typedef struct _ServiceDescription {
-    ServiceStatus status;
+    enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status;
     char *service_name;	    // name of the service
     struct Type {
 	char *name;
