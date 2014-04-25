@@ -8,7 +8,6 @@
 #include <zmq.h>
 #include <zmq_utils.h>
 #include <stdio.h>
-#include <assert.h>
 #include "zmq-reqrep.h"
 #include "../inc/zhelpers.h"
 
@@ -41,7 +40,6 @@ int createClient(char *host, int port, char *type, void *sslargs) {
 			printf("going to connect %s\n",addr);
 		#endif
 		rc = zmq_connect(zmqContainer.requester,addr);
-		assert(rc == 0);
 		#if DEBUG
 			printf("connect completed");
 		#endif
@@ -54,7 +52,6 @@ int createClient(char *host, int port, char *type, void *sslargs) {
 		#endif
 		zmqContainer.responder = zmq_socket(zmqContainer.context,ZMQ_REP);
 		rc = zmq_bind(zmqContainer.responder,addr);
-		assert (rc == 0);
 		#if DEBUG
 			printf("bind completed\n");
 		#endif
