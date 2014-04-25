@@ -3,8 +3,16 @@
         "pluginDir": "plugins",
         "superInterfaceName": "interface-for-interfaces",
         "serviceDir": "serviceSpecs",
+        "communication": {
+        "pluginFileSuffixes": {
+            "clientFileSuffix": "client",
+            "serverFileSuffix": "service"
+        },
         "plugins":
             [
-                 {"fileName": "libpubsubstub.so"}
+                {"pluginName": "zmqpubsub"},
+                {"pluginName": "mqtt"},
+                {"pluginName": "zmqreqrep"}
             ]
+    }
 }

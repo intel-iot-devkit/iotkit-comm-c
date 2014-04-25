@@ -4,9 +4,7 @@
     "name": "zmqpubsub",
     "protocol": "tcp"
   },
-  "address": "*",
   "port": 1884,
   "properties": {"dataType": "float", "unit": "F"},
-  "advertise": {"locally": true, "cloud": false},
-  "comm_params": {"name": "value", "name1": "value1"}
+  "advertise": {"locally": true, "cloud": false}
 }

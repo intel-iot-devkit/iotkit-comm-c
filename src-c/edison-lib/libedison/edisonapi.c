@@ -30,6 +30,8 @@ char *g_cwd;
 typedef struct _ConfigFileData {
     char *pluginInterfaceDir;
     char *pluginDir;
+    char *clientFileSuffix;
+    char *serverFileSuffix;
     char *plugin;
 } ConfigFileData;
 
@@ -50,7 +52,7 @@ char **g_funcSignatures;
 bool parseConfigFile(char *config_file)
 {
     char *out;
-    cJSON *json, *jitem, *child;
+    cJSON *json, *jitem, *child, *subjson;
     bool status = true;
     FILE *fp = fopen(config_file, "rb");
 
@@ -102,7 +104,37 @@ bool parseConfigFile(char *config_file)
             printf("pluginDir = %s\n", g_configData.pluginDir);
             #endif
 
-            jitem = cJSON_GetObjectItem(json, "plugins");
+
+            jitem = cJSON_GetObjectItem(json, "communication");
+            if (!isJsonObject(json)) handleParseConfigError();
+
+            subjson = cJSON_GetObjectItem(jitem, "pluginFileSuffixes");
+            if (!isJsonObject(json)) handleParseConfigError();
+
+
+
+            jitem = cJSON_GetObjectItem(subjson, "clientFileSuffix");
+            if (!isJsonString(jitem)) handleParseConfigError();
+
+            g_configData.clientFileSuffix = strdup(jitem->valuestring);
+            #if DEBUG
+            printf("clientFileSuffix = %s\n", g_configData.clientFileSuffix);
+            #endif
+
+
+            jitem = cJSON_GetObjectItem(subjson, "serverFileSuffix");
+            if (!isJsonString(jitem)) handleParseConfigError();
+
+            g_configData.serverFileSuffix = strdup(jitem->valuestring);
+            #if DEBUG
+            printf("serverFileSuffix = %s\n", g_configData.serverFileSuffix);
+            #endif
+
+            // TODO: We are considering only the last plugin specified under plugins array
+            jitem = cJSON_GetObjectItem(json, "communication");
+            if (!isJsonObject(json)) handleParseConfigError();
+
+            jitem = cJSON_GetObjectItem(jitem, "plugins");
             if (!isJsonArray(jitem)) handleParseConfigError();
 
             child=jitem->child;
@@ -113,10 +145,8 @@ bool parseConfigFile(char *config_file)
             }
 
 	    if (!jitem) handleParseConfigError();
-
-            jitem = cJSON_GetObjectItem(jitem, "fileName");
+            jitem = cJSON_GetObjectItem(jitem, "pluginName");
 	    if (!isJsonString(jitem)) handleParseConfigError();
-
 	    g_configData.plugin = strdup(jitem->valuestring);
 	    #if DEBUG
 	    printf("plugin = %s\n", g_configData.plugin);
@@ -227,7 +257,7 @@ void freeGlobals()
 }
 
 // clean up by freeing memory
-void cleanUp(CommHandle *commHandle)
+void cleanUpClient(CommClientHandle *commHandle)
 {
     freeGlobals();
     if (commHandle) 
@@ -239,12 +269,26 @@ void cleanUp(CommHandle *commHandle)
     }
 }
 
-// check signatures and load the plugin
-CommHandle *loadCommPlugin(char *plugin_path)
+// clean up by freeing memory
+void cleanUpService(CommServiceHandle *commHandle)
+{
+    freeGlobals();
+    if (commHandle)
+    {
+	if (commHandle->handle) {
+	    dlclose(commHandle->handle);
+	}
+	free(commHandle);
+    }
+}
+
+
+// check signatures and load the service plugin
+CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
 {
     char *ptr;
     void *handle;
-    CommHandle *commHandle = (CommHandle *)malloc(sizeof(CommHandle));
+    CommServiceHandle *commHandle = (CommServiceHandle *)malloc(sizeof(CommServiceHandle));
     if (commHandle == NULL) 
     {
 	fprintf(stderr,"Can't alloc memory for commHandle\n");
@@ -271,21 +315,98 @@ CommHandle *loadCommPlugin(char *plugin_path)
 	if (!handle) 
 	{
 	    fprintf(stderr, "DL open error %s\n", dlerror());
+	    commHandle->handle = NULL;
 	    return NULL; 
 	}
 	else
 	{
+
 	    dlerror();	/* Clear any existing error */
-	    commHandle->send = (void (*)(char *, char *)) dlsym(handle, g_funcSignatures[0]);
+	    commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[0]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->unsubscribe = (void (*)(char *)) dlsym(handle, g_funcSignatures[1]);
+	    commHandle->publish = (int (*)(char *,Context)) dlsym(handle, g_funcSignatures[1]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->subscribe = (void (*)(char *)) dlsym(handle, g_funcSignatures[2]);
+	    commHandle->manageClient = (int (*)(void *,Context)) dlsym(handle, g_funcSignatures[2]);
 	    if (!checkDLError()) return NULL;
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->setReceivedMessageHandler = (int (*)(void (*)(void *, char *, Context))) dlsym(handle, g_funcSignatures[3]);
+	    if (!checkDLError()) return NULL;
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[4]);
+	    if (!checkDLError()) return NULL;
+
+	    commHandle->handle = handle;
+	}
+
+	return commHandle;
+    }
+}
+
+// check signatures and load the client plugin
+CommClientHandle *loadClientCommPlugin(char *plugin_path)
+{
+    char *ptr;
+    void *handle;
+    CommClientHandle *commHandle = (CommClientHandle *)malloc(sizeof(CommClientHandle));
+    if (commHandle == NULL)
+    {
+	fprintf(stderr,"Can't alloc memory for commHandle\n");
+	return NULL;
+    }
+    else
+    {
+	// Check to see if filepath has the right extension as ".so"
+	if ((ptr = strrchr(plugin_path, '.')) != NULL)
+	{
+	    if (strcmp(ptr, ".so") != 0)
+	    {
+		fprintf(stderr, "Invalid plugin file %s\n", plugin_path);
+		*ptr = '\0';
+		strcat(plugin_path, ".so");
+	    }
+	}
+	else
+	{
+	    strcat(plugin_path, ".so");
+	}
+
+	handle = dlopen(plugin_path, RTLD_LAZY);
+	if (!handle)
+	{
+	    fprintf(stderr, "DL open error %s\n", dlerror());
+	    commHandle->handle = NULL;
+	    return NULL;
+	}
+	else
+	{
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[0]);
+	    if (!checkDLError()) return NULL;
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->subscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[1]);
+	    if (!checkDLError()) return NULL;
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->unsubscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[2]);
+	    if (!checkDLError()) return NULL;
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->setReceivedMessageHandler = (int (*)(void (*)(char *, Context))) dlsym(handle, g_funcSignatures[3]);
+	    if (!checkDLError()) return NULL;
+
+	    dlerror();	/* Clear any existing error */
+	    commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[4]);
+	    if (!checkDLError()) return NULL;
+
+	    commHandle->handle = handle;
 	}
 
 	return commHandle;
@@ -293,9 +414,9 @@ CommHandle *loadCommPlugin(char *plugin_path)
 }
 
 // initialize the system
-CommHandle *createClient()
+CommClientHandle *createClient(ServiceQuery *queryDesc)
 {
-    CommHandle *commHandle;
+    CommClientHandle *commHandle;
 
     char cwd_temp[1024];
     // get current working directory
@@ -318,26 +439,71 @@ CommHandle *createClient()
     strcpy(cwd_temp, g_cwd);
     strcat(cwd_temp, g_configData.pluginInterfaceDir);
     strcat(cwd_temp, "/");
-    strcat(cwd_temp, "communication-pubsub.json");
+    strcat(cwd_temp, "edison-client-interface.json");
     if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
 
     // load the plugin
     strcpy(cwd_temp, g_cwd);
     strcat(cwd_temp, g_configData.pluginDir);
-    strcat(cwd_temp, "/");
-    strcat(cwd_temp, g_configData.plugin);
-    commHandle = loadCommPlugin(cwd_temp);
-    if (!commHandle) cleanUp(commHandle);
+    strcat(cwd_temp, "/lib");
+    strcat(cwd_temp, queryDesc->type.name);
+    commHandle = loadClientCommPlugin(cwd_temp);
+    if (!commHandle) cleanUpClient(commHandle);
 
     return commHandle;
-}    
+}
+
+// initialize the system
+CommServiceHandle *createService(ServiceDescription *description)
+{
+    CommServiceHandle *commHandle;
+
+    char cwd_temp[1024];
+    // get current working directory
+    if (getcwd(cwd_temp, sizeof(cwd_temp)))
+    {
+        strcat(cwd_temp, "/");
+        g_cwd = strdup(cwd_temp);
+    }
+    else
+    {
+        g_cwd = strdup("./");
+    }
+
+    // Parse configuration file
+    strcpy(cwd_temp, g_cwd);
+    strcat(cwd_temp, "config.json");
+    if (!parseConfigFile(cwd_temp)) freeGlobals();
+
+    // Parse plugin interface file
+    strcpy(cwd_temp, g_cwd);
+    strcat(cwd_temp, g_configData.pluginInterfaceDir);
+    strcat(cwd_temp, "/");
+    strcat(cwd_temp, "edison-service-interface.json");
+    if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
+
+    // load the plugin
+    strcpy(cwd_temp, g_cwd);
+    strcat(cwd_temp, g_configData.pluginDir);
+    strcat(cwd_temp, "/lib");
+    strcat(cwd_temp, description->type.name);
+    commHandle = loadServiceCommPlugin(cwd_temp);
+    if (!commHandle) cleanUpService(commHandle);
+
+    return commHandle;
+}
     
 #if DEBUG
 int main(int argc, char *argv[])
 {
-    CommHandle *commHandle = createClient();
+    ServiceDescription *description = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
+    CommClientHandle *commHandle = createClient(description);
+
     if (commHandle) {
-	commHandle->send("temperature", "75 degree");
+    Context context;
+    context.name = "topic";
+    context.value = "temperature";
+	commHandle->send("75 degrees", context);
 	commHandle->unsubscribe("temperature");
 	commHandle->subscribe("temperature");
     }

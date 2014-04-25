@@ -86,7 +86,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
             jitem = cJSON_GetObjectItem(json, "name");
 	    if (!isJsonString(jitem)) handleParseError();
-		    
+
             description->service_name = strdup(jitem->valuestring);
 	    #if DEBUG
 	    printf("service name %s\n", description->service_name);
@@ -94,7 +94,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
             child = cJSON_GetObjectItem(json, "type");
 	    if (!isJsonObject(child)) handleParseError();
-		    
+
 	    jitem = cJSON_GetObjectItem(child, "name");
 	    if (!isJsonString(jitem)) handleParseError();
 
@@ -111,6 +111,8 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 	    printf("protocol %s\n", description->type.protocol);
 	    #endif
 
+/*
+// TODO: NOT HANDLING SUBTYPES
             jitem = cJSON_GetObjectItem(child, "subtypes");
 	    if (!isJsonArray(jitem)) handleParseError();
 
@@ -132,7 +134,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 		    child=child->next;
 		}
 	    }
-
+*/
 	    // must have a port
 	    jitem = cJSON_GetObjectItem(json, "port");
 	    if (!jitem || !isJsonNumber(jitem)) handleParseError();
