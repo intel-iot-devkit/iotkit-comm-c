@@ -14,15 +14,15 @@ var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
 
 //load specified plugins for all supported components
 var pluginLoader = new PluginLoader();
-if (!edisonConfig.communicationPlugins || edisonConfig.communicationPlugins.length == 0) {
+if (!edisonConfig.communication.plugins || edisonConfig.communication.plugins.length == 0) {
   throw new Error("At least one communication plugin must be configured.");
 }
 
-for (var i = 0; i < edisonConfig.communicationPlugins.length; i++) {
-  if (edisonConfig.communicationPlugins[i].ignored || !edisonConfig.communicationPlugins[i].pluginName) {
+for (var i = 0; i < edisonConfig.communication.plugins.length; i++) {
+  if (edisonConfig.communication.plugins[i].ignored || !edisonConfig.communication.plugins[i].pluginName) {
     continue;
   }
-  pluginLoader.loadPlugin(edisonConfig.communicationPlugins[i].pluginName);
+  pluginLoader.loadPlugin(edisonConfig.communication.plugins[i].pluginName);
 }
 
 exports.plugins = pluginLoader.loadedPlugins;

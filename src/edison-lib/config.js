@@ -8,10 +8,16 @@ module.exports =
     clientFileSuffix: "client",
     serverFileSuffix: "service"
   },
-  communicationPlugins:
+  communication: {
+    pluginFileSuffixes: {
+      clientFileSuffix: "client",
+      serverFileSuffix: "service"
+    },
+    plugins:
     [
       {pluginName: "zmqpubsub"},
       {pluginName: "mqtt"},
       {pluginName: "zmqreqrep"}
     ]
+  }
 };
