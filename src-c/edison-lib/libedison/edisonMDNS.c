@@ -42,7 +42,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 {
     ServiceDescription *description = NULL;
     char *out;
-    int numentries=0, i=0;
+    int i=0;
     cJSON *json, *jitem, *child;
     bool status = true;
 
@@ -113,19 +113,24 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
             jitem = cJSON_GetObjectItem(child, "subtypes");
 	    if (!isJsonArray(jitem)) handleParseError();
-		    
-	    child = jitem->child;
-	    while (child) numentries++, child=child->next;
-	    description->type.subTypes = (char **)malloc(numentries*sizeof(char*));
 
+	    description->type.numSubTypes = 0;
 	    child = jitem->child;
-	    while (child) {
-		description->type.subTypes[i] = strdup(child->valuestring);
-	        #if DEBUG
-	        printf("subType %s\n", description->type.subTypes[i]);
-	        #endif
-		i++;
-		child=child->next;
+	    while (child) description->type.numSubTypes++, child=child->next;
+	    if (description->type.numSubTypes) 
+	    {
+		description->type.subTypes = (char **)malloc(
+					description->type.numSubTypes*sizeof(char*));
+		i=0;
+		child = jitem->child;
+		while (child) {
+		    description->type.subTypes[i] = strdup(child->valuestring);
+		    #if DEBUG
+		    printf("subType %s\n", description->type.subTypes[i]);
+		    #endif
+		    i++;
+		    child=child->next;
+		}
 	    }
 
 	    // must have a port
@@ -138,11 +143,27 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
 	    jitem = cJSON_GetObjectItem(json, "properties");
 	    if (!isJsonObject(jitem)) handleParseError();
-	    if (jitem)
-		description->properties = cJSON_Print(jitem, 0);
-	    #if DEBUG
-	    printf("properties %s\n", description->properties);
-	    #endif
+
+	    description->numProperties = 0;
+	    child = jitem->child;
+	    while (child) description->numProperties++, child=child->next;
+	    if (description->numProperties) 
+	    {
+		description->properties = (Property *)malloc(
+					    description->numProperties*sizeof(Property));
+		i=0;
+		child = jitem->child;
+		while (child) {
+		    description->properties[i].key = strdup(child->string);
+		    description->properties[i].value = strdup(child->valuestring);
+		    #if DEBUG
+		    printf("properties key=%s value=%s\n", description->properties[i].key,
+			    description->properties[i].value);
+		    #endif
+		    i++;
+		    child=child->next;
+		}
+	    }
 
 endParseSrvFile:
             cJSON_Delete(json);
@@ -152,7 +173,6 @@ endParseSrvFile:
 	fclose(fp);
         free(buffer);
     }
-
     return description;
 }
 
@@ -382,13 +402,25 @@ void *advertiseService(ServiceDescription *description,
     DNSServiceErrorType err;
     pthread_t tid;	    // thread to handle events from DNS server
     char regtype[128];
-    static const char TXT[] = "\xC" "First String" "\xD" "Second String" "\xC" "Third String";
+    TXTRecordRef txtRecord;
 
     // register type
     strcpy(regtype, "_");
     strcat(regtype, description->type.name);
     strcat(regtype, "._");
     strcat(regtype, description->type.protocol); 
+
+    if (description->numProperties) 
+    {
+	uint8_t txtLen, i=0;
+	TXTRecordCreate(&txtRecord, 0, NULL);
+	for (i=0; i<description->numProperties; i++) 
+	{
+	    txtLen = (uint8_t)strlen(description->properties[i].value);
+	    TXTRecordSetValue(&txtRecord, description->properties[i].key, 
+				    txtLen, description->properties[i].value );
+	}
+    }
 
     err = DNSServiceRegister
 	    (&client, 
@@ -399,10 +431,14 @@ void *advertiseService(ServiceDescription *description,
 	    "",				// default = local
 	    NULL,	    // only needed when creating proxy registrations
 	    htons(description->port),   // Must have a port
-	    sizeof(TXT)-1, //	description->properties ? strlen(description->properties) : 0,  // text size
-	    TXT, // description->properties,	// text description
+	    TXTRecordGetLength(&txtRecord), 
+	    TXTRecordGetBytesPtr(&txtRecord),
 	    regReply,			// callback
 	    callback);	    // param to pass as context into regReply
+
+    if (description->numProperties)  {
+	TXTRecordDeallocate(&txtRecord);
+    }
 
     if (!client || err != kDNSServiceErr_NoError) 
     {

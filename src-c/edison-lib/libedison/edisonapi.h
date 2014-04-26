@@ -9,20 +9,26 @@ typedef struct _CommHandle {
 
 //typedef enum { ADDED, REMOVED, UNKNOWN } ServiceStatus;
 
+typedef struct _Prop {
+    char *key;
+    char *value;
+} Property;
+
 // service description
 typedef struct _ServiceDescription {
     enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status;
     char *service_name;	    // name of the service
-    struct Type {
+    struct {
 	char *name;
 	char *protocol; // the protocol
+	int numSubTypes;
 	char **subTypes;
     } type;
     int port;
-    char *properties;
+    int numProperties;
+    Property *properties;
 } ServiceDescription, ServiceQuery;
      
-
 // Create client which returns a CommHandle
 CommHandle *createClient();
 void cleanUp(CommHandle *);
