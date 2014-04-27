@@ -362,7 +362,8 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
     else
     {
 	// Check to see if filepath has the right extension as ".so"
-	if ((ptr = strrchr(plugin_path, '.')) != NULL)
+	// TODO: verify path brokes when . appears in the path
+	/*if ((ptr = strrchr(plugin_path, '.')) != NULL)
 	{
 	    if (strcmp(ptr, ".so") != 0)
 	    {
@@ -374,7 +375,7 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
 	else
 	{
 	    strcat(plugin_path, ".so");
-	}
+	}*/
 
 	handle = dlopen(plugin_path, RTLD_LAZY);
 	if (!handle)
@@ -422,7 +423,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     // get current working directory
     if (getcwd(cwd_temp, sizeof(cwd_temp))) 
     {
-        strcat(cwd_temp, "/");
+        strcat(cwd_temp, "/../../edison-lib/");
         g_cwd = strdup(cwd_temp); 
     } 
     else 
@@ -432,14 +433,14 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
 
     // Parse configuration file
     strcpy(cwd_temp, g_cwd);
-    strcat(cwd_temp, "config.json");
+    strcat(cwd_temp, "libedison/config.json");
     if (!parseConfigFile(cwd_temp)) freeGlobals();
 
     // Parse plugin interface file
     strcpy(cwd_temp, g_cwd);
+    strcat(cwd_temp, "libedison/");
     strcat(cwd_temp, g_configData.pluginInterfaceDir);
-    strcat(cwd_temp, "/");
-    strcat(cwd_temp, "edison-client-interface.json");
+    strcat(cwd_temp, "/edison-client-interface.json");
     if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
 
     // load the plugin
@@ -447,6 +448,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     strcat(cwd_temp, g_configData.pluginDir);
     strcat(cwd_temp, "/lib");
     strcat(cwd_temp, queryDesc->type.name);
+    strcat(cwd_temp, "-client.so");
     commHandle = loadClientCommPlugin(cwd_temp);
     if (!commHandle) cleanUpClient(commHandle);
 
@@ -462,7 +464,7 @@ CommServiceHandle *createService(ServiceDescription *description)
     // get current working directory
     if (getcwd(cwd_temp, sizeof(cwd_temp)))
     {
-        strcat(cwd_temp, "/");
+        strcat(cwd_temp, "/../../edison-lib/");
         g_cwd = strdup(cwd_temp);
     }
     else
@@ -472,14 +474,14 @@ CommServiceHandle *createService(ServiceDescription *description)
 
     // Parse configuration file
     strcpy(cwd_temp, g_cwd);
-    strcat(cwd_temp, "config.json");
+    strcat(cwd_temp, "libedison/config.json");
     if (!parseConfigFile(cwd_temp)) freeGlobals();
 
     // Parse plugin interface file
     strcpy(cwd_temp, g_cwd);
+    strcat(cwd_temp, "libedison/");
     strcat(cwd_temp, g_configData.pluginInterfaceDir);
-    strcat(cwd_temp, "/");
-    strcat(cwd_temp, "edison-service-interface.json");
+    strcat(cwd_temp, "/edison-service-interface.json");
     if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
 
     // load the plugin
@@ -487,6 +489,7 @@ CommServiceHandle *createService(ServiceDescription *description)
     strcat(cwd_temp, g_configData.pluginDir);
     strcat(cwd_temp, "/lib");
     strcat(cwd_temp, description->type.name);
+    strcat(cwd_temp, "-service.so");
     commHandle = loadServiceCommPlugin(cwd_temp);
     if (!commHandle) cleanUpService(commHandle);
 
