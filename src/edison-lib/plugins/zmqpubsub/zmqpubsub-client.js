@@ -4,10 +4,10 @@ EdisonZMQPubSubClient.prototype.interface = "edison-client-interface";
 EdisonZMQPubSubClient.prototype.socket = null;
 EdisonZMQPubSubClient.prototype.receivedMsgHandler = null;
 
-function EdisonZMQPubSubClient(serviceDescription) {
+function EdisonZMQPubSubClient(serviceSpec) {
   "use strict";
   this.socket = zeromq.socket('sub');
-  this.socket.connect('tcp://' + serviceDescription.address + ':' + serviceDescription.port);
+  this.socket.connect('tcp://' + serviceSpec.address + ':' + serviceSpec.port);
 
   var self = this;
   this.socket.on('message', function (message) {

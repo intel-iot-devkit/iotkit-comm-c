@@ -7,7 +7,7 @@ var path = require('path');
 var PluginLoader = require("./core/plugin-loader.njs");
 
 var edisonConfig = require("./config.js");
-var ServiceDescriptionValidator = require("./core/ServiceDescriptionValidator.js");
+var ServiceSpecValidator = require("./core/ServiceSpecValidator.js");
 var Service = require("./core/Service.js");
 var Client = require("./core/Client.js");
 var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
@@ -29,7 +29,7 @@ exports.plugins = pluginLoader.loadedPlugins;
 
 exports.config = edisonConfig;
 
-exports.ServiceDescriptionValidator = ServiceDescriptionValidator;
+exports.ServiceSpecValidator = ServiceSpecValidator;
 
 exports.sayhello = function ()
 {
@@ -42,7 +42,7 @@ exports.getClientPlugin = function (name) {
 				"Please ensure that this plugin is included in the configuration file.");
 	}
 	
-	return exports.plugins[name][edisonConfig.pluginFileSuffixes.clientFileSuffix];
+	return exports.plugins[name][edisonConfig.communication.pluginFileSuffixes.clientFileSuffix];
 };
 
 exports.getServicePlugin = function (name) {
@@ -51,20 +51,20 @@ exports.getServicePlugin = function (name) {
       "Please ensure that this plugin is included in the configuration file.");
   }
 
-  return exports.plugins[name][edisonConfig.pluginFileSuffixes.serverFileSuffix];
+  return exports.plugins[name][edisonConfig.communication.pluginFileSuffixes.serverFileSuffix];
 };
 
-exports.createService = function (serviceDescription, serviceCreatedCallback) {
-  var service = new Service(serviceDescription);
-  if (!service.description.advertise || service.description.advertise.locally) {
-    EdisonMDNS.advertiseService(service.description);
+exports.createService = function (serviceSpec, serviceCreatedCallback) {
+  var service = new Service(serviceSpec);
+  if (!service.spec.advertise || service.spec.advertise.locally) {
+    EdisonMDNS.advertiseService(service.spec);
   }
   serviceCreatedCallback(service);
 }
 
 exports.createClient = function (serviceQuery, serviceFilter, clientCreatedCallback) {
-  EdisonMDNS.discoverServices(serviceQuery, serviceFilter, function(serviceDescription) {
-    clientCreatedCallback(new Client(serviceDescription));
+  EdisonMDNS.discoverServices(serviceQuery, serviceFilter, function(serviceSpec) {
+    clientCreatedCallback(new Client(serviceSpec));
   });
 }
 
@@ -72,6 +72,6 @@ exports.discoverServices = function (serviceQuery, serviceFoundCallback) {
   EdisonMDNS.discoverServices(serviceQuery, null, serviceFoundCallback);
 };
 
-exports.createClientForGivenService = function (serviceDescription, clientCreatedCallback) {
-  clientCreatedCallback(new Client(serviceDescription));
+exports.createClientForGivenService = function (serviceSpec, clientCreatedCallback) {
+  clientCreatedCallback(new Client(serviceSpec));
 };

@@ -1,5 +1,4 @@
 var mdns = require('mdns2');
-var path = require('path');
 var os = require('os');
 
 var ServiceRecord = require("./ServiceRecord.js");
@@ -32,8 +31,8 @@ EdisonMDNS.prototype.name = "mdns";
 EdisonMDNS.prototype.component = "discovery";
 
 // public functions
-EdisonMDNS.prototype.advertiseService = function (serviceDescription) {
-  var serviceRecord = new ServiceRecord(serviceDescription);
+EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
+  var serviceRecord = new ServiceRecord(serviceSpec);
   var ad = mdns.createAdvertisement(serviceRecord.rawRecord.type, serviceRecord.rawRecord.port,
     {txtRecord: serviceRecord.rawRecord.properties, name: serviceRecord.rawRecord.name});
   ad.start();
@@ -57,7 +56,7 @@ EdisonMDNS.prototype.discoverServices = function (serviceQuery, serviceFilter, c
 
       if (!serviceFilter || serviceFilter(serviceRecord)) {
         try {
-          callback(serviceRecord.getSuggestedServiceDescription());
+          callback(serviceRecord.getSuggestedServiceSpec());
         } catch (err) {
           return;
         }

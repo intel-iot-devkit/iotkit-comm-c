@@ -4,13 +4,13 @@ EdisonZMQReqRepService.prototype.interface = "edison-service-interface";
 EdisonZMQReqRepService.prototype.socket = null;
 EdisonZMQReqRepService.prototype.receivedMsgHandler = null;
 
-function EdisonZMQReqRepService(serviceDescription) {
+function EdisonZMQReqRepService(serviceSpec) {
   "use strict";
   this.socket = zeromq.socket('rep');
-  if (serviceDescription.address) {
-    this.socket.bindSync('tcp://' + serviceDescription.address + ':' + serviceDescription.port);
+  if (serviceSpec.address) {
+    this.socket.bindSync('tcp://' + serviceSpec.address + ':' + serviceSpec.port);
   } else {
-    this.socket.bindSync('tcp://*:' + serviceDescription.port);
+    this.socket.bindSync('tcp://*:' + serviceSpec.port);
   }
 
   var self = this;

@@ -1,9 +1,9 @@
 var edisonLib = require("../edison-lib");
 
-var validator = new edisonLib.ServiceDescriptionValidator();
-validator.readServiceDescriptionFromFile("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
+var validator = new edisonLib.ServiceSpecValidator();
+validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
-edisonLib.discoverServices(validator.getValidatedDescription(), function (serviceDescription) {
+edisonLib.discoverServices(validator.getValidatedSpec(), function (serviceDescription) {
   "use strict";
 
   console.log("Found " + serviceDescription.type.name + " service at " +

@@ -2,25 +2,25 @@ var main = require("../main.njs");
 
 
 Client.prototype.comm = null;
-Client.prototype.serviceDescription = null;
+Client.prototype.spec = null;
 
-function Client(serviceDescription) {
+function Client(serviceSpec) {
   "use strict";
 
-  this.serviceDescription = serviceDescription;
+  this.spec = serviceSpec;
 
   var commplugin;
   try {
-    commplugin =  main.getClientPlugin(serviceDescription.type.name);
+    commplugin =  main.getClientPlugin(serviceSpec.type.name);
   } catch (err) {
     console.log("ERROR: An appropriate communication plugin could not be found for service at '" +
-      serviceDescription.address + "'. To interact with this service the '" + serviceDescription.type.name +
+      serviceSpec.address + "'. To interact with this service the '" + serviceSpec.type.name +
       "' plugin is required.");
     console.log(err);
     throw err;
   }
 
-  this.comm = new commplugin(serviceDescription);
+  this.comm = new commplugin(serviceSpec);
 }
 
 // export the class

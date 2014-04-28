@@ -5,7 +5,7 @@ EdisonMQTTService.prototype.interface = "edison-service-interface";
 EdisonMQTTService.prototype.service = {};
 EdisonMQTTService.prototype.receivedMsgHandler = null;
 
-function EdisonMQTTService(serviceDescription) {
+function EdisonMQTTService(serviceSpec) {
   "use strict";
 
   var self = this;
@@ -53,7 +53,7 @@ function EdisonMQTTService(serviceDescription) {
     });
   });
 
-  this.service.listen(serviceDescription.port);
+  this.service.listen(serviceSpec.port);
 }
 
 EdisonMQTTService.prototype.sendTo = function (client, msg, context) {

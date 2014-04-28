@@ -4,10 +4,6 @@ module.exports =
   pluginInterfaceDir: "plugin-interfaces",
   pluginDir: "plugins",
   superInterfaceName: "interface-for-interfaces",
-  pluginFileSuffixes: {
-    clientFileSuffix: "client",
-    serverFileSuffix: "service"
-  },
   communication: {
     pluginFileSuffixes: {
       clientFileSuffix: "client",

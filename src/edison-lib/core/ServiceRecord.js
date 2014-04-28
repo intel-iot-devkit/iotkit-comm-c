@@ -1,38 +1,38 @@
-var ServiceDescriptionValidator = require("./ServiceDescriptionValidator.js");
+var ServiceSpecValidator = require("./ServiceSpecValidator.js");
 
 // private static
 exports.COMM_PARAMS_PREFIX = "_comm_params_";
 
 ServiceRecord.prototype.rawRecord = {};
-ServiceRecord.prototype.serviceDescription = {};
+ServiceRecord.prototype.spec = {};
 ServiceRecord.prototype.suggestedAddresses = [];
 
 function ServiceRecord (serviceDescription) {
   "use strict";
-  this.serviceDescription = serviceDescription;
+  this.spec = serviceDescription;
   makeServiceRecord.call(this);
 }
 
-ServiceRecord.prototype.getSuggestedServiceDescription = function () {
+ServiceRecord.prototype.getSuggestedServiceSpec = function () {
   "use strict";
 
-  if (this.serviceDescription.address) {
-    return this.serviceDescription;
+  if (this.spec.address) {
+    return this.spec;
   }
 
-  this.serviceDescription.address = this.getSuggestedAddress();
-  if (!this.serviceDescription.address) {
+  this.spec.address = this.getSuggestedAddress();
+  if (!this.spec.address) {
     throw new Error("No valid address found for this service.");
   }
 
-  return this.serviceDescription;
+  return this.spec;
 };
 
 ServiceRecord.prototype.getSuggestedAddress = function () {
   "use strict";
 
-  if (this.serviceDescription.address) {
-    return this.serviceDescription.address;
+  if (this.spec.address) {
+    return this.spec.address;
   }
 
   if (this.suggestedAddresses.length != 0) {
@@ -48,7 +48,7 @@ ServiceRecord.prototype.getSuggestedAddress = function () {
 
 ServiceRecord.prototype.setSuggestedAddress = function (address) {
   "use strict";
-  this.serviceDescription.address = address;
+  this.spec.address = address;
 };
 
 ServiceRecord.prototype.getSuggestedAddresses = function (addresses) {
@@ -64,24 +64,24 @@ ServiceRecord.prototype.setSuggestedAddresses = function (addresses) {
 ServiceRecord.prototype.initFromRawServiceRecord = function (serviceRecord) {
   "use strict";
 
-  ServiceDescriptionValidator.validateRawServiceRecord(serviceRecord);
+  ServiceSpecValidator.validateRawServiceRecord(serviceRecord);
 
   this.rawRecord = serviceRecord;
-  this.serviceDescription = serviceRecord;
+  this.spec = serviceRecord;
 
   if (this.rawRecord.addresses && this.rawRecord.addresses.length > 0) {
     this.suggestedAddresses = this.rawRecord.addresses;
-    this.serviceDescription.address = this.rawRecord.addresses[0];
+    this.spec.address = this.rawRecord.addresses[0];
   } else {
-    this.serviceDescription.address = "";
+    this.spec.address = "";
   }
 
   if (typeof this.rawRecord.properties === 'undefined') {
     return;
   }
 
-  if (typeof this.serviceDescription.comm_params === 'undefined') {
-    this.serviceDescription.comm_params = {};
+  if (typeof this.spec.comm_params === 'undefined') {
+    this.spec.comm_params = {};
   }
 
   var properties = Object.keys(this.rawRecord.properties);
@@ -93,20 +93,20 @@ ServiceRecord.prototype.initFromRawServiceRecord = function (serviceRecord) {
     var comm_param_key = properties[i].substring(exports.COMM_PARAMS_PREFIX.length);
     var comm_param_value = this.rawRecord.properties[properties[i]];
 
-    this.serviceDescription.comm_params[comm_param_key] = comm_param_value;
+    this.spec.comm_params[comm_param_key] = comm_param_value;
   }
 };
 
 function makeServiceRecord () {
   "use strict";
 
-  this.rawRecord = this.serviceDescription;
+  this.rawRecord = this.spec;
 
-  if (!this.serviceDescription) {
+  if (!this.spec) {
     return;
   }
 
-  if (!this.serviceDescription.comm_params) {
+  if (!this.spec.comm_params) {
     return;
   }
 
@@ -114,13 +114,13 @@ function makeServiceRecord () {
     this.rawRecord.properties = {};
   }
 
-  var commparams = Object.keys(this.serviceDescription.comm_params);
+  var commparams = Object.keys(this.spec.comm_params);
   for (var i = 0; i < commparams.length; i++) {
     var propertyName = exports.COMM_PARAMS_PREFIX + commparams[i];
     if (this.rawRecord.properties[propertyName]) {
       continue;
     }
-    this.rawRecord.properties[propertyName] = this.serviceDescription.comm_params[commparams[i]];
+    this.rawRecord.properties[propertyName] = this.spec.comm_params[commparams[i]];
   }
 }
 

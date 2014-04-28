@@ -4,13 +4,13 @@ EdisonZMQPubSubService.prototype.interface = "edison-service-interface";
 EdisonZMQPubSubService.prototype.socket = null;
 EdisonZMQPubSubService.prototype.receivedMsgHandler = null;
 
-function EdisonZMQPubSubService(serviceDescription) {
+function EdisonZMQPubSubService(serviceSpec) {
     "use strict";
   this.socket = zeromq.socket('pub');
-  if (serviceDescription.address) {
-    this.socket.bindSync('tcp://' + serviceDescription.address + ':' + serviceDescription.port);
+  if (serviceSpec.address) {
+    this.socket.bindSync('tcp://' + serviceSpec.address + ':' + serviceSpec.port);
   } else {
-    this.socket.bindSync('tcp://*:' + serviceDescription.port);
+    this.socket.bindSync('tcp://*:' + serviceSpec.port);
   }
 }
 

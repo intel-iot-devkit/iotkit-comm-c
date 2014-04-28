@@ -1,13 +1,13 @@
-var ServiceDescriptionValidator = require("../core/ServiceDescriptionValidator.js");
+var ServiceDescriptionValidator = require("../core/ServiceSpecValidator.js");
 var ServiceRecord = require("../core/ServiceRecord.js");
 
-var validator = new ServiceDescriptionValidator();
-validator.readServiceDescriptionFromFile("../../sample-apps/serviceSpecs/temperatureServiceZMQPUBSUB.json");
+var validator = new ServiceSpecValidator();
+validator.readServiceSpecFromFile("../../sample-apps/serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
-var record = new ServiceRecord(validator.getValidatedDescription());
+var record = new ServiceRecord(validator.getValidatedSpec());
 console.log(record.rawRecord);
 
 var newrecord = new ServiceRecord();
 newrecord.initFromRawServiceRecord(record.rawRecord);
 
-console.log(newrecord.serviceDescription);
+console.log(newrecord.spec);

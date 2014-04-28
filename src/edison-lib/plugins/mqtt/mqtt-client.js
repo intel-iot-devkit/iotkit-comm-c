@@ -5,14 +5,14 @@ EdisonMQTTClient.prototype.interface = "edison-client-interface";
 EdisonMQTTClient.prototype.client = {};
 EdisonMQTTClient.prototype.receivedMsgHandler = null;
 
-function EdisonMQTTClient(serviceDescription) {
+function EdisonMQTTClient(serviceSpec) {
   "use strict";
 
-  if (serviceDescription.comm_params && serviceDescription.comm_params['ssl']) {
-    this.client = mqtt.createSecureClient(serviceDescription.port, serviceDescription.address,
-      serviceDescription.comm_params);
+  if (serviceSpec.comm_params && serviceSpec.comm_params['ssl']) {
+    this.client = mqtt.createSecureClient(serviceSpec.port, serviceSpec.address,
+      serviceSpec.comm_params);
   } else {
-    this.client = mqtt.createClient(serviceDescription.port, serviceDescription.address);
+    this.client = mqtt.createClient(serviceSpec.port, serviceSpec.address);
   }
 
   var self = this;

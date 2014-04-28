@@ -5,7 +5,7 @@
     "protocol" : "tcp"
   },
   "address" : "127.0.0.1",
-  "port" : 1885,
+  "port" : 1883,
   "properties" : {"dataType": "float"},
   "comm_params": {"ssl": false}
 }
