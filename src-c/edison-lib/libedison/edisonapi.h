@@ -6,6 +6,7 @@ typedef struct _Context {
 
 // handle to the client communication plugin
 typedef struct _CommClientHandle {
+    int (*init)(char *, int, char *, void *);
     int (*send)(char *, Context context);	// int send(topic, context)
     int (*subscribe)(char *);	// int subscribe(topic)
     int (*unsubscribe)(char *);	// int unsubscribe(topic)
@@ -16,6 +17,7 @@ typedef struct _CommClientHandle {
 
 // handle to the service communication plugin
 typedef struct _CommServiceHandle {
+    int (*init)(char *, int, char *, void *);
     int (*sendTo)(void *, char *, Context context);	// int send(client, message, context) // for example, incase of mqtt... int sendTo(<<mqtt client>>, message, context);
     int (*publish)(char *,Context context); // int publish(message,context)
     int (*manageClient)(void *,Context context); // int manageClient(client,context) // for example, incase of mqtt... int manageClient(<<mqtt client>>, context);

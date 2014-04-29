@@ -321,6 +321,10 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
 	else
 	{
 
+        dlerror();	/* Clear any existing error */
+	    commHandle->init = (int (*)(char *, Context)) dlsym(handle, "init");
+	    if (!checkDLError()) return NULL;
+
 	    dlerror();	/* Clear any existing error */
 	    commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[0]);
 	    if (!checkDLError()) return NULL;
@@ -386,6 +390,10 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
 	}
 	else
 	{
+
+        dlerror();	/* Clear any existing error */
+	    commHandle->init = (int (*)(char *, Context)) dlsym(handle, "init");
+	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
 	    commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[0]);
