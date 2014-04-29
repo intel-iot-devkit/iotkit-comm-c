@@ -14,7 +14,7 @@
 
 #include <MQTTAsync.h>
 
-#define CLIENTID    "ExampleClientPub"
+#define CLIENTID    "ExampleClientSub"
 #define QOS         1
 #define TIMEOUT     10000L
 volatile MQTTAsync_token deliveredtoken;
