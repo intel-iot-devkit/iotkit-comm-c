@@ -1,13 +1,13 @@
 var edisonLib = require("../edison-lib");
 
 var validator = new edisonLib.ServiceSpecValidator();
-validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceMQTT.json");
+validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceMQTTBROKER.json");
 
-var serviceDescription = validator.getValidatedSpec();
+var serviceSpec = validator.getValidatedSpec();
 
-edisonLib.createClientForGivenService(serviceDescription, function (client) {
+edisonLib.createClientForGivenService(serviceSpec, function (client) {
 
-  client.comm.subscribe(serviceDescription.name);
+  client.comm.subscribe(serviceSpec.name);
 
   client.comm.setReceivedMessageHandler(function(message, context) {
     "use strict";

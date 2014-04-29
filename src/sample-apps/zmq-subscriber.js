@@ -1,9 +1,9 @@
 var edisonLib = require("../edison-lib");
 
-var validator = new edisonLib.ServiceSpecValidator();
-validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
+var query = new edisonLib.ServiceQuery();
+query.initServiceQueryFromFile("./serviceQueries/temperatureServiceQueryZMQPUBSUB.json");
 
-edisonLib.createClient(validator.getValidatedSpec(), serviceFilter, function (client) {
+edisonLib.createClient(query, serviceFilter, function (client) {
   "use strict";
 
   client.comm.subscribe("mytopic");

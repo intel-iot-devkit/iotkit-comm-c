@@ -8,6 +8,7 @@ var PluginLoader = require("./core/plugin-loader.njs");
 
 var edisonConfig = require("./config.js");
 var ServiceSpecValidator = require("./core/ServiceSpecValidator.js");
+var ServiceQuery = require("./core/ServiceQuery.js");
 var Service = require("./core/Service.js");
 var Client = require("./core/Client.js");
 var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
@@ -30,6 +31,8 @@ exports.plugins = pluginLoader.loadedPlugins;
 exports.config = edisonConfig;
 
 exports.ServiceSpecValidator = ServiceSpecValidator;
+
+exports.ServiceQuery = ServiceQuery;
 
 exports.sayhello = function ()
 {

@@ -1,7 +1,7 @@
 var edisonLib = require("../edison-lib");
 
 var validator = new edisonLib.ServiceSpecValidator();
-validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceMQTT.json");
+validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceMQTTBROKER.json");
 
 edisonLib.createClientForGivenService(validator.getValidatedSpec(), function (client) {
 

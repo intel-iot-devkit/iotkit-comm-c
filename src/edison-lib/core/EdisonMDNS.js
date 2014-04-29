@@ -38,13 +38,23 @@ EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
   ad.start();
 };
 
-EdisonMDNS.prototype.discoverServices = function (serviceQuery, serviceFilter, callback) {
+EdisonMDNS.prototype.discoverServices = function (serviceQuery, userServiceFilter, callback) {
+
+  if (serviceQuery.constructor.name !== 'ServiceQuery') {
+    throw new Error("Invalid argument: must use a ServiceQuery object to discover services.");
+  }
+
+  var rawServiceQuery = serviceQuery.rawQuery;
 
   // todo: needs fix: multiple subtypes in the serviceType causes errors.
   // make sure your serviceType contains only *one* subtype
-  var browser = mdns.createBrowser(serviceQuery.type, { resolverSequence: exports.mdnsResolverSequence });
+  var browser = mdns.createBrowser(rawServiceQuery.type, { resolverSequence: exports.mdnsResolverSequence });
 
   browser.on('serviceUp', function(service) {
+    if (!serviceQueryFilter(serviceQuery, service)) {
+      return;
+    }
+
     var filteredServiceAddresses = serviceAddressFilter(service);
 
     if (filteredServiceAddresses.length != 0) {
@@ -54,7 +64,7 @@ EdisonMDNS.prototype.discoverServices = function (serviceQuery, serviceFilter, c
       serviceRecord.setSuggestedAddresses(filteredServiceAddresses);
       serviceRecord.setSuggestedAddress(filteredServiceAddresses[0]);
 
-      if (!serviceFilter || serviceFilter(serviceRecord)) {
+      if (!userServiceFilter || userServiceFilter(serviceRecord)) {
         try {
           callback(serviceRecord.getSuggestedServiceSpec());
         } catch (err) {
@@ -203,6 +213,52 @@ function serviceAddressFilter(service) {
   longestPrefixMatches.sort(); // so we can return addresses in the same order for the same service. Necessary?
 
   return longestPrefixMatches;
+}
+
+function serviceQueryFilter(query, serviceRecord) {
+  "use strict";
+
+  if (query.nameRegEx) {
+    if (serviceRecord.name) {
+      if (query.nameRegEx.test(serviceRecord.name)) {
+        return true;
+      }
+    }
+  }
+
+  if (query.rawQuery.port) {
+    if (serviceRecord.port) {
+      if (query.rawQuery.port == serviceRecord.port) {
+        return true;
+      }
+    }
+  }
+
+  if (query.rawQuery.properties) {
+    // OR
+    if (serviceRecord.properties) {
+      var found = Object.keys(query.rawQuery.properties).some(function (property) {
+        if (serviceRecord.properties[property]) {
+          if (serviceRecord.properties[property] === query.rawQuery.properties[property]) {
+            return true;
+          }
+        }
+      });
+      if (found) {
+        return true;
+      }
+    }
+  }
+
+  // MUST contain all fields tested above
+  if (!query.nameRegEx && !query.rawQuery.port && !query.properties) {
+    // only a service.type query was issued. Since serrvice.type is a compulsory
+    // query attribute to search for services, this service must be of the
+    // same type.
+    return true;
+  }
+
+  return false;
 }
 
 // export the class

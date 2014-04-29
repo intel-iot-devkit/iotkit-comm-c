@@ -1,23 +1,13 @@
 var edisonLib = require("../edison-lib");
 
-var validator = new edisonLib.ServiceSpecValidator();
-validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
+var query = new edisonLib.ServiceQuery();
+query.initServiceQueryFromFile("./serviceQueries/temperatureServiceQueryMQTT.json");
 
-edisonLib.discoverServices(validator.getValidatedSpec(), function (serviceDescription) {
+edisonLib.discoverServices(query, function (serviceQuery) {
   "use strict";
 
-  console.log("Found " + serviceDescription.type.name + " service at " +
-    serviceDescription.address + ":" + serviceDescription.port + " on interface " +
-    serviceDescription.networkInterface);
+  console.log("Found " + serviceQuery.type.name + " service at " +
+    serviceQuery.address + ":" + serviceQuery.port + " on interface " +
+    serviceQuery.networkInterface);
 
-  edisonLib.createClientForGivenService(serviceDescription, function (client) {
-
-    client.comm.subscribe("mytopic");
-
-    client.comm.setReceivedMessageHandler(function(message) {
-      "use strict";
-      console.log(message.toString());
-    });
-
-  });
 });
