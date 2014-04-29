@@ -8,7 +8,7 @@
  ============================================================================
  */
 
-#include "edison-mqtt_async-client.h"
+#include "edison-mqtt_async-service.h"
 #include "dlfcn.h"
 
 #include <signal.h>
@@ -170,8 +170,7 @@ void handleSignal(int sig)
  	}
  }
 
-
- int send(char *message, Context context) {
+ int sendTo(void *client1, char *message, Context context) {
 
  	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
  	MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
@@ -223,35 +222,10 @@ void handleSignal(int sig)
  	return rc;
  }
 
- int subscribe(char *topic) {
- 	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-
- 	int rc = 0;
-
- 	opts.onSuccess = onSubscribe;
- 	opts.onFailure = onSubscribeFailure;
- 	opts.context = client;
-
- 	if ((rc = MQTTAsync_subscribe(client, topic, QOS, &opts)) != MQTTASYNC_SUCCESS) {
- 	 	printf("Failed to subscribe, return code %d\n", rc);
- 	 	exit(-1);
- 	}
-
- 	while (!finished)
- 	{
- 	 	usleep(1000L);
-
- 	 	if (toStop == 1)
- 	 	{
- 	 		close();
-
- 	 		#if DEBUG
- 	 		    printf("I think it is disconnected\n");
- 	 		#endif
- 	 	}
- 	}
-
- 	return rc;
+ int publish(char *message, Context context){
+    #if DEBUG
+         printf("Invoked MQTT: publish()\n");
+     #endif
  }
 
  int done() {
@@ -276,14 +250,8 @@ void handleSignal(int sig)
  	return rc;
  }
 
-int unsubscribe(char *topic){
 
-    #if DEBUG
-        printf("Invoked MQTT: unsubscribe()\n");
-    #endif
-}
-
-int setReceivedMessageHandler(void (*handler) (char *topic, Context context)){
+int setReceivedMessageHandler(void (*handler) (void *client, char *topic, Context context)){
 
     #if DEBUG
         printf("Invoked MQTT: setReceivedMessageHandler()\n");
@@ -293,76 +261,83 @@ int setReceivedMessageHandler(void (*handler) (char *topic, Context context)){
 }
 
 
+int manageClient(void *client, Context context){
+    #if DEBUG
+        printf("Invoked MQTT: manageClient()\n");
+    #endif
+}
+
+
  //values for type --> open, ssl
  int init(char *host, int port, char *type, void *sslargs)
-{
-		MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
-	int rc = 0;
-	 	char uri[256];
+ {
+ 		MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
+ 	int rc = 0;
+ 	 	char uri[256];
 
-        if(strcmp(type, "ssl") == 0){
-            sprintf(uri, "ssl://%s:%d", host, port);
-        }else {
-	 	    sprintf(uri, "tcp://%s:%d", host, port);
-	 	}
-		// Default settings:
-	 	int i=0;
-
-
-
-	 	MQTTAsync_token token;
-
-	 	signal(SIGINT, handleSignal);
-	 	signal(SIGTERM, handleSignal);
-
-	 	quietMode = 0;
+         if(strcmp(type, "ssl") == 0){
+             sprintf(uri, "ssl://%s:%d", host, port);
+         }else {
+ 	 	    sprintf(uri, "tcp://%s:%d", host, port);
+ 	 	}
+ 		// Default settings:
+ 	 	int i=0;
 
 
-	 	MQTTAsync_create(&client, uri, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
-//		MQTTAsync_setTraceCallback(handleTrace);
-//		MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_ERROR);
+ 	 	MQTTAsync_token token;
+
+ 	 	signal(SIGINT, handleSignal);
+ 	 	signal(SIGTERM, handleSignal);
+
+ 	 	quietMode = 0;
 
 
-	 	MQTTAsync_setCallbacks(client, client, connectionLost, messageArrived, deliveryComplete);
+ 	 	MQTTAsync_create(&client, uri, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
-	 	conn_opts.cleansession = 0;
-	 	conn_opts.onSuccess = onConnect;
-	 	conn_opts.onFailure = onConnectFailure;
-	 	conn_opts.context = client;
-	 	conn_opts.keepAliveInterval = 0;
-	 	conn_opts.retryInterval = 0;
-	 	//conn_opts.maxInflight= 30;
+ //		MQTTAsync_setTraceCallback(handleTrace);
+ //		MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_ERROR);
 
-        /*
-	 	// TODO: SSL based client needs to be implemented
-	 	conn_opts.ssl = &sslopts;
-	 	conn_opts.ssl->trustStore = "./certs/client.crt";
-	 	conn_opts.ssl->keyStore = "./certs/client.key";
-	 	conn_opts.ssl->enableServerCertAuth = 0;
-	 	*/
 
-	 	if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
-	 	{
-	 		printf("Failed to start connect, return code %d\n", rc);
-	 		exit(1);
-	 	}
+ 	 	MQTTAsync_setCallbacks(client, client, connectionLost, messageArrived, deliveryComplete);
 
-	 	#if DEBUG
-	 	    printf("Waiting for connect\n");
-	 	#endif
+ 	 	conn_opts.cleansession = 0;
+ 	 	conn_opts.onSuccess = onConnect;
+ 	 	conn_opts.onFailure = onConnectFailure;
+ 	 	conn_opts.context = client;
+ 	 	conn_opts.keepAliveInterval = 0;
+ 	 	conn_opts.retryInterval = 0;
+ 	 	//conn_opts.maxInflight= 30;
 
-	 	while (connected == 0 && finished == 0 && toStop == 0) {
+         /*
+ 	 	// TODO: SSL based client needs to be implemented
+ 	 	conn_opts.ssl = &sslopts;
+ 	 	conn_opts.ssl->trustStore = "./certs/client.crt";
+ 	 	conn_opts.ssl->keyStore = "./certs/client.key";
+ 	 	conn_opts.ssl->enableServerCertAuth = 0;
+ 	 	*/
 
-	 	    #if DEBUG
-	 		    printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
-	 		#endif
+ 	 	if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
+ 	 	{
+ 	 		printf("Failed to start connect, return code %d\n", rc);
+ 	 		exit(1);
+ 	 	}
 
-	 		usleep(10000L);
-	 	}
+ 	 	#if DEBUG
+ 	 	    printf("Waiting for connect\n");
+ 	 	#endif
 
-    return rc;
-}
+ 	 	while (connected == 0 && finished == 0 && toStop == 0) {
+
+ 	 	    #if DEBUG
+ 	 		    printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
+ 	 		#endif
+
+ 	 		usleep(10000L);
+ 	 	}
+
+     return rc;
+ }
 /*
 int createService(){
     #if DEBUG
