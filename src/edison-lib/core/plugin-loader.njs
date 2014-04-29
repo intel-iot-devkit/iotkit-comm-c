@@ -59,10 +59,10 @@ InterfaceValidator.prototype.loadedPlugins = {};
 InterfaceValidator.prototype.loadPlugin = function(pluginName, callback)
 {
   var pluginDirectory = path.join(edisonConfig.libRoot, edisonConfig.pluginDir, pluginName);
-  var suffixKeys = Object.keys(edisonConfig.communication.pluginFileSuffixes);
+  var suffixKeys = Object.keys(edisonConfig.communicationPlugins.fileSuffixes);
 
 	for (var i = 0; i < suffixKeys.length; i++) {
-    var suffix = edisonConfig.communication.pluginFileSuffixes[suffixKeys[i]];
+    var suffix = edisonConfig.communicationPlugins.fileSuffixes[suffixKeys[i]];
     var pluginFile = pluginName + '-' + suffix + '.js';
 		var plugin = require(path.join(pluginDirectory, pluginFile));
 		
