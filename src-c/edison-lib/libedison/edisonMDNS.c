@@ -216,19 +216,10 @@ static void DNSSD_API regReply(DNSServiceRef client,
 
 }
 
-// struct to pass to our event thread
-typedef struct _EventThreadParams {
-    DNSServiceRef client;
-    void (*callback)(void *, int32_t, ServiceDescription *);
-} EventThreadParams;
-
 // Handle events from DNS server
-void *handleEvents(void *p)
+void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, ServiceDescription *)) 
 {
-    EventThreadParams *params = (EventThreadParams *)p;
-    DNSServiceRef client = params->client;
     int dns_sd_fd  = client  ? DNSServiceRefSockFD(client) : -1;
-
     int nfds = dns_sd_fd + 1;
     fd_set readfds;
     struct timeval tv;
@@ -258,7 +249,7 @@ void *handleEvents(void *p)
 		err = DNSServiceProcessResult(client );
             if (err) { 
 		sprintf(lastError, "Failed waiting on DNS file descriptor");
-		params->callback(client, err, NULL);
+		callback(client, err, NULL);
 		stopNow = 1; 
 	    }
         }
@@ -268,22 +259,18 @@ void *handleEvents(void *p)
             if (err != kDNSServiceErr_NoError)
             {
                 sprintf(lastError, "DNSService call failed");
-		params->callback(client, err, NULL);
+		callback(client, err, NULL);
                 stopNow = 1;
             }
         }
         else
         { 
 	    sprintf(lastError, "select() returned %d errno %s", result, strerror(errno));
-	    params->callback(client, errno, NULL);
+	    callback(client, errno, NULL);
             if (errno != EINTR) 
 		stopNow = 1;
         }
     }
-
-    // free memory that was allocated before pthread_create and 
-    // passing in this routine
-    free(params);
 }
 
 // discover context we passing around which contains function pointers to 
@@ -330,7 +317,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 }
 
 // Discover the service from MDNS. Filtered by the filterCB
-void *discoverServicesFiltered(ServiceQuery *queryDesc, 
+void discoverServicesFiltered(ServiceQuery *queryDesc, 
 	    bool (*filterCB)(ServiceDescription *), 
 	    void (*callback)(void *, int32_t, ServiceDescription *))
 {
@@ -366,38 +353,23 @@ void *discoverServicesFiltered(ServiceQuery *queryDesc,
 	callback(client, err, NULL);
 	if (client) 
 	    DNSServiceRefDeallocate(client);
-	client = NULL;
     }
     else 
     {
-	EventThreadParams *params = (EventThreadParams *)malloc(sizeof(EventThreadParams));
-	if (params) {
-	    params->client = client;
-	    params->callback = callback;
-	    // Create a thread to handle events
-	    if (pthread_create(&tid, NULL, &handleEvents, (void *)params) != 0)
-	    {
-		sprintf(lastError, "Thread failure to handle events from DNS server");
-		callback(client, kDNSServiceErr_NotInitialized, NULL);
-		if (client ) DNSServiceRefDeallocate(client );
-		client = NULL;
-	    }
-	}
+	handleEvents(client, callback);
     }
-
-    return client;
 }
 
 // Discover the service from MDNS
-void *discoverServices(ServiceQuery *queryDesc, 
+void discoverServices(ServiceQuery *queryDesc, 
 	void (*callback)(void *, int32_t, ServiceDescription *) )
 {
-    return discoverServicesFiltered(queryDesc, NULL, callback);
+    discoverServicesFiltered(queryDesc, NULL, callback);
 }
 
 // Advertise the service. Return an opaque object which is passed along to
 // callback
-void *advertiseService(ServiceDescription *description,
+void advertiseService(ServiceDescription *description,
 	void (*callback)(void *, int32_t, ServiceDescription *)) 
 {		
     DNSServiceRef client;
@@ -448,26 +420,11 @@ void *advertiseService(ServiceDescription *description,
 	callback(client, err, NULL);
 	if (client) 
 	    DNSServiceRefDeallocate(client);
-	client = NULL;
     }
     else 
     {
-	EventThreadParams *params = (EventThreadParams *)malloc(sizeof(EventThreadParams));
-	if (params) {
-	    params->client = client;
-	    params->callback = callback;
-	    // Create a thread to handle events
-	    if (pthread_create(&tid, NULL, &handleEvents, (void *)params) != 0)
-	    {
-		sprintf(lastError, "Thread failure to handle events from DNS server");
-		callback(client, kDNSServiceErr_NotInitialized, NULL);
-		if (client ) DNSServiceRefDeallocate(client );
-		client = NULL;
-	    }
-	}
+	handleEvents(client, callback);
     }
-
-    return client;
 }
 
 #if DEBUG
@@ -483,33 +440,26 @@ void callback(void *handle, int32_t error_code, ServiceDescription *desc)
 // Test code for advertisement
 void testAdvertise() 
 {
-    void *handle;
-
-    ServiceDescription *description = parseServiceDescription("./serviceSpecs/temperatureService.json");
+    ServiceDescription *description = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
     if (description)
-	handle = advertiseService(description, callback);
+	advertiseService(description, callback);
 
     printf ("Done advertise\n");
-    while(1);
 }
 
 // Test code for discover
 void testDiscover()
 {
-    void *handle;
-
-    ServiceQuery *query = parseServiceDescription("./serviceSpecs/temperatureService.json");
+    ServiceQuery *query = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
     if (query)
-	handle = discoverServices(query, callback);
+	discoverServices(query, callback);
     printf("Done discover\n");
-
-    while(1);
 }
 
 int main(void) 
 {
-    testAdvertise();
-    //testDiscover();
+    //testAdvertise();
+    testDiscover();
 }
 
 #endif
