@@ -473,7 +473,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     if (!commHandle) cleanUpClient(commHandle);
     void *sslArgs;
     char *type;
-    commHandle->init(queryDesc->address,queryDesc->port,type,sslArgs);
+    commHandle->init(queryDesc);
     return commHandle;
 }
 
@@ -517,7 +517,7 @@ CommServiceHandle *createService(ServiceDescription *description)
     fprintf(stderr,"host address: %s\n",description->address);
     void *sslArgs;
     char *type;
-    commHandle->init(description->address,description->port,type,sslArgs);
+    commHandle->init(description);
 
     return commHandle;
 }

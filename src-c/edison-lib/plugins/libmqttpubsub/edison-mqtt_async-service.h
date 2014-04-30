@@ -18,6 +18,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include "edisonapi.h"
 
 #include <MQTTAsync.h>
 
@@ -39,13 +40,7 @@ volatile int toStop = 0;
  volatile int delivery = 0;
 
 
-// TODO: use common header file for Context
-typedef struct _Context {
-    char *name;
-    char *value;
-} Context;
-
-
+int init(void *serviceDesc);
 int sendTo(void *client, char *message, Context context);
 int publish(char *message, Context context);
 int manageClient(void *client, Context context);

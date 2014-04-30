@@ -303,17 +303,17 @@ void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
 }
 #endif
 
- //values for type --> open, ssl
- int init(char *host, int port, char *type, void *sslargs)
+int init(void *serviceDesc)
 {
-		MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
+    ServiceQuery *serviceQuery = (ServiceQuery *)serviceDesc;
+	MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
 	int rc = 0;
-	 	char uri[256];
+	char uri[256];
 
 //        if(strcmp(type, "ssl") == 0){
 //            sprintf(uri, "ssl://%s:%d", host, port);
 //        }else {
-	 	    sprintf(uri, "tcp://%s:%d", host, port);
+	 	    sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
 //	 	}
 		// Default settings:
 	 	int i=0;
