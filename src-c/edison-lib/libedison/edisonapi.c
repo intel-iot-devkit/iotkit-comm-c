@@ -282,7 +282,6 @@ void cleanUpService(CommServiceHandle *commHandle)
     }
 }
 
-
 // check signatures and load the service plugin
 CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
 {
@@ -322,27 +321,27 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
 	{
 
         dlerror();	/* Clear any existing error */
-	    commHandle->init = (int (*)(char *, Context)) dlsym(handle, "init");
+	    commHandle->init = (int (*)(char *host, int port, char *type, void *sslargs)) dlsym(handle, g_funcSignatures[0]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[0]);
+	    commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[1]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->publish = (int (*)(char *,Context)) dlsym(handle, g_funcSignatures[1]);
+	    commHandle->publish = (int (*)(char *,Context)) dlsym(handle, g_funcSignatures[2]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->manageClient = (int (*)(void *,Context)) dlsym(handle, g_funcSignatures[2]);
+	    commHandle->manageClient = (int (*)(void *,Context)) dlsym(handle, g_funcSignatures[3]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->setReceivedMessageHandler = (int (*)(void (*)(void *, char *, Context))) dlsym(handle, g_funcSignatures[3]);
+	    commHandle->receive = (int (*)(void (*)(void *, char *, Context))) dlsym(handle, g_funcSignatures[4]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[4]);
+	    commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
 	    if (!checkDLError()) return NULL;
 
 	    commHandle->handle = handle;
@@ -360,8 +359,8 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
     CommClientHandle *commHandle = (CommClientHandle *)malloc(sizeof(CommClientHandle));
     if (commHandle == NULL)
     {
-	fprintf(stderr,"Can't alloc memory for commHandle\n");
-	return NULL;
+    	fprintf(stderr,"Can't alloc memory for commHandle\n");
+	    return NULL;
     }
     else
     {
@@ -392,33 +391,32 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
 	{
 
         dlerror();	/* Clear any existing error */
-	    commHandle->init = (int (*)(char *, Context)) dlsym(handle, "init");
+	    commHandle->init = (int (*)(char *host, int port, char *type, void *sslargs)) dlsym(handle, g_funcSignatures[0]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[0]);
+	    commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[1]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->subscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[1]);
+	    commHandle->subscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[2]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->unsubscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[2]);
+	    commHandle->unsubscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[3]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->setReceivedMessageHandler = (int (*)(void (*)(char *, Context))) dlsym(handle, g_funcSignatures[3]);
+	    commHandle->receive = (int (*)(void (*)(char *, Context))) dlsym(handle, g_funcSignatures[4]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
-	    commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[4]);
+	    commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
 	    if (!checkDLError()) return NULL;
 
 	    commHandle->handle = handle;
 	}
-
-	return commHandle;
+    	return commHandle;
     }
 }
 
@@ -431,7 +429,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     // get current working directory
     if (getcwd(cwd_temp, sizeof(cwd_temp))) 
     {
-        strcat(cwd_temp, "/../../edison-lib/");
+        strcat(cwd_temp, "/../edison-lib/");
         g_cwd = strdup(cwd_temp); 
     } 
     else 
@@ -459,7 +457,9 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     strcat(cwd_temp, "-client.so");
     commHandle = loadClientCommPlugin(cwd_temp);
     if (!commHandle) cleanUpClient(commHandle);
-
+    void *sslArgs;
+    char *type;
+    commHandle->init(queryDesc->address,queryDesc->port,type,sslArgs);
     return commHandle;
 }
 
@@ -472,7 +472,7 @@ CommServiceHandle *createService(ServiceDescription *description)
     // get current working directory
     if (getcwd(cwd_temp, sizeof(cwd_temp)))
     {
-        strcat(cwd_temp, "/../../edison-lib/");
+        strcat(cwd_temp, "/../edison-lib/");
         g_cwd = strdup(cwd_temp);
     }
     else
@@ -500,6 +500,10 @@ CommServiceHandle *createService(ServiceDescription *description)
     strcat(cwd_temp, "-service.so");
     commHandle = loadServiceCommPlugin(cwd_temp);
     if (!commHandle) cleanUpService(commHandle);
+    fprintf(stderr,"host address: %s\n",description->address);
+    void *sslArgs;
+    char *type;
+    commHandle->init(description->address,description->port,type,sslArgs);
 
     return commHandle;
 }
