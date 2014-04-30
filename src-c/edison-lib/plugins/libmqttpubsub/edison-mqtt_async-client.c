@@ -323,7 +323,7 @@ void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
 
 	 	MQTTAsync_create(&client, uri, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
-if DEBUG
+#if DEBUG
 		MQTTAsync_setTraceCallback(handleTrace);
 		MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_ERROR);
 #endif
