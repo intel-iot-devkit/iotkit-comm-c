@@ -28,6 +28,14 @@ static volatile int timeOut = LONG_TIME;
 static char lastError[256];
 char *getLastError() { return lastError; }
 
+// discover context we passing around which contains function pointers to
+// callback and Filter
+typedef struct _DiscoverContext {
+    bool (*filterCB)(ServiceDescription *);
+    void (*callback)(void *, int32_t, void *);
+    void *serviceSpec;
+} DiscoverContext;
+
 // helper define
 #define handleParseError() \
 {\
@@ -38,7 +46,7 @@ char *getLastError() { return lastError; }
 }
 
 // parse the service description
-ServiceDescription *parseServiceDescription(char *service_desc_file) 
+ServiceDescription *parseServiceDescription(char *service_desc_file)
 {
     ServiceDescription *description = NULL;
     char *out;
@@ -50,7 +58,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
     if (fp == NULL) {
         fprintf(stderr,"Error can't open file %s\n", service_desc_file);
     }
-    else 
+    else
     {
         fseek(fp, 0, SEEK_END);
         long size = ftell(fp);
@@ -113,7 +121,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
             jitem = cJSON_GetObjectItem(child, "protocol");
 	    if (!isJsonString(jitem)) handleParseError();
-		    
+
             description->type.protocol = strdup(jitem->valuestring);
 	    #if DEBUG
 	    printf("protocol %s\n", description->type.protocol);
@@ -127,7 +135,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 	    description->type.numSubTypes = 0;
 	    child = jitem->child;
 	    while (child) description->type.numSubTypes++, child=child->next;
-	    if (description->type.numSubTypes) 
+	    if (description->type.numSubTypes)
 	    {
 		description->type.subTypes = (char **)malloc(
 					description->type.numSubTypes*sizeof(char*));
@@ -143,6 +151,15 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 		}
 	    }
 */
+
+        jitem = cJSON_GetObjectItem(json, "address");
+	    if (!isJsonString(jitem)) handleParseError();
+
+        description->address = strdup(jitem->valuestring);
+	    #if DEBUG
+	    printf("host address %s\n", description->address);
+	    #endif
+
 	    // must have a port
 	    jitem = cJSON_GetObjectItem(json, "port");
 	    if (!jitem || !isJsonNumber(jitem)) handleParseError();
@@ -157,7 +174,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 	    description->numProperties = 0;
 	    child = jitem->child;
 	    while (child) description->numProperties++, child=child->next;
-	    if (description->numProperties) 
+	    if (description->numProperties)
 	    {
 		description->properties = (Property *)malloc(
 					    description->numProperties*sizeof(Property));
@@ -186,7 +203,7 @@ endParseSrvFile:
     return description;
 }
 
-static void DNSSD_API regReply(DNSServiceRef client, 
+static void DNSSD_API regReply(DNSServiceRef client,
 				const DNSServiceFlags flags, 
 				DNSServiceErrorType errorCode,
 				const char *name, 
@@ -196,9 +213,7 @@ static void DNSSD_API regReply(DNSServiceRef client,
 {
     (void)flags;    // Unused
 
-    // get error callback
-    void (*callback)(void *, int32_t, ServiceDescription *) 
-	= (void (*)(void *, int32_t, ServiceDescription *))context;
+    DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceDescription desc;
     desc.service_name = (char *)name;
 
@@ -208,24 +223,24 @@ static void DNSSD_API regReply(DNSServiceRef client,
     if (errorCode == kDNSServiceErr_NoError)
     {
 	desc.status = REGISTERED;
-	callback(client, errorCode, &desc);
+	discContext->callback(client, errorCode,createService(discContext->serviceSpec));
     }
     else if (errorCode == kDNSServiceErr_NameConflict)
     {
         sprintf(lastError, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
 	desc.status = IN_USE;
-	callback(client, errorCode, &desc);
+	discContext->callback(client, errorCode, NULL);
     }
     else 
     {
 	sprintf(lastError, "MDNS unexpected error");
-	callback(client, errorCode, NULL);
+	discContext->callback(client, errorCode, NULL);
     }
 
 }
 
 // Handle events from DNS server
-void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, ServiceDescription *)) 
+void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *))
 {
     int dns_sd_fd  = client  ? DNSServiceRefSockFD(client) : -1;
     int nfds = dns_sd_fd + 1;
@@ -272,21 +287,14 @@ void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, Servic
             }
         }
         else
-        { 
+        {
 	    sprintf(lastError, "select() returned %d errno %s", result, strerror(errno));
 	    callback(client, errno, NULL);
-            if (errno != EINTR) 
+            if (errno != EINTR)
 		stopNow = 1;
         }
     }
 }
-
-// discover context we passing around which contains function pointers to 
-// callback and Filter 
-typedef struct _DiscoverContext {
-    bool (*filterCB)(ServiceDescription *);
-    void (*callback)(void *, int32_t, ServiceDescription *);
-} DiscoverContext;
 
 // handle query reply
 static void DNSSD_API queryReply(DNSServiceRef client, 
@@ -312,10 +320,14 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 	    desc.status = REMOVED;
 	desc.service_name = (char *)name;
 
+#if DEBUG
+    printf("desc status %d\n", desc.status);
+#endif
+
 	// there is a filterCB, so calls it. If it returns false then donothing
 	if (discContext->filterCB && discContext->filterCB(&desc) == false)
 	    return;
-	discContext->callback(client, errorCode, &desc);
+	discContext->callback(client, errorCode, createClient(discContext->serviceSpec));
     }
     else 
     {
@@ -327,7 +339,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 // Discover the service from MDNS. Filtered by the filterCB
 void discoverServicesFiltered(ServiceQuery *queryDesc, 
 	    bool (*filterCB)(ServiceDescription *), 
-	    void (*callback)(void *, int32_t, ServiceDescription *))
+	    void (*callback)(void *, int32_t, void *))
 {
     
     DNSServiceRef client;
@@ -338,6 +350,7 @@ void discoverServicesFiltered(ServiceQuery *queryDesc,
     if (!context) return;
     context->filterCB = filterCB;
     context->callback = callback;
+    context->serviceSpec = queryDesc;
     
 
     // register type
@@ -370,7 +383,7 @@ void discoverServicesFiltered(ServiceQuery *queryDesc,
 
 // Discover the service from MDNS
 void discoverServices(ServiceQuery *queryDesc, 
-	void (*callback)(void *, int32_t, ServiceDescription *) )
+	void (*callback)(void *, int32_t, void *) )
 {
     discoverServicesFiltered(queryDesc, NULL, callback);
 }
@@ -378,13 +391,18 @@ void discoverServices(ServiceQuery *queryDesc,
 // Advertise the service. Return an opaque object which is passed along to
 // callback
 void advertiseService(ServiceDescription *description,
-	void (*callback)(void *, int32_t, ServiceDescription *)) 
+	void (*callback)(void *, int32_t, void *))
 {		
     DNSServiceRef client;
     DNSServiceErrorType err;
     pthread_t tid;	    // thread to handle events from DNS server
     char regtype[128];
     TXTRecordRef txtRecord;
+
+    DiscoverContext *context = (DiscoverContext *)malloc(sizeof(DiscoverContext));
+    if (!context) return;
+    context->callback = callback;
+    context->serviceSpec = description;
 
     // register type
     strcpy(regtype, "_");
@@ -416,7 +434,7 @@ void advertiseService(ServiceDescription *description,
 	    TXTRecordGetLength(&txtRecord), 
 	    TXTRecordGetBytesPtr(&txtRecord),
 	    regReply,			// callback
-	    callback);	    // param to pass as context into regReply
+	    context);	    // param to pass as context into regReply
 
     if (description->numProperties)  {
 	TXTRecordDeallocate(&txtRecord);
