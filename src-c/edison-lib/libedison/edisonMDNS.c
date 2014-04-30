@@ -81,6 +81,14 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 		goto endParseSrvFile;
 	    }
 
+        description->service_name = NULL;
+        description->type.name = NULL;
+        description->type.protocol = NULL;
+        description->type.subTypes = NULL;
+        description->address = NULL;
+        description->comm_params = NULL;
+        description->properties = NULL;
+
 	    // initially set status to UNKNOWN
 	    description->status = UNKNOWN;
 
