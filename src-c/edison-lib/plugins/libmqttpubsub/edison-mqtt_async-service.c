@@ -267,6 +267,12 @@ int manageClient(void *client, Context context){
     #endif
 }
 
+#if DEBUG
+void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
+{
+        printf("%s\n", message);
+}
+#endif
 
  //values for type --> open, ssl
  int init(char *host, int port, char *type, void *sslargs)
@@ -284,20 +290,21 @@ int manageClient(void *client, Context context){
  	 	int i=0;
 
 
+        #if DEBUG
+            printf("URL:%s\n", uri);
+        #endif
 
  	 	MQTTAsync_token token;
-
- 	 	signal(SIGINT, handleSignal);
- 	 	signal(SIGTERM, handleSignal);
 
  	 	quietMode = 0;
 
 
  	 	MQTTAsync_create(&client, uri, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
- //		MQTTAsync_setTraceCallback(handleTrace);
- //		MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_ERROR);
-
+#if DEBUG
+ 		MQTTAsync_setTraceCallback(handleTrace);
+ 		MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_PROTOCOL);
+#endif
 
  	 	MQTTAsync_setCallbacks(client, client, connectionLost, messageArrived, deliveryComplete);
 
