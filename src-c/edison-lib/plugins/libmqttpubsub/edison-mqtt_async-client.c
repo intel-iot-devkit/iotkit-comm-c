@@ -1,11 +1,15 @@
 /*
- ============================================================================
- Name        : edison-mqtt_async.c
- Author      : pc
- Version     :
- Copyright   : Your copyright notice
- Description : Asynchronous MQTT client
- ============================================================================
+ * MQTT Async client plugin to enable subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  */
 
 #include "edison-mqtt_async-client.h"
@@ -283,7 +287,7 @@ int unsubscribe(char *topic){
     #endif
 }
 
-int setReceivedMessageHandler(void (*handler) (char *topic, Context context)){
+int receive(void (*handler) (char *topic, Context context)){
 
     #if DEBUG
         printf("Invoked MQTT: setReceivedMessageHandler()\n");
@@ -306,11 +310,11 @@ void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
 	int rc = 0;
 	 	char uri[256];
 
-        if(strcmp(type, "ssl") == 0){
-            sprintf(uri, "ssl://%s:%d", host, port);
-        }else {
+//        if(strcmp(type, "ssl") == 0){
+//            sprintf(uri, "ssl://%s:%d", host, port);
+//        }else {
 	 	    sprintf(uri, "tcp://%s:%d", host, port);
-	 	}
+//	 	}
 		// Default settings:
 	 	int i=0;
 

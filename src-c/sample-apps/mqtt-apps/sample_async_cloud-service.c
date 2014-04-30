@@ -1,3 +1,17 @@
+/*
+ * Sample program to demonstrate MQTT Async subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
+
 #include <stdio.h>
 #include <cJSON.h>
 #include <stdbool.h>
@@ -5,34 +19,32 @@
 #include "edisonapi.h"
 #include "util.h"
 
+#ifndef DEBUG
+    #define DEBUG 1
+#endif
+
 ServiceDescription *srvDesc = NULL;
-void message_callback(char *message, Context context){
-    printf("Message received:%s", message);
-}
+int msgnumber = 0;
 
-
-void callback(void *handle, int32_t error_code, ServiceDescription *desc)
+void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
-Context context;
-context.name = "topic";
-context.value = "/foo";
+    Context context;
+    char msg[256];
 
-    printf("message error=%d error_string=%s\nservice status=%d service name=%s\n",
-	    error_code,
-	    getLastError(),
-	    desc ? desc->status : -1,
-	    desc ? desc->service_name : "");
+    if(serviceHandle != NULL){
+        CommServiceHandle *commHandle = (CommServiceHandle *)serviceHandle;
 
-	    CommServiceHandle *commHandle;
-	    commHandle = createService(srvDesc);
+        context.name = "topic";
+        context.value = "/foo";
+    //    commHandle->init("localhost", srvDesc->port, "open", NULL);
 
-            commHandle->init("localhost", desc->port, "open", NULL);
-            commHandle->setReceivedMessageHandler(message_callback);
-//            commHandle->subscribe("/foo");
-
-            commHandle->sendTo(NULL, "How are you", context);
+        while(1){
+            sprintf(msg, "This is a test message %d", msgnumber++);
+            commHandle->sendTo(NULL, msg, context);
+            sleep(2);
+        }
+    }
 }
-
 
 
 int main(void) {
@@ -43,14 +55,11 @@ int main(void) {
 
     srvDesc = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceMQTT.json");
 
-    if (srvDesc)
-	    handle = advertiseService(srvDesc, callback);
+    printf("111status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);
 
 
-    while(1);
-//	publish();
-
-//	subscribe("/foo", NULL);
+    if(srvDesc)
+	    advertiseService(srvDesc, callback);
 
 	//return EXIT_SUCCESS;
 	return 0;

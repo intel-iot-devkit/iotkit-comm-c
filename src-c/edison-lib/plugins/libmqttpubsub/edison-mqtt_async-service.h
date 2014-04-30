@@ -1,8 +1,15 @@
 /*
- * edison-mqtt.h
+ * MQTT Async service plugin to enable publish feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
  *
- *  Created on: 2014-04-16
- *      Author: pchenthx
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  */
 
 #ifndef EDISON_MQTT_ASYNC_H_
@@ -42,7 +49,7 @@ typedef struct _Context {
 int sendTo(void *client, char *message, Context context);
 int publish(char *message, Context context);
 int manageClient(void *client, Context context);
-int setReceivedMessageHandler(void (*) (void *client, char *message, Context context));
+int receive(void (*) (void *client, char *message, Context context));
 int done();
 
 

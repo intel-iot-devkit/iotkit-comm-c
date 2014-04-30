@@ -1,3 +1,17 @@
+/*
+ * Edison 'C' Library to load plugins on-demand
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -429,7 +443,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     // get current working directory
     if (getcwd(cwd_temp, sizeof(cwd_temp))) 
     {
-        strcat(cwd_temp, "/../edison-lib/");
+        strcat(cwd_temp, "/../../edison-lib/");
         g_cwd = strdup(cwd_temp); 
     } 
     else 
@@ -472,7 +486,7 @@ CommServiceHandle *createService(ServiceDescription *description)
     // get current working directory
     if (getcwd(cwd_temp, sizeof(cwd_temp)))
     {
-        strcat(cwd_temp, "/../edison-lib/");
+        strcat(cwd_temp, "/../../edison-lib/");
         g_cwd = strdup(cwd_temp);
     }
     else

@@ -1,3 +1,17 @@
+/*
+ * Sample program to demonstrate MQTT Async subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
+
 #include <stdio.h>
 #include <cJSON.h>
 #include <stdbool.h>
@@ -11,20 +25,15 @@ void message_callback(char *message, Context context){
 }
 
 
-void callback(void *handle, int32_t error_code, ServiceDescription *desc)
+void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
-    printf("message error=%d error_string=%s\nservice status=%d service name=%s\n",
-	    error_code,
-	    getLastError(),
-	    desc ? desc->status : -1,
-	    desc ? desc->service_name : "");
+    if(serviceHandle != NULL){
+        CommClientHandle *commHandle = (CommClientHandle *) serviceHandle;
 
-	    CommClientHandle *commHandle;
-	    commHandle = createClient(query);
-
-            commHandle->init("localhost", desc->port, "open", NULL);
-            commHandle->setReceivedMessageHandler(message_callback);
-            commHandle->subscribe("/foo");
+    //    commHandle->init("localhost", query->port, "open", NULL);
+        commHandle->subscribe("/foo");
+        commHandle->receive(message_callback);
+    }
 }
 
 
@@ -38,10 +47,10 @@ int main(void) {
     query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceMQTT.json");
 
     if (query)
-	    handle = discoverServices(query, callback);
+	    discoverServices(query, callback);
 
 
-    while(1);
+//    while(1);
 //	publish();
 
 //	subscribe("/foo", NULL);
