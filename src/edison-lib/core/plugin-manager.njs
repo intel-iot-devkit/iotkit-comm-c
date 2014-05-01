@@ -41,7 +41,7 @@ function getPluginInterfaceFilePath(pluginPrototype, pluginName) {
   var foundPath = "";
   var found = config.pluginInterfaceDirPaths.some(function (pluginInterfaceDirPath) {
     var currPath = path.join(pluginInterfaceDirPath, pluginPrototype.interface + ".json");
-    if (fs.statSync(currPath)) {
+    if (fs.existsSync(currPath)) {
       foundPath = currPath;
       return true;
     }
@@ -60,7 +60,7 @@ function getPluginDirectoryPath(pluginName) {
   var foundPath = "";
   var found = config.pluginDirPaths.some(function (pluginDirPath) {
     var currPath = path.join(pluginDirPath, pluginName);
-    if (fs.statSync(currPath)) {
+    if (fs.existsSync(currPath)) {
       foundPath = currPath;
       return true;
     }
