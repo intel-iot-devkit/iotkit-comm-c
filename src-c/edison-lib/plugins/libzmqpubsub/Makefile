@@ -15,9 +15,9 @@ clean:
 
 setup: *.c *.h
 	@if ! test -d output; then mkdir output; fi
-	cc -c -fPIC zmqpubsub-client.c -o ./output/zmqpubsubclient.o
+	cc -c -fPIC zmqpubsub-client.c -o ./output/zmqpubsubclient.o -I../../libedison/
 	cc -shared -o ./output/libzmqpubsub-client.so ./output/zmqpubsubclient.o -lzmq
 	cp ./output/libzmqpubsub-client.so ../
-	cc -c -fPIC zmqpubsub-service.c -o ./output/zmqpubsubservice.o
+	cc -c -fPIC zmqpubsub-service.c -o ./output/zmqpubsubservice.o -I../../libedison/
 	cc -shared -o ./output/libzmqpubsub-service.so ./output/zmqpubsubservice.o -lzmq
 	cp ./output/libzmqpubsub-service.so ../
