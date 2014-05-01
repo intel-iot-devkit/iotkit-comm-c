@@ -38,22 +38,39 @@ function validateFunctions(pluginPrototype, pluginFile, interfaceSpec) {
 }
 
 function getPluginInterfaceFilePath(pluginPrototype, pluginName) {
-  var currentPath = path.join(
-    config.pluginInterfaceDir,
-    pluginPrototype.interface + ".json");
+  var foundPath = "";
+  var found = config.pluginInterfaceDirPaths.some(function (pluginInterfaceDirPath) {
+    var currPath = path.join(pluginInterfaceDirPath, pluginPrototype.interface + ".json");
+    if (fs.statSync(currPath)) {
+      foundPath = currPath;
+      return true;
+    }
+  });
 
-  if (!fs.existsSync(currentPath))
-  { // no interface file exists for this plugin
-    throw ("Missing interface specification file for plugin '" + pluginName +
-      "'. Plugin expects an interface file named '" + pluginPrototype.interface + ".json'.");
+  if (!found) {
+    throw new Error("Could not find plugin interface file '" + pluginPrototype.interface + ".json" +
+      "' required by plugin '" + pluginName + "' in any of the configured plugin interface directories.");
   }
 
-  return currentPath;
+  return foundPath;
 }
 
 function getPluginDirectoryPath(pluginName) {
   "use strict";
-  return path.join(config.pluginDir, pluginName);
+  var foundPath = "";
+  var found = config.pluginDirPaths.some(function (pluginDirPath) {
+    var currPath = path.join(pluginDirPath, pluginName);
+    if (fs.statSync(currPath)) {
+      foundPath = currPath;
+      return true;
+    }
+  });
+
+  if (!found) {
+    throw new Error("Could not find plugin '" + pluginName + "' in any of the configured plugin directories.");
+  }
+
+  return foundPath;
 }
 
 // format: { "type": ["plugin1", "plugin2"]}
@@ -71,9 +88,10 @@ exports.loadPlugin = function(pluginName)
 
 	for (var i = 0; i < suffixKeys.length; i++) {
     var suffix = config.communicationPlugins.fileSuffixes[suffixKeys[i]];
-    var pluginFile = pluginName + '-' + suffix + '.js';
-		var plugin = require(path.join(pluginDirectoryPath, pluginFile));
-		
+    var pluginFileName = pluginName + '-' + suffix + '.js';
+		var plugin = require(path.join(pluginDirectoryPath, pluginFileName));
+		var pluginPrototype = null;
+
 		if (typeof plugin === "function" && plugin.prototype)
 		{ // if pluginPrototype is defined as a class with module.exports = <constructor name>
 				pluginPrototype = plugin.prototype;
@@ -83,19 +101,18 @@ exports.loadPlugin = function(pluginName)
     }
 
     // todo: the path at which the super interface is available needs to be a constant and not dependent on anything else.
-		var superInterfaceFilePath = path.join(config.pluginInterfaceDir, config.superInterfaceName + ".json");
-		var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
+		var superInterfaceSpec = JSON.parse(fs.readFileSync(config.superInterfaceFilePath));
 
 		// check if interface contains properties and functions that all interfaces are required to have
 		// need to do this here since pluginPrototype.interface is needed below
-		validateProperties(pluginPrototype, pluginFile, superInterfaceSpec);
-		validateFunctions(pluginPrototype, pluginFile, superInterfaceSpec);
+		validateProperties(pluginPrototype, pluginFileName, superInterfaceSpec);
+		validateFunctions(pluginPrototype, pluginFileName, superInterfaceSpec);
 
 		var pluginInterfaceFilePath = getPluginInterfaceFilePath(pluginPrototype, pluginName);
 		var pluginInterfaceSpec = JSON.parse(fs.readFileSync(pluginInterfaceFilePath));
 
-    validateProperties(pluginPrototype, pluginFile, pluginInterfaceSpec);
-    validateFunctions(pluginPrototype, pluginFile, pluginInterfaceSpec);
+    validateProperties(pluginPrototype, pluginFileName, pluginInterfaceSpec);
+    validateFunctions(pluginPrototype, pluginFileName, pluginInterfaceSpec);
 
     if (!exports.loadedPlugins[pluginName]) {
       exports.loadedPlugins[pluginName] = {};

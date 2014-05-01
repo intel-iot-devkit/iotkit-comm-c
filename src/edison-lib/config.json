@@ -1,7 +1,7 @@
 {
-  "pluginInterfaceDir": "plugin-interfaces",
-  "pluginDir": "plugins",
-  "superInterfaceName": "interface-for-interfaces",
+  "pluginInterfaceDirPaths": [],
+  "pluginDirPaths": [],
+  "superInterfaceFilePath": "",
   "communicationPlugins": {
     "fileSuffixes": {
       "clientFileSuffix": "client",
