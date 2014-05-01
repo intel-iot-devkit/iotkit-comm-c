@@ -19,5 +19,10 @@ edisonLib.discoverServices(query, function (serviceSpec) {
       console.log(message.toString());
     });
 
+    setInterval(function () {
+      "use strict";
+      client.comm.send("my message", {topic: "mytopic"});
+    }, 1000);
+
   });
 });

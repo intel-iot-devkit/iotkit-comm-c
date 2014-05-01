@@ -1,44 +1,18 @@
 'use strict';
 
-/* 
- * initialize the edison library based on its configuration file.
- */
-var PluginLoader = require("./core/plugin-loader.njs");
-var edisonConfig = require("./config.js");
-var ServiceSpecValidator = require("./core/ServiceSpecValidator.js");
-var ServiceQuery = require("./core/ServiceQuery.js");
+var ConfigManager = require("./core/config-manager.js");
+ConfigManager.init(__dirname, "config.json");
+
 var Service = require("./core/Service.js");
 var Client = require("./core/Client.js");
 var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
 
-var pluginLoader = new PluginLoader();
-exports.plugins = pluginLoader.loadedPlugins;
-
-exports.config = edisonConfig;
-
-exports.ServiceSpecValidator = ServiceSpecValidator;
-
-exports.ServiceQuery = ServiceQuery;
+exports.ServiceSpecValidator = require("./core/ServiceSpecValidator.js");
+exports.ServiceQuery = require("./core/ServiceQuery.js");
 
 exports.sayhello = function ()
 {
 	return "Hello Edison user!";
-};
-
-exports.getClientPlugin = function (name) {
-	if (!exports.plugins[name]) {
-    pluginLoader.loadPlugin(name);
-	}
-
-	return exports.plugins[name][edisonConfig.communicationPlugins.fileSuffixes.clientFileSuffix];
-};
-
-exports.getServicePlugin = function (name) {
-  if (!exports.plugins[name]) {
-    pluginLoader.loadPlugin(name);
-  }
-
-  return exports.plugins[name][edisonConfig.communicationPlugins.fileSuffixes.serverFileSuffix];
 };
 
 exports.createService = function (serviceSpec, serviceCreatedCallback) {
@@ -47,13 +21,13 @@ exports.createService = function (serviceSpec, serviceCreatedCallback) {
     EdisonMDNS.advertiseService(service.spec);
   }
   serviceCreatedCallback(service);
-}
+};
 
 exports.createClient = function (serviceQuery, serviceFilter, clientCreatedCallback) {
   EdisonMDNS.discoverServices(serviceQuery, serviceFilter, function(serviceSpec) {
     clientCreatedCallback(new Client(serviceSpec));
   });
-}
+};
 
 exports.discoverServices = function (serviceQuery, serviceFoundCallback) {
   EdisonMDNS.discoverServices(serviceQuery, null, serviceFoundCallback);

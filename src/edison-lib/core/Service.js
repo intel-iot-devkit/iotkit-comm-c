@@ -1,5 +1,4 @@
-var main = require("../main.njs");
-
+var PluginManager = require("./plugin-manager.njs");
 
 Service.prototype.comm = null;
 Service.prototype.spec = null;
@@ -11,7 +10,7 @@ function Service(serviceSpec) {
 
   var commplugin;
   try {
-    commplugin =  main.getServicePlugin(this.spec.type.name);
+    commplugin =  PluginManager.getServicePlugin(this.spec.type.name);
   } catch (err) {
     console.log("ERROR: An appropriate communication plugin could not be found for service '" + this.spec.name +
       "'. Service needs communication plugin '" + this.spec.type.name + "'.");

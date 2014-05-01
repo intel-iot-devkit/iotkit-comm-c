@@ -1,6 +1,7 @@
-var edisonConfig = require("./../config.js");
 var path = require('path');
 var fs = require('fs');
+
+var config = require('./config-manager.js').config;
 
 // if pluginFilePath is not supplied, it is assumed that property plugin.name exists
 function validateProperties(pluginPrototype, pluginFile, interfaceSpec) {
@@ -37,8 +38,8 @@ function validateFunctions(pluginPrototype, pluginFile, interfaceSpec) {
 }
 
 function getPluginInterfaceFilePath(pluginPrototype, pluginName) {
-  var currentPath = path.join(edisonConfig.libRoot,
-    edisonConfig.pluginInterfaceDir,
+  var currentPath = path.join(
+    config.pluginInterfaceDir,
     pluginPrototype.interface + ".json");
 
   if (!fs.existsSync(currentPath))
@@ -50,21 +51,28 @@ function getPluginInterfaceFilePath(pluginPrototype, pluginName) {
   return currentPath;
 }
 
+function getPluginDirectoryPath(pluginName) {
+  "use strict";
+  return path.join(config.pluginDir, pluginName);
+}
+
 // format: { "type": ["plugin1", "plugin2"]}
-InterfaceValidator.prototype.loadedPlugins = {};
+exports.loadedPlugins = {};
+
+exports.config = require('./config-manager.js').config;
 
 // methods
 
 //Verifies that a plugin confirms to the interface type it claims to be.
-InterfaceValidator.prototype.loadPlugin = function(pluginName, callback)
+exports.loadPlugin = function(pluginName)
 {
-  var pluginDirectory = path.join(edisonConfig.libRoot, edisonConfig.pluginDir, pluginName);
-  var suffixKeys = Object.keys(edisonConfig.communicationPlugins.fileSuffixes);
+  var pluginDirectoryPath = getPluginDirectoryPath(pluginName);
+  var suffixKeys = Object.keys(config.communicationPlugins.fileSuffixes);
 
 	for (var i = 0; i < suffixKeys.length; i++) {
-    var suffix = edisonConfig.communicationPlugins.fileSuffixes[suffixKeys[i]];
+    var suffix = config.communicationPlugins.fileSuffixes[suffixKeys[i]];
     var pluginFile = pluginName + '-' + suffix + '.js';
-		var plugin = require(path.join(pluginDirectory, pluginFile));
+		var plugin = require(path.join(pluginDirectoryPath, pluginFile));
 		
 		if (typeof plugin === "function" && plugin.prototype)
 		{ // if pluginPrototype is defined as a class with module.exports = <constructor name>
@@ -75,7 +83,7 @@ InterfaceValidator.prototype.loadPlugin = function(pluginName, callback)
     }
 
     // todo: the path at which the super interface is available needs to be a constant and not dependent on anything else.
-		var superInterfaceFilePath = path.join(edisonConfig.libRoot, edisonConfig.pluginInterfaceDir, edisonConfig.superInterfaceName + ".json");
+		var superInterfaceFilePath = path.join(config.pluginInterfaceDir, config.superInterfaceName + ".json");
 		var superInterfaceSpec = JSON.parse(fs.readFileSync(superInterfaceFilePath));
 
 		// check if interface contains properties and functions that all interfaces are required to have
@@ -89,23 +97,32 @@ InterfaceValidator.prototype.loadPlugin = function(pluginName, callback)
     validateProperties(pluginPrototype, pluginFile, pluginInterfaceSpec);
     validateFunctions(pluginPrototype, pluginFile, pluginInterfaceSpec);
 
-    if (!this.loadedPlugins[pluginName]) {
-      this.loadedPlugins[pluginName] = {};
+    if (!exports.loadedPlugins[pluginName]) {
+      exports.loadedPlugins[pluginName] = {};
     }
 
-    if (this.loadedPlugins[pluginName][suffix]) {
+    if (exports.loadedPlugins[pluginName][suffix]) {
       console.log("INFO: Plugin file '" + pluginName + '-' + suffix + ".js' already loaded. Skipping...");
       continue;
     }
 
-    this.loadedPlugins[pluginName][suffix] = plugin;
+    exports.loadedPlugins[pluginName][suffix] = plugin;
 	}
-
 };
 
-function InterfaceValidator() {
-	
-}
+exports.getClientPlugin = function (name) {
+  if (!exports.loadedPlugins[name]) {
+    this.loadPlugin(name);
+  }
 
-// needed to include like a class
-module.exports = InterfaceValidator;
+  return exports.loadedPlugins[name][config.communicationPlugins.fileSuffixes.clientFileSuffix];
+};
+
+exports.getServicePlugin = function (name) {
+  if (!exports.loadedPlugins[name]) {
+    this.loadPlugin(name);
+  }
+
+  return exports.loadedPlugins[name][config.communicationPlugins.fileSuffixes.serverFileSuffix];
+};
+
