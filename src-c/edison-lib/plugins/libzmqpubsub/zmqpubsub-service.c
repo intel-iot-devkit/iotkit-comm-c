@@ -1,8 +1,15 @@
 /*
- * zmqpubsub-server.c
+ * ZMQ PUB/SUB plugin to enable publish feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
  *
- *  Created on: 2014-04-18
- *      Author: skothurx
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  */
 
 #include <stdio.h>
@@ -22,17 +29,18 @@ struct Holder {
 
 struct Holder zmqContainer;
 
-int init(char *host, int port, char *type, void *sslargs) {
+int init(void *serviceDesc) {
 	#if DEBUG
 		printf("In createClient\n");
 	#endif
+	ServiceDescription *serviceDescription = (ServiceDescription *)serviceDesc;
 	zmqContainer.context = zmq_ctx_new();
 	#if DEBUG
 		printf("context initialised\n");
 	#endif
     zmqContainer.publisher = zmq_socket(zmqContainer.context,ZMQ_PUB);
     char addr[128];
-    sprintf(addr, "tcp://%s:%d\n", host, port);
+    sprintf(addr, "tcp://%s:%d\n", serviceDescription->address, serviceDescription->port);
     #if DEBUG
         printf("going to bind %s\n",addr);
     #endif

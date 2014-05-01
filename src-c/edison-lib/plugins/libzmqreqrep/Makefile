@@ -15,10 +15,10 @@ clean:
 
 setup: *.c *.h
 	@if ! test -d output; then mkdir output; fi
-	cc -c -fPIC zmqreqrep-client.c -o ./output/zmqreqrepclient.o
+	cc -c -fPIC zmqreqrep-client.c -o ./output/zmqreqrepclient.o -I../../libedison/
 	cc -shared -o ./output/libzmqreqrep-client.so ./output/zmqreqrepclient.o -lzmq
 	cp ./output/libzmqreqrep-client.so ../
-	cc -c -fPIC zmqreqrep-service.c -o ./output/zmqreqrepservice.o
+	cc -c -fPIC zmqreqrep-service.c -o ./output/zmqreqrepservice.o -I../../libedison/
 	cc -shared -o ./output/libzmqreqrep-service.so ./output/zmqreqrepservice.o -lzmq
 	cp ./output/libzmqreqrep-service.so ../
 

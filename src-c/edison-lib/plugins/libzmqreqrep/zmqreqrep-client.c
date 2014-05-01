@@ -1,8 +1,15 @@
 /*
- * zmqreqrep-client.c
+ * ZMQ REQ/REP plugin to enable request feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
  *
- *  Created on: 2014-04-21
- *      Author: skothurx
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  */
 
 #include <zmq.h>
@@ -22,16 +29,17 @@ struct Holder {
 
 struct Holder zmqContainer;
 
-int init(char *host, int port, char *type, void *sslargs) {
-	zmqContainer.context = zmq_ctx_new();
+int init(void *servQuery) {
 	#if DEBUG
 		printf("context initialised\n");
 	#endif
-	int rc = -1;
+	ServiceQuery *serviceQuery = (ServiceQuery *)servQuery;
+	zmqContainer.context = zmq_ctx_new();
+    int rc = -1;
     // This is client side
     zmqContainer.requester = zmq_socket(zmqContainer.context,ZMQ_REQ);
     char addr[128];
-    sprintf(addr, "tcp://%s:%d", host, port);
+    sprintf(addr, "tcp://%s:%d",serviceQuery->address, serviceQuery->port);
     #if DEBUG
         printf("going to connect %s\n",addr);
     #endif

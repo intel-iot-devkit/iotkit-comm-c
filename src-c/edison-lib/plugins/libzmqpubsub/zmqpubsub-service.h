@@ -1,13 +1,20 @@
 /*
- * zmqpubsub-server.h
+ * ZMQ PUB/SUB plugin to enable publish feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
  *
- *  Created on: 2014-04-18
- *      Author: skothurx
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
  */
 
-#include "../inc/common.h"
+#include "edisonapi.h"
 
-int init(char *host,int port,char *type,void *sslargs);
+int init(void *serviceDesc);
 int sendTo(void *,char *,Context context);	// int sendTo(client, message, context) // for example, incase of mqtt... int sendTo(<<mqtt client>>, message, context);
 int publish(char *,Context context); // int publish(message,context)
 int manageClient(void *,Context context); // int manageClient(client,context) // for example, incase of mqtt... int manageClient(<<mqtt client>>, context);

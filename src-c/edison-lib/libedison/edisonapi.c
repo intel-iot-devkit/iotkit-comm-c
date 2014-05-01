@@ -335,7 +335,7 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
 	{
 
         dlerror();	/* Clear any existing error */
-	    commHandle->init = (int (*)(char *host, int port, char *type, void *sslargs)) dlsym(handle, g_funcSignatures[0]);
+	    commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
@@ -405,7 +405,7 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
 	{
 
         dlerror();	/* Clear any existing error */
-	    commHandle->init = (int (*)(char *host, int port, char *type, void *sslargs)) dlsym(handle, g_funcSignatures[0]);
+	    commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
 	    if (!checkDLError()) return NULL;
 
 	    dlerror();	/* Clear any existing error */
@@ -471,9 +471,8 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     strcat(cwd_temp, "-client.so");
     commHandle = loadClientCommPlugin(cwd_temp);
     if (!commHandle) cleanUpClient(commHandle);
-    void *sslArgs;
-    char *type;
     commHandle->init(queryDesc);
+
     return commHandle;
 }
 
@@ -515,8 +514,6 @@ CommServiceHandle *createService(ServiceDescription *description)
     commHandle = loadServiceCommPlugin(cwd_temp);
     if (!commHandle) cleanUpService(commHandle);
     fprintf(stderr,"host address: %s\n",description->address);
-    void *sslArgs;
-    char *type;
     commHandle->init(description);
 
     return commHandle;
