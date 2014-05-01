@@ -54,14 +54,18 @@ typedef struct _ServiceDescription {
     struct {
 	char *name;
 	char *protocol; // the protocol
-	int numSubTypes;
-	char **subTypes;
     } type;
     char *address;
     int port;
-    char *comm_params;
+    struct {
+        char *ssl;
+    } comm_params;
     int numProperties;
     Property *properties;
+    struct {
+        char *locally;
+        char *cloud;
+    } advertise;
 } ServiceDescription, ServiceQuery;
 
 // Create client which returns a CommClientHandle

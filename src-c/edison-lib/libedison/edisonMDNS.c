@@ -106,10 +106,11 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
         description->service_name = NULL;
         description->type.name = NULL;
         description->type.protocol = NULL;
-        description->type.subTypes = NULL;
         description->address = NULL;
-        description->comm_params = NULL;
+        description->comm_params.ssl = NULL;
         description->properties = NULL;
+        description->advertise.locally = NULL;
+        description->advertise.cloud = NULL;
 
 	    // initially set status to UNKNOWN
 	    description->status = UNKNOWN;
@@ -140,31 +141,6 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 	    #if DEBUG
 	    printf("protocol %s\n", description->type.protocol);
 	    #endif
-
-/*
-// TODO: NOT HANDLING SUBTYPES
-            jitem = cJSON_GetObjectItem(child, "subtypes");
-	    if (!isJsonArray(jitem)) handleParseError();
-
-	    description->type.numSubTypes = 0;
-	    child = jitem->child;
-	    while (child) description->type.numSubTypes++, child=child->next;
-	    if (description->type.numSubTypes)
-	    {
-		description->type.subTypes = (char **)malloc(
-					description->type.numSubTypes*sizeof(char*));
-		i=0;
-		child = jitem->child;
-		while (child) {
-		    description->type.subTypes[i] = strdup(child->valuestring);
-		    #if DEBUG
-		    printf("subType %s\n", description->type.subTypes[i]);
-		    #endif
-		    i++;
-		    child=child->next;
-		}
-	    }
-*/
 
         jitem = cJSON_GetObjectItem(json, "address");
 	    if (!isJsonString(jitem)) handleParseError();
@@ -205,6 +181,30 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 		    child=child->next;
 		}
 	    }
+
+	    child = cJSON_GetObjectItem(json, "comm_params"); // this is an optional parameter; so, ignore if absent
+        if (isJsonObject(child)){
+            jitem = cJSON_GetObjectItem(child, "ssl"); // this is an optional parameter; so, ignore if absent
+            if (isJsonString(jitem)){
+                description->comm_params.ssl = strdup(jitem->valuestring);
+            }
+        }
+
+
+        child = cJSON_GetObjectItem(json, "advertise"); // this is an optional parameter; so, ignore if absent
+        if (isJsonObject(child)){
+            jitem = cJSON_GetObjectItem(child, "locally"); // this is an optional parameter; so, ignore if absent
+            if (isJsonString(jitem)){
+                description->advertise.locally = strdup(jitem->valuestring);
+            }
+
+            jitem = cJSON_GetObjectItem(child, "cloud"); // this is an optional parameter; so, ignore if absent
+            if (isJsonString(jitem)){
+                description->advertise.cloud = strdup(jitem->valuestring);
+            }
+        }
+
+
 
 endParseSrvFile:
             cJSON_Delete(json);
