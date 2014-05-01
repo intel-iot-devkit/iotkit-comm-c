@@ -3,52 +3,62 @@
 /* 
  * initialize the edison library based on its configuration file.
  */
-var path = require('path');
-
+var PluginLoader = require("./core/plugin-loader.njs");
 var edisonConfig = require("./config.js");
-var InterfaceValidator = require("./interface-validator.njs");
+var ServiceSpecValidator = require("./core/ServiceSpecValidator.js");
+var ServiceQuery = require("./core/ServiceQuery.js");
+var Service = require("./core/Service.js");
+var Client = require("./core/Client.js");
+var EdisonMDNS = require("./core/EdisonMDNS.js"); // singleton use as is
 
-// init edison plugin validator
-var validator = new InterfaceValidator();
+var pluginLoader = new PluginLoader();
+exports.plugins = pluginLoader.loadedPlugins;
 
-// load component plugins
-var component; // current component being processed
-
-function setPluginAccessVariable(plugin) {
-	if (!exports[component]) {
-		exports[component] = {};
-	}
-	exports[component][plugin.prototype.type] = plugin;
-}
-
-//load specified plugins for all supported components
-for (component in edisonConfig.components) {
-	if (!edisonConfig.components[component] || !edisonConfig.components[component].plugins) {
-		console.log("INFO: No plugins configured for component '" + component + "'. Skipping...");
-		continue;
-	}
-	validator.validate(component, edisonConfig.components[component].plugins, setPluginAccessVariable);
-}
-
-//exports (no real need for this)
 exports.config = edisonConfig;
 
-// test function
+exports.ServiceSpecValidator = ServiceSpecValidator;
+
+exports.ServiceQuery = ServiceQuery;
+
 exports.sayhello = function ()
 {
 	return "Hello Edison user!";
 };
 
-exports.getPlugin = function (component, type) {
-	if (!exports[component]) {
-		throw("Component '" + component + "' was not included in the edison library. " +
-				"It is either not defined in the configuration file or has no plugins associated with it.");
+exports.getClientPlugin = function (name) {
+	if (!exports.plugins[name]) {
+    pluginLoader.loadPlugin(name);
 	}
-	
-	if (!exports[component][type]) {
-		throw("No plugin of type '" + type + "' exists for component '" + component + "'. " +
-				"Please ensure that a plugin for this type is included in the configuration of this component.");
-	}
-	
-	return exports[component][type];
+
+	return exports.plugins[name][edisonConfig.communicationPlugins.fileSuffixes.clientFileSuffix];
+};
+
+exports.getServicePlugin = function (name) {
+  if (!exports.plugins[name]) {
+    pluginLoader.loadPlugin(name);
+  }
+
+  return exports.plugins[name][edisonConfig.communicationPlugins.fileSuffixes.serverFileSuffix];
+};
+
+exports.createService = function (serviceSpec, serviceCreatedCallback) {
+  var service = new Service(serviceSpec);
+  if (!service.spec.advertise || service.spec.advertise.locally) {
+    EdisonMDNS.advertiseService(service.spec);
+  }
+  serviceCreatedCallback(service);
+}
+
+exports.createClient = function (serviceQuery, serviceFilter, clientCreatedCallback) {
+  EdisonMDNS.discoverServices(serviceQuery, serviceFilter, function(serviceSpec) {
+    clientCreatedCallback(new Client(serviceSpec));
+  });
+}
+
+exports.discoverServices = function (serviceQuery, serviceFoundCallback) {
+  EdisonMDNS.discoverServices(serviceQuery, null, serviceFoundCallback);
+};
+
+exports.createClientForGivenService = function (serviceSpec, clientCreatedCallback) {
+  clientCreatedCallback(new Client(serviceSpec));
 };
