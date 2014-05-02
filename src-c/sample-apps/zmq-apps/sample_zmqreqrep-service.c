@@ -12,6 +12,11 @@
  * more details.
  */
 
+/** @file sample_zmqreqrep-service.c
+
+    Sample service program of ZMQ REQ/REP
+
+ */
 
 #include <stdio.h>
 #include <cJSON.h>
@@ -20,12 +25,14 @@
 #include "edisonapi.h"
 #include "util.h"
 
-ServiceDescription *serviceDescription = NULL;
-
+/** a callback function to be invoked when it receives any messages from the client
+ */
 void message_callback(void *client, char *message, Context context) {
     fprintf(stderr,"Message received in Server: %s\n", message);
 }
 
+/** a callback function to be invoked when the service is advertised
+ */
 void callback(void *handle, int32_t error_code,CommServiceHandle *serviceHandle)
 {
         if (serviceHandle != NULL) {
@@ -42,12 +49,13 @@ void callback(void *handle, int32_t error_code,CommServiceHandle *serviceHandle)
 }
 
 
-
+/** The starting point of sample program
+ */
 int main(void) {
 
     void *handle;
 	puts("Sample program to test the Edison ZMQ req/rep plugin !!");
-    serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
 
     if (serviceDescription)
 	    handle = advertiseService(serviceDescription, callback);

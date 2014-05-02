@@ -12,6 +12,13 @@
  * more details.
  */
 
+/** @file zmqpubsub-service.c
+
+    This class helps in publishing the message to the clients which are connected and subscribed
+    on a topic.
+
+ */
+
 #include <stdio.h>
 #include <zmq.h>
 #include <zmq_utils.h>
@@ -19,16 +26,26 @@
 #include "../inc/zhelpers.h"
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
+/** Structure which holds the context and publisher handler
+ */
 struct Holder {
-	void *context;
-	void *publisher;
+	void *context; /**< context handler */
+	void *publisher; /**< publisher handler */
 };
 
+/** An Global Holder Object.
+ */
 struct Holder zmqContainer;
 
+/** Creates the context object and publisher socket. With the help of the ServiceDescription parameter the
+publisher socket binds to the address and port to initiate communication.
+
+* @param serviceDesc an void pointer
+* @return The result code
+*/
 int init(void *serviceDesc) {
 	#if DEBUG
 		printf("In createClient\n");
@@ -57,6 +74,13 @@ int sendTo(void *client, char *message, Context context) {
 	#endif
 }
 
+/** Publishing a message. The service will be publishing a message to the clients.
+
+* @param message a string message
+* @param context a context object
+* @return The result code
+
+*/
 int publish(char *message,Context context) {
 	#if DEBUG
 		printf("publish started\n");
@@ -83,6 +107,11 @@ int receive(void (*handler)(void *,char *,Context)) {
     #endif
 }
 
+/** Cleanup function. This method helps in closing the subscriber socket and destroying the
+context object.
+* @return The result code
+
+*/
 int done() {
 	if (zmqContainer.publisher != NULL) {
 		zmq_close(zmqContainer.publisher);

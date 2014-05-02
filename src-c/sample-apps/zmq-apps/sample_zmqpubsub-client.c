@@ -12,6 +12,11 @@
  * more details.
  */
 
+/** @file sample_zmqpubsub-client.c
+
+    Sample client program of ZMQ PUB/SUB
+
+ */
 
 #include <stdio.h>
 #include <cJSON.h>
@@ -20,12 +25,14 @@
 #include "edisonapi.h"
 #include "util.h"
 
-ServiceQuery *query = NULL;
+/** a callback function to be invoked when it receives any messages for the subscribed topic
+ */
 void message_callback(char *message, Context context){
     fprintf(stderr,"Message received in Client: %s\n", message);
 }
 
-
+/** a callback function to be invoked when the service is discovered
+ */
 void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
 {
     if (commHandle != NULL) {
@@ -41,13 +48,14 @@ void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
 }
 
 
-
+/** The starting point of sample program
+ */
 int main(void) {
 
     void *handle;
 
 	puts("Sample program to test the Edison ZMQ pub/sub plugin !!");
-    query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQPUBSUB.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
     if (query) {
         fprintf(stderr,"query host address %s\n",query->address);
