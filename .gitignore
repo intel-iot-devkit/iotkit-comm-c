@@ -5,6 +5,7 @@ output/
 *.iml
 .DS_Store
 
+*.so
 a.out
 *.swp
 *.o
