@@ -1,7 +1,7 @@
 .gradle
 /local.properties
 /.idea
-
+output/
 *.iml
 .DS_Store
 
