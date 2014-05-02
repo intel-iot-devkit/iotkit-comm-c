@@ -12,6 +12,13 @@
  * more details.
  */
 
+/**
+ * @file sample_async_cloud-service.c
+ * @brief Sample to demonstrate MQTT publisher through Edison API
+ *
+ * Provides features to connect to an MQTT Broker and publish a topic
+ */
+
 #include <stdio.h>
 #include <cJSON.h>
 #include <stdbool.h>
@@ -26,6 +33,14 @@
 ServiceDescription *srvDesc = NULL;
 int msgnumber = 0;
 
+/**
+ * @name callback to handle the communication
+ * @brief handles the communication with an MQTT broker once the connection is established
+ * @param[in] error_code specifies the error code is any
+ * @param[in] serviceHandle is the client object initialized with the required APIs
+ *
+ * handles the communication such as publishing data to an MQTT broker once the connection is established
+ */
 void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
     Context context;
@@ -40,13 +55,20 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
 
         while(1){
             sprintf(msg, "This is a test message %d", msgnumber++);
+            printf("Publishing msg:%s\n", msg);
+
             commHandle->sendTo(NULL, msg, context);
             sleep(2);
         }
     }
 }
 
-
+/**
+ * @name Starts the application
+ * @brief Starts the application to demonstrate publish for a topic
+ *
+ * Establishes the connection with an MQTT broker
+ */
 int main(void) {
 
     void *handle;

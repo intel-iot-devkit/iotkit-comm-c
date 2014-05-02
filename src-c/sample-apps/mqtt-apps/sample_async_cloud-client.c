@@ -12,6 +12,13 @@
  * more details.
  */
 
+/**
+ * @file sample_async_cloud-client.c
+ * @brief Sample to demonstrate MQTT subscriber through Edison API
+ *
+ * Provides features to connect to an MQTT Broker and subscribe to a topic
+ */
+
 #include <stdio.h>
 #include <cJSON.h>
 #include <stdbool.h>
@@ -20,24 +27,50 @@
 #include "util.h"
 
 ServiceQuery *query = NULL;
+
+/**
+ * @name message handler
+ * @brief callback invoked upon receiving a message from an MQTT broker
+ * @param[in] message received from an MQTT broker
+ * @param[in] context with the topic information
+ *
+ * callback invoked upon receiving a message from an MQTT broker
+ */
 void message_callback(char *message, Context context){
-    printf("Message received:%s", message);
+    printf("Message received:%s\n", message);
 }
 
+// TODO: MDNS does frequent add/rem operations due to which multiple clients get created
+int serviceStarted = 0; // temporary fix to avoid recreation of client due to frequent MDNS add/rem operations
 
+/**
+ * @name callback to handle the communication
+ * @brief handles the communication with an MQTT broker once the connection is established
+ * @param[in] error_code specifies the error code is any
+ * @param[in] serviceHandle is the client object initialized with the required APIs
+ *
+ * handles the communication with an MQTT broker once the connection is established
+ */
 void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
-    if(serviceHandle != NULL){
+    if(serviceHandle != NULL && !serviceStarted){
         CommClientHandle *commHandle = (CommClientHandle *) serviceHandle;
 
     //    commHandle->init("localhost", query->port, "open", NULL);
-        commHandle->subscribe("/foo");
         commHandle->receive(message_callback);
+        commHandle->subscribe("/foo");
+
+        serviceStarted = 1;
     }
 }
 
 
-
+/**
+ * @name Starts the application
+ * @brief Starts the application to demonstrate subscription to an topic
+ *
+ * Establishes the connection with an MQTT broker
+ */
 int main(void) {
 
     void *handle;
@@ -49,13 +82,6 @@ int main(void) {
     if (query)
 	    discoverServices(query, callback);
 
-
-//    while(1);
-//	publish();
-
-//	subscribe("/foo", NULL);
-
-	//return EXIT_SUCCESS;
 	return 0;
 }
 

@@ -12,6 +12,12 @@
  * more details.
  */
 
+/**
+ * @file edison-mqtt_async-service.c
+ * @brief Implementation of MQTT Async Service plugin for Edison API
+ *
+ * Provides features to connect to an MQTT Broker and subscribe to a topic
+ */
 #include "edison-mqtt_async-service.h"
 #include "dlfcn.h"
 
@@ -174,6 +180,13 @@ void handleSignal(int sig)
  	}
  }
 
+/**
+ * @name publish to a topic
+ * @brief publish to a topic with an MQTT broker
+ * @param[in] message which needs to be subscribed to
+ * @param[in] context to specify the topic
+ * @return boolean which specifies whether successfully published or not
+ */
  int sendTo(void *client1, char *message, Context context) {
 
  	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
@@ -226,12 +239,23 @@ void handleSignal(int sig)
  	return rc;
  }
 
+/**
+ * @name publish to a topic
+ * @brief publish to a topic with an MQTT broker
+ * @param[in] message which needs to be subscribed to
+ * @param[in] context to specify the topic
+ */
  int publish(char *message, Context context){
     #if DEBUG
          printf("Invoked MQTT: publish()\n");
      #endif
  }
 
+/**
+ * @name cleanup the MQTT client
+ * @brief used to close the connections and for cleanup activities
+ * @return boolean which specifies whether the connection is disconnected or not
+ */
  int done() {
 
  	MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
@@ -254,7 +278,12 @@ void handleSignal(int sig)
  	return rc;
  }
 
-
+// TODO: validate whether we need to return any value or not
+/**
+ * @name subscribe to a topic
+ * @brief registers the client's callback to be invoked on receiving a message from MQTT broker
+ * @param handler to be registered as a callback
+ */
 int receive(void (*handler) (void *client, char *topic, Context context)){
 
     #if DEBUG
@@ -278,6 +307,14 @@ void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
 }
 #endif
 
+/**
+ * @name initialise the MQTT service
+ * @brief initialises the plugin.
+ * @param[in] serviceDesc is the service description being registered for
+ * @return boolean which specifies whether the connection is successfully established or not
+ *
+ * Establishes the connection with an MQTT broker
+ */
 int init(void *serviceDesc)
  {
 
@@ -345,14 +382,8 @@ int init(void *serviceDesc)
  	 		    printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
  	 		#endif
 
- 	 		usleep(10000L);
+ 	 		sleep(1);
  	 	}
 
      return rc;
  }
-/*
-int createService(){
-    #if DEBUG
-        printf("Invoked MQTT: createService()\n");
-    #endif
-}*/
