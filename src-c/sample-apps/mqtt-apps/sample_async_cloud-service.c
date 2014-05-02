@@ -77,13 +77,14 @@ int main(void) {
 
     srvDesc = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceMQTT.json");
 
-    printf("111status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);
+    #if DEBUG
+        printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);
+    #endif
 
 
     if(srvDesc)
 	    advertiseService(srvDesc, callback);
 
-	//return EXIT_SUCCESS;
 	return 0;
 }
 
