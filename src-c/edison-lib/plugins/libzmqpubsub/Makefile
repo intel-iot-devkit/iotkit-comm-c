@@ -32,3 +32,4 @@ setup: *.c *.h
 	cc -c -fPIC zmqpubsub-service.c -o ./output/zmqpubsubservice.o -I../../libedison/
 	cc -shared -o ./output/libzmqpubsub-service.so ./output/zmqpubsubservice.o -lzmq
 	cp ./output/libzmqpubsub-service.so ../
+
