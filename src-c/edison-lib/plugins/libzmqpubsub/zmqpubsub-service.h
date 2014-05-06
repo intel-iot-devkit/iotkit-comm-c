@@ -12,11 +12,24 @@
  * more details.
  */
 
+/** @file zmqpubsub-service.h
+
+    Header file. This class lists all those functions in zmq pub/sub service.
+
+ */
+
 #include "edisonapi.h"
 
+/** @defgroup zmqpubsubservice
+*
+*  @{
+*/
+
 int init(void *serviceDesc);
-int sendTo(void *,char *,Context context);	// int sendTo(client, message, context) // for example, incase of mqtt... int sendTo(<<mqtt client>>, message, context);
-int publish(char *,Context context); // int publish(message,context)
-int manageClient(void *,Context context); // int manageClient(client,context) // for example, incase of mqtt... int manageClient(<<mqtt client>>, context);
-int receive(void (*)(void *,char *,Context context)); // int receive(handler) // handler takes 3 parameters
+int sendTo(void *client, char *message, Context context);
+int publish(char *message,Context context);
+int manageClient(void *client,Context context);
+int receive(void (*handler)(void *client,char *message,Context));
 int done();
+
+/** @} */ // end of zmqpubsubservice

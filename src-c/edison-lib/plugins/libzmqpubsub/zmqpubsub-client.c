@@ -16,7 +16,6 @@
 
     This class provides functions to subscribe on a topic,to receive messages on a topic,to
  unsubscribe from a topic.
-
  */
 
 #include <stdio.h>
@@ -29,16 +28,21 @@
 #define DEBUG 0
 #endif
 
+/** @defgroup zmqpubsubclient
+*   This is ZMQ PUB/SUB Client
+*  @{
+*/
+
 /** Structure which holds the context and subscriber handler
  */
-struct Holder {
+struct ZMQPubSubClient {
 	void *context; /**< context handler */
 	void *subscriber; /**< subscriber handler */
 };
 
-/** An Global Holder Object.
+/** An Global ZMQPubSubClient Object.
  */
-struct Holder zmqContainer;
+struct ZMQPubSubClient zmqContainer;
 
 /** Creates the context object and subscriber socket. With the help of the ServiceQuery parameter the
 subscriber socket establishes connection to the address and port to initiate communication.
@@ -68,9 +72,16 @@ int init(void *servQuery) {
     return rc;
 }
 
+/** Empty function. This function is unimplemented since in ZMQ pub/sub client we use only
+subscribe and receive
+* @param message a string message
+* @param context a context object
+* @return The result code
+
+*/
 int send(char *message,Context context) {
     #if DEBUG
-    	printf("\nsending message: %s\n",message);
+    	printf("\ninside sending message: %s\n",message);
     #endif
 }
 
@@ -96,7 +107,7 @@ received message.
 * @return The result code
 
 */
-int receive(void (*handler)(char *, Context)) {
+int receive(void (*handler)(char *message, Context context)) {
     #if DEBUG
         printf("In receive Waiting for the message\n");
     #endif
@@ -157,3 +168,5 @@ int done() {
 		printf("\nclosed\n");
 	#endif
 }
+
+/** @} */ // end of zmqpubsubclient

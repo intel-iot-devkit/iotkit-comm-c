@@ -29,16 +29,23 @@
 #define DEBUG 0
 #endif
 
+/** @defgroup zmqreqrepservice
+*  This is ZMQ REQ REP Service
+
+*  @{
+
+*/
+
 /** Structure which holds the context and responder handler
  */
-struct Holder {
+struct ZMQReqRepService {
 	void *context; /**< context handler */
 	void *responder; /**< responder handler */
 };
 
-/** An Global Holder Object.
+/** An Global ZMQReqRepService Object.
  */
-struct Holder zmqContainer;
+struct ZMQReqRepService zmqContainer;
 
 /** Creates the context object and responder socket. With the help of the ServiceDescription parameter the
 responder socket binds connection to the address and port to initiate communication.
@@ -83,12 +90,24 @@ int sendTo(void *client,char *message,Context context) {
 	return rc;
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param message a string message
+* @param context a context object
+* @return The result code
+*/
 int publish(char *message,Context context) {
     #if DEBUG
         printf("In publish\n");
     #endif
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param client a client object
+* @param context a context object
+* @return The result code
+*/
 int manageClient(void *client,Context context) {
     #if DEBUG
         printf ("In manageClient\n"");
@@ -151,3 +170,4 @@ int done() {
 	#endif
 	return rc;
 }
+/** @} */ // end of zmqreqrepservice

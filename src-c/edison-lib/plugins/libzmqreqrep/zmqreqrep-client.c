@@ -28,16 +28,23 @@
 #define DEBUG 0
 #endif
 
+/** @defgroup zmqreqrepclient
+*  This is ZMQ REQ REP Client
+
+*  @{
+
+*/
+
 /** Structure which holds the context and requester handler
  */
-struct Holder {
+struct ZMQReqRepClient {
 	void *context; /**< context handler */
 	void *requester; /**< requester handler */
 };
 
-/** An Global Holder Object.
+/** An Global ZMQReqRepClient Object.
  */
-struct Holder zmqContainer;
+struct ZMQReqRepClient zmqContainer;
 
 /** Creates the context object and requester socket. With the help of the ServiceQuery parameter the
 requester socket establishes connection to the address and port to initiate communication.
@@ -81,12 +88,22 @@ int send(char *message,Context context) {
 	return rc;
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param topic a string message
+* @return The result code
+*/
 int subscribe(char *topic) {
 	#if DEBUG
 		printf("In subscribe\n");
 	#endif
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param topic a string message
+* @return The result code
+*/
 int unsubscribe(char *topic) {
 	#if DEBUG
 		printf("In unsubscribe\n");
@@ -122,7 +139,6 @@ int receive(void (*handler)(char *message, Context)) {
 /** Cleanup function. This method helps in closing the requester socket and destroying the
 context object.
 * @return The result code
-
 */
 int done() {
     int rc = -1;
@@ -145,3 +161,4 @@ int done() {
 	#endif
 	return rc;
 }
+/** @} */ // end of zmqreqrepclient

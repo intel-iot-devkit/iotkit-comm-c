@@ -17,7 +17,7 @@
     This class helps in publishing the message to the clients which are connected and subscribed
     on a topic.
 
- */
+*/
 
 #include <stdio.h>
 #include <zmq.h>
@@ -29,18 +29,24 @@
 #define DEBUG 0
 #endif
 
+/** @defgroup zmqpubsubservice
+*   This is ZMQ PUB/SUB Service
+*  @{
+*/
+
 /** Structure which holds the context and publisher handler
  */
-struct Holder {
+struct ZMQPubSubService {
 	void *context; /**< context handler */
 	void *publisher; /**< publisher handler */
 };
 
-/** An Global Holder Object.
+/** An Global ZMQPubSubService Object.
  */
-struct Holder zmqContainer;
+struct ZMQPubSubService zmqContainer;
 
-/** Creates the context object and publisher socket. With the help of the ServiceDescription parameter the
+
+/**  Creates the context object and publisher socket. With the help of the ServiceDescription parameter the
 publisher socket binds to the address and port to initiate communication.
 
 * @param serviceDesc an void pointer
@@ -68,13 +74,22 @@ int init(void *serviceDesc) {
     return rc;
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ pub/sub service we use only
+publish
+
+* @param client a client object
+* @param message a string message
+* @param context a context object
+* @return The result code
+
+*/
 int sendTo(void *client, char *message, Context context) {
 	#if DEBUG
 		printf("In sendTo\n");
 	#endif
 }
 
-/** Publishing a message. The service will be publishing a message to the clients.
+/**  Publishing a message. The service will be publishing a message to the clients.
 
 * @param message a string message
 * @param context a context object
@@ -95,19 +110,32 @@ int publish(char *message,Context context) {
 	return rc;
 }
 
+/** Empty function. This function is unimplemented since in ZMQ pub/sub service we use only
+publish
+* @param client a client object
+* @param context a context object
+* @return The result code
+
+*/
 int manageClient(void *client,Context context) {
     #if DEBUG
         printf("In manageClient\n");
     #endif
 }
 
-int receive(void (*handler)(void *,char *,Context)) {
+/** Empty function. This function is unimplemented since in ZMQ pub/sub service we use only
+publish
+* @param handler a callback handler which takes multiple params
+* @return The result code
+
+*/
+int receive(void (*handler)(void *client,char *message,Context)) {
     #if DEBUG
         printf("In receive\n");
     #endif
 }
 
-/** Cleanup function. This method helps in closing the subscriber socket and destroying the
+/** Cleanup function. This method helps in closing the publisher socket and destroying the
 context object.
 * @return The result code
 
@@ -131,3 +159,5 @@ int done() {
 		printf("\nclosed\n");
 	#endif
 }
+
+/** @} */ // end of zmqpubsubservice

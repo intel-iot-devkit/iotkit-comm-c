@@ -12,11 +12,23 @@
  * more details.
  */
 
+/** @file zmqreqrep-client.h
+
+    Header file. This file lists all those functions which helps in implementing ZMQ REQ/REP
+
+ */
+
 #include "edisonapi.h"
 
+/** @defgroup zmqreqrepclient
+*
+*  @{
+
+*/
 int init(void *serviceQuery);
-int send(char *, Context);	// int send(message, context)
-int subscribe(char *);	// int subscribe(topic)
-int unsubscribe(char *);	// int unsubscribe(topic)
-int receive(void (*)(char *message, Context)); // int receive(handler) // handler takes 2 parameters
+int send(char *message, Context);
+int subscribe(char *topic);
+int unsubscribe(char *topic);
+int receive(void (*handler)(char *message, Context context));
 int done();
+/** @} */ // end of zmqreqrepclient
