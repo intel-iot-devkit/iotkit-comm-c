@@ -16,7 +16,8 @@
 SUBDIRS = edison-lib/plugins/libmqttpubsub \
             edison-lib/plugins/libzmqpubsub \
             edison-lib/plugins/libzmqreqrep \
-            sample-apps/mqtt-apps
+            sample-apps/mqtt-apps \
+            sample-apps/zmq-apps
 
 all: setup
 
