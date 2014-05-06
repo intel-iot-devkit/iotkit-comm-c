@@ -1,11 +1,11 @@
-var edisonLib = require("../edison-lib");
+var edisonLib = require("../../edison-lib");
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 var validator = new edisonLib.ServiceSpecValidator();
-validator.readServiceSpecFromFile("./serviceSpecs/IOTKitBroker.json");
+validator.readServiceSpecFromFile("../serviceSpecs/IOTKitAgent.json");
 var brokerSpec = validator.getValidatedSpec();
 
 var count;

@@ -1,0 +1,17 @@
+{
+  "name" : "/server/metric/pradeeptmp",
+  "type" : {
+    "name": "mqtt",
+    "protocol" : "tcp"
+  },
+  "address" : "broker.enableiot.com",
+  "port" : 8884,
+  "comm_params": {
+    "ssl": true,
+    "args": {
+      "keyPath": "/Users/adua/Development/edison-api/src/sample-apps-non-production/certs/client.key",
+      "certPath": "/Users/adua/Development/edison-api/src/sample-apps-non-production/certs/client.crt",
+      "keepalive": 59000
+    }
+  }
+}

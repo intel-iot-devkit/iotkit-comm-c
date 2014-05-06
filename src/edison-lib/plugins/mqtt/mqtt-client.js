@@ -10,7 +10,7 @@ function EdisonMQTTClient(serviceSpec) {
 
   if (serviceSpec.comm_params && serviceSpec.comm_params['ssl']) {
     this.client = mqtt.createSecureClient(serviceSpec.port, serviceSpec.address,
-      serviceSpec.comm_params);
+      serviceSpec.comm_params.args);
   } else {
     this.client = mqtt.createClient(serviceSpec.port, serviceSpec.address);
   }
