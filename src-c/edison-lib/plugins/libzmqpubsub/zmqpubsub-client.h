@@ -12,11 +12,22 @@
  * more details.
  */
 
+/** @file zmqpubsub-client.h
+
+    Header file. This class lists all those functions in zmq pub/sub client.
+*/
+
 #include "edisonapi.h"
 
-int init(void *serviceQuery);
-int send(char *, Context);	// int send(message, context)
-int subscribe(char *);	// int subscribe(topic)
-int unsubscribe(char *);	// int unsubscribe(topic)
-int receive(void (*)(char *, Context)); // int receive(handler) // handler takes 2 parameters
+/** @defgroup zmqpubsubclient
+*
+*  @{
+*/
+int init(void *servQuery);
+int send(char *message,Context context);
+int subscribe(char *topic);
+int unsubscribe(char *topic);
+int receive(void (*handler)(char *message, Context context));
 int done();
+
+/** @} */ // end of zmqpubsubclient

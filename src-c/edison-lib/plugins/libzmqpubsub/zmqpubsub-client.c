@@ -12,6 +12,12 @@
  * more details.
  */
 
+/** @file zmqpubsub-client.c
+
+    This class provides functions to subscribe on a topic,to receive messages on a topic,to
+ unsubscribe from a topic.
+ */
+
 #include <stdio.h>
 #include <zmq.h>
 #include <zmq_utils.h>
@@ -22,13 +28,28 @@
 #define DEBUG 0
 #endif
 
-struct Holder {
-	void *context;
-	void *subscriber;
+/** @defgroup zmqpubsubclient
+*   This is ZMQ PUB/SUB Client
+*  @{
+*/
+
+/** Structure which holds the context and subscriber handler
+ */
+struct ZMQPubSubClient {
+	void *context; /**< context handler */
+	void *subscriber; /**< subscriber handler */
 };
 
-struct Holder zmqContainer;
+/** An Global ZMQPubSubClient Object.
+ */
+struct ZMQPubSubClient zmqContainer;
 
+/** Creates the context object and subscriber socket. With the help of the ServiceQuery parameter the
+subscriber socket establishes connection to the address and port to initiate communication.
+
+* @param servQuery an void pointer
+* @return The result code
+*/
 int init(void *servQuery) {
 	#if DEBUG
 		printf("In createClient\n");
@@ -51,12 +72,26 @@ int init(void *servQuery) {
     return rc;
 }
 
+/** Empty function. This function is unimplemented since in ZMQ pub/sub client we use only
+subscribe and receive
+* @param message a string message
+* @param context a context object
+* @return The result code
+
+*/
 int send(char *message,Context context) {
     #if DEBUG
-    	printf("\nsending message: %s\n",message);
+    	printf("\ninside sending message: %s\n",message);
     #endif
 }
 
+/** Subscribing for a topic. The client can subscribe for a topic in which he is interested
+in to receive the messages.
+
+* @param topic which client is interested in
+* @return The result code
+
+*/
 int subscribe(char *topic) {
 	#if DEBUG
 		printf("\nsubscribing for topic: %s\n",topic);
@@ -66,7 +101,13 @@ int subscribe(char *topic) {
     return rc;
 }
 
-int receive(void (*handler)(char *, Context)) {
+/** Receive the message. The client will be passing an handler which is used as a callback mechanism to pass the
+received message.
+* @param handler a callback handler
+* @return The result code
+
+*/
+int receive(void (*handler)(char *message, Context context)) {
     #if DEBUG
         printf("In receive Waiting for the message\n");
     #endif
@@ -89,6 +130,12 @@ int receive(void (*handler)(char *, Context)) {
 
 }
 
+/** Unsubscribing a topic. The client can unsubscribe a topic in which he is no more
+interested to receive the messages.
+* @param topic which client wants to unsubscribe from
+* @return The result code
+
+*/
 int unsubscribe(char *topic) {
 	#if DEBUG
 		printf("\nunsubscribing the topic: %s\n",topic);
@@ -97,6 +144,11 @@ int unsubscribe(char *topic) {
     return rc;
 }
 
+/** Cleanup function. This method helps in closing the subscriber socket and destroying the
+context object.
+* @return The result code
+
+*/
 int done() {
 	if (zmqContainer.subscriber != NULL) {
 		zmq_close(zmqContainer.subscriber);
@@ -116,3 +168,5 @@ int done() {
 		printf("\nclosed\n");
 	#endif
 }
+
+/** @} */ // end of zmqpubsubclient

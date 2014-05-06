@@ -1,9 +1,11 @@
 .gradle
 /local.properties
 /.idea
-
+output/
 *.iml
 .DS_Store
 
+*.so
 a.out
 *.swp
+*.o

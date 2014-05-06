@@ -12,6 +12,13 @@
  * more details.
  */
 
+/** @file zmqreqrep-service.c
+
+    This class provides functions to send and receive message to/from a Client to which it
+    is connected to.
+
+ */
+
 #include <zmq.h>
 #include <zmq_utils.h>
 #include <stdio.h>
@@ -22,13 +29,30 @@
 #define DEBUG 0
 #endif
 
-struct Holder {
-	void *context;
-	void *responder;
+/** @defgroup zmqreqrepservice
+*  This is ZMQ REQ REP Service
+
+*  @{
+
+*/
+
+/** Structure which holds the context and responder handler
+ */
+struct ZMQReqRepService {
+	void *context; /**< context handler */
+	void *responder; /**< responder handler */
 };
 
-struct Holder zmqContainer;
+/** An Global ZMQReqRepService Object.
+ */
+struct ZMQReqRepService zmqContainer;
 
+/** Creates the context object and responder socket. With the help of the ServiceDescription parameter the
+responder socket binds connection to the address and port to initiate communication.
+
+* @param serviceDesc an void pointer
+* @return The result code
+*/
 int init(void *serviceDesc) {
 	#if DEBUG
 		printf("context initialised\n");
@@ -50,6 +74,14 @@ int init(void *serviceDesc) {
 	return rc;
 }
 
+/** Sending a message. The service can send a message to the client to which it is connected to.
+
+* @param client a client object
+* @param message a string message
+* @param context a context message
+* @return The result code
+
+*/
 int sendTo(void *client,char *message,Context context) {
 	#if DEBUG
     	printf ("Sending message from Service %s...\n", message);
@@ -58,12 +90,38 @@ int sendTo(void *client,char *message,Context context) {
 	return rc;
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param message a string message
+* @param context a context object
+* @return The result code
+*/
+int publish(char *message,Context context) {
+    #if DEBUG
+        printf("In publish\n");
+    #endif
+}
+
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param client a client object
+* @param context a context object
+* @return The result code
+*/
 int manageClient(void *client,Context context) {
     #if DEBUG
         printf ("In manageClient\n"");
     #endif
 }
 
+
+/** Receive the message. The service will be receiving an handler which is used as a callback mechanism to pass the
+received message.
+
+* @param handler a callback handler which takes a client,message,context object as params
+* @return The result code
+
+*/
 int receive(void (*handler)(void *client,char *message,Context context)) {
     #if DEBUG
         printf("In receive\n");
@@ -85,12 +143,12 @@ int receive(void (*handler)(void *client,char *message,Context context)) {
     free(message);
 }
 
-int publish(char *message,Context context) {
-    #if DEBUG
-        printf("In publish\n");
-    #endif
-}
 
+/** Cleanup function. This method helps in closing the responder socket and destroying the
+context object.
+* @return The result code
+
+*/
 int done() {
     int rc = -1;
 	if (zmqContainer.responder != NULL) {
@@ -112,3 +170,4 @@ int done() {
 	#endif
 	return rc;
 }
+/** @} */ // end of zmqreqrepservice

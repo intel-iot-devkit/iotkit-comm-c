@@ -12,6 +12,12 @@
  * more details.
  */
 
+/** @file sample_zmqpubsub-service.c
+
+    Sample service program of ZMQ PUB/SUB
+
+ */
+
 #include <stdio.h>
 #include <cJSON.h>
 #include <stdbool.h>
@@ -19,8 +25,8 @@
 #include "edisonapi.h"
 #include "util.h"
 
-ServiceDescription *serviceDescription = NULL;
-
+/** a callback function to be invoked when the service is advertised
+ */
 void callback(void *handle, int32_t error_code, CommServiceHandle *serviceHandle)
 {
 	    if (serviceHandle != NULL) {
@@ -36,13 +42,14 @@ void callback(void *handle, int32_t error_code, CommServiceHandle *serviceHandle
 }
 
 
-
+/** The starting point of sample program
+ */
 int main(void) {
 
     void *handle;
 
 	puts("Sample program to test the Edison ZMQ pub/sub plugin !!");
-    serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQPUBSUB.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
     if (serviceDescription)
 	    handle = advertiseService(serviceDescription, callback);

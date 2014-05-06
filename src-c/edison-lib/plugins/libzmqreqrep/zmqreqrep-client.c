@@ -12,6 +12,12 @@
  * more details.
  */
 
+/** @file zmqreqrep-client.c
+
+    This class provides functions to send and receive message to/from a Service to which it
+    is connected to.
+
+ */
 #include <zmq.h>
 #include <zmq_utils.h>
 #include <stdio.h>
@@ -22,13 +28,30 @@
 #define DEBUG 0
 #endif
 
-struct Holder {
-	void *context;
-	void *requester;
+/** @defgroup zmqreqrepclient
+*  This is ZMQ REQ REP Client
+
+*  @{
+
+*/
+
+/** Structure which holds the context and requester handler
+ */
+struct ZMQReqRepClient {
+	void *context; /**< context handler */
+	void *requester; /**< requester handler */
 };
 
-struct Holder zmqContainer;
+/** An Global ZMQReqRepClient Object.
+ */
+struct ZMQReqRepClient zmqContainer;
 
+/** Creates the context object and requester socket. With the help of the ServiceQuery parameter the
+requester socket establishes connection to the address and port to initiate communication.
+
+* @param servQuery an void pointer
+* @return The result code
+*/
 int init(void *servQuery) {
 	#if DEBUG
 		printf("context initialised\n");
@@ -50,6 +73,13 @@ int init(void *servQuery) {
 	return rc;
 }
 
+/** Sending a message. The client can send a message to the service to which it is connected to.
+
+* @param message a string message
+* @param context a context message
+* @return The result code
+
+*/
 int send(char *message,Context context) {
 	#if DEBUG
     	printf ("Sending message from Client %s...\n",message);
@@ -58,18 +88,34 @@ int send(char *message,Context context) {
 	return rc;
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param topic a string message
+* @return The result code
+*/
 int subscribe(char *topic) {
 	#if DEBUG
 		printf("In subscribe\n");
 	#endif
 }
 
+/**  Empty function. This function is unimplemented since in ZMQ req/rep this is not applicable
+
+* @param topic a string message
+* @return The result code
+*/
 int unsubscribe(char *topic) {
 	#if DEBUG
 		printf("In unsubscribe\n");
 	#endif
 }
 
+/** Receive the message. The client will be passing an handler which is used as a callback mechanism to pass the
+received message.
+* @param handler a callback handler which takes message and context object as params
+* @return The result code
+
+*/
 int receive(void (*handler)(char *message, Context)) {
 	#if DEBUG
 		printf("In receive\n");
@@ -90,6 +136,10 @@ int receive(void (*handler)(char *message, Context)) {
     free(contents);
 }
 
+/** Cleanup function. This method helps in closing the requester socket and destroying the
+context object.
+* @return The result code
+*/
 int done() {
     int rc = -1;
 	if (zmqContainer.requester != NULL) {
@@ -111,3 +161,4 @@ int done() {
 	#endif
 	return rc;
 }
+/** @} */ // end of zmqreqrepclient

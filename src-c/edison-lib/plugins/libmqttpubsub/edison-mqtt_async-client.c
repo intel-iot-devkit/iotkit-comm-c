@@ -12,10 +12,15 @@
  * more details.
  */
 
+/**
+ * @file edison-mqtt_async-client.c
+ * @brief Implementation of MQTT Async Client plugin for Edison API
+ *
+ * Provides features to connect to an MQTT Broker and subscribe to a topic
+ */
+
 #include "edison-mqtt_async-client.h"
 #include "dlfcn.h"
-
-#include <signal.h>
 
 void *handle=NULL;
 char *err=NULL;
@@ -56,7 +61,8 @@ void handleSignal(int sig)
  	#endif
 
     payloadmsg = (char *)malloc(message->payloadlen+1);
-    strncpy(payloadmsg, message->payload, message->payloadlen+1);
+    strncpy(payloadmsg, message->payload, message->payloadlen);
+    payloadmsg[message->payloadlen] = '\0';
 
 
     context.name = "topic";
@@ -77,6 +83,7 @@ void handleSignal(int sig)
     #if DEBUG
  	    printf("Subscribe succeeded\n");
  	#endif
+ 	subscribed = 1;
  }
 
  void onSubscribeFailure(void* context, MQTTAsync_failureData* response)
@@ -174,7 +181,13 @@ void handleSignal(int sig)
  	}
  }
 
-
+/**
+ * @name publish a message
+ * @brief used to send message to a broker
+ * @param[in] message to be published
+ * @param[in] context w.r.t topic the message required to be published
+ * @return boolean specifies whether the message is successfully published or not
+ */
  int send(char *message, Context context) {
 
  	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
@@ -227,6 +240,12 @@ void handleSignal(int sig)
  	return rc;
  }
 
+/**
+ * @name subscribes to a topic
+ * @brief subscribes to a topic with an MQTT broker
+ * @param[in] topic which needs to be subscribed to
+ * @return boolean which specifies whether successfully subscribed or not
+ */
  int subscribe(char *topic) {
  	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
 
@@ -241,23 +260,19 @@ void handleSignal(int sig)
  	 	exit(-1);
  	}
 
- 	while (!finished)
+ 	while (!subscribed)
  	{
- 	 	usleep(1000L);
-
- 	 	if (toStop == 1)
- 	 	{
- 	 		close();
-
- 	 		#if DEBUG
- 	 		    printf("I think it is disconnected\n");
- 	 		#endif
- 	 	}
+ 	 	sleep(1); // waiting for subscribe
  	}
 
  	return rc;
  }
 
+/**
+ * @name cleanup the MQTT client
+ * @brief used to close the connections and for cleanup activities
+ * @return boolean which specifies whether the connection is disconnected or not
+ */
  int done() {
 
  	MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
@@ -280,6 +295,12 @@ void handleSignal(int sig)
  	return rc;
  }
 
+// TODO: validate whether we need to return any value or not
+/**
+ * @name unsubscribe a topic
+ * @brief discontinues the subscription to a topic
+ * @param[in] topic which has been previously subscribed to
+ */
 int unsubscribe(char *topic){
 
     #if DEBUG
@@ -287,6 +308,12 @@ int unsubscribe(char *topic){
     #endif
 }
 
+// TODO: validate whether we need to return any value or not
+/**
+ * @name subscribe to a topic
+ * @brief registers the client's callback to be invoked on receiving a message from MQTT broker
+ * @param handler to be registered as a callback
+ */
 int receive(void (*handler) (char *topic, Context context)){
 
     #if DEBUG
@@ -297,12 +324,22 @@ int receive(void (*handler) (char *topic, Context context)){
 }
 
 #if DEBUG
-void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
-{
-        printf("%s\n", message);
-}
+    void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message)
+    {
+            printf("%s\n", message);
+    }
 #endif
 
+int clientInstanceNumber = 0;
+
+/**
+ * @name initialise the MQTT client
+ * @brief initialises the plugin.
+ * @param[in] serviceDesc is the service description being queried for
+ * @return boolean which specifies whether the connection is successfully established or not
+ *
+ * Establishes the connection with an MQTT broker
+ */
 int init(void *serviceDesc)
 {
     ServiceQuery *serviceQuery = (ServiceQuery *)serviceDesc;
@@ -324,8 +361,10 @@ int init(void *serviceDesc)
 
 	 	quietMode = 0;
 
+        char clientID[256];
+        sprintf(clientID, "%s%d", CLIENTID, clientInstanceNumber++);
 
-	 	MQTTAsync_create(&client, uri, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+	 	MQTTAsync_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
 #if DEBUG
 		MQTTAsync_setTraceCallback(handleTrace);
@@ -366,14 +405,8 @@ int init(void *serviceDesc)
 	 		    printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
 	 		#endif
 
-	 		usleep(10000L);
+	 		sleep(1);
 	 	}
 
     return rc;
 }
-/*
-int createService(){
-    #if DEBUG
-        printf("Invoked MQTT: createService()\n");
-    #endif
-}*/
