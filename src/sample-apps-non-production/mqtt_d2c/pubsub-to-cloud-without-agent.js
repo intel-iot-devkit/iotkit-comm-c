@@ -1,4 +1,4 @@
-var edisonLib = require("../../edison-lib");
+var edisonLib = require("edisonapi");
 
 var msgTemplate = {
   "msg_type": "metrics_msg",

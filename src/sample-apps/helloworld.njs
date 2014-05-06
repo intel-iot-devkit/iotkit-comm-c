@@ -1,5 +1,5 @@
 /**
  * New node file
  */
-var edison = require('../edison-lib');
+var edison = require('edisonapi');
 console.log(edison.sayhello());

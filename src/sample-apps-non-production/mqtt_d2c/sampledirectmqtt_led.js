@@ -1,6 +1,6 @@
 //'use strict';
 
-var edison = require('/home/root/edison-api/src/edison-lib');
+var edison = require('edison-lib');
 var path = require('path');
 var fs = require('fs');
 var PIA = require('.');

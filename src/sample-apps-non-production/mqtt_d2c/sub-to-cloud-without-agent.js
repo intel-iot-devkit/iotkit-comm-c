@@ -1,10 +1,14 @@
-var edisonLib = require("../../edison-lib");
+var path = require("path");
+
+var edisonLib = require("edisonapi");
 
 var validator = new edisonLib.ServiceSpecValidator();
 validator.readServiceSpecFromFile("../serviceSpecs/IOTKitCloudBrokerSubOnly.json");
-var brokerSpec = validator.getValidatedSpec();
 
-var count;
+validator.spec.comm_params.args.keyPath = path.resolve("../serviceSpecs/", validator.spec.comm_params.args.keyPath);
+validator.spec.comm_params.args.certPath = path.resolve("../serviceSpecs/", validator.spec.comm_params.args.certPath);
+
+var brokerSpec = validator.getValidatedSpec();
 
 edisonLib.createClientForGivenService(brokerSpec, function (client) {
 
