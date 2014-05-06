@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
   },
+  "engines": {
+    "node": ">=0.10.26"
+  },
   "repository": "",
   "dependencies": {
     "mdns2" : ">=2.1.3",

@@ -1,3 +1,5 @@
+var path = require("path");
+
 var edisonLib = require("edisonapi");
 
 var msgTemplate = {
@@ -29,6 +31,10 @@ function getRandomInt(min, max) {
 
 var validator = new edisonLib.ServiceSpecValidator();
 validator.readServiceSpecFromFile("../serviceSpecs/IOTKitCloudBroker.json");
+
+validator.spec.comm_params.args.keyPath = path.resolve("../serviceSpecs/", validator.spec.comm_params.args.keyPath);
+validator.spec.comm_params.args.certPath = path.resolve("../serviceSpecs/", validator.spec.comm_params.args.certPath);
+
 var brokerSpec = validator.getValidatedSpec();
 
 var count;
