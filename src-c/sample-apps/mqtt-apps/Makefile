@@ -19,5 +19,5 @@ clean:
 	@if test -f service.out ; then rm service.out ; fi
 
 setup:
-	cc -o service.out sample_async_cloud-service.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
-	cc -o client.out sample_async_cloud-client.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
+	cc -g -o service.out sample_async_cloud-service.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
+	cc -g -o client.out sample_async_cloud-client.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
