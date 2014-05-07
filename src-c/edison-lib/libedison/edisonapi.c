@@ -12,21 +12,10 @@
  * more details.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <memory.h>
-#include <stdbool.h>
-#include <dlfcn.h>
-#include <pwd.h>
-
-#include <cJSON.h>
-
-#include "util.h"
 #include "edisonapi.h"
 
 #ifndef DEBUG
-#define DEBUG 0
+    #define DEBUG 0
 #endif
 
 static inline bool checkDLError() {
@@ -37,20 +26,6 @@ static inline bool checkDLError() {
     }
     return true;
 }
-
-// configuration data
-typedef struct _ConfigFileData {
-    char *pluginInterfaceDir;
-    char *pluginDir;
-    char *clientFileSuffix;
-    char *serverFileSuffix;
-    char *plugin;
-} ConfigFileData;
-
-ConfigFileData g_configData;
-
-// function signatures
-char **g_funcSignatures;
 
 // helper define
 #define handleParseConfigError() \
@@ -416,13 +391,14 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
     char *ptr;
     void *handle;
     CommServiceHandle *commHandle = (CommServiceHandle *)malloc(sizeof(CommServiceHandle));
-    if (commHandle == NULL) 
+    if (commHandle == NULL)
     {
 	fprintf(stderr,"Can't alloc memory for commHandle\n");
 	return NULL;
     }
     else
     {
+    commHandle->handle = NULL;
 	// Check to see if filepath has the right extension as ".so"
 	if ((ptr = strrchr(plugin_path, '.')) != NULL) 
 	{

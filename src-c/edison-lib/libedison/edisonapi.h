@@ -12,13 +12,41 @@
  * more details.
  */
 
+#ifndef __EDISON_API_H__
+#define __EDISON_API_H__
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <memory.h>
+#include <stdbool.h>
+#include <dlfcn.h>
+#include <pwd.h>
+
+#include <cJSON.h>
+
+#include "util.h"
+
+
 #define FALSE 0
 #define TRUE 1
+
+
+// configuration data
+typedef struct _ConfigFileData {
+    char *pluginInterfaceDir;
+    char *pluginDir;
+    char *clientFileSuffix;
+    char *serverFileSuffix;
+    char *plugin;
+} ConfigFileData;
+
 
 typedef struct _Context {
     char *name;
     char *value;
 } Context;
+
 
 // handle to the client communication plugin
 typedef struct _CommClientHandle {
@@ -73,6 +101,13 @@ typedef struct _ServiceDescription {
     } advertise;
 } ServiceDescription, ServiceQuery;
 
+
+ConfigFileData g_configData;
+
+// function signatures
+char **g_funcSignatures;
+
+
 // Create client which returns a CommClientHandle
 CommClientHandle *createClient(ServiceQuery *);
 
@@ -82,3 +117,5 @@ CommServiceHandle *createService(ServiceDescription *);
 
 void cleanUpClient(CommClientHandle *);
 void cleanUpService(CommServiceHandle *);
+
+#endif

@@ -12,6 +12,9 @@
  * more details.
  */
 
+#ifndef __EDISON_UTIL_H__
+#define __EDISON_UTIL_H__
+
 #include <stdbool.h>
 #include <cJSON.h>
 
@@ -42,3 +45,5 @@ static inline bool isJsonArray(cJSON *item) {
 	return false;
     return true;
 }
+
+#endif
