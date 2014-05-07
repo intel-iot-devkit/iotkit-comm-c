@@ -1,17 +1,20 @@
 var edisonLib = require("edisonapi");
 
-var validator = new edisonLib.ServiceSpecValidator();
-validator.readServiceSpecFromFile("./serviceSpecs/temperatureServiceMQTTBROKER.json");
+var query = new edisonLib.ServiceQuery();
+query.initServiceQueryFromFile("./serviceQueries/temperatureServiceQueryMQTT.json");
 
-var serviceSpec = validator.getValidatedSpec();
+edisonLib.createClient(query, serviceFilter, function (client) {
 
-edisonLib.createClientForGivenService(serviceSpec, function (client) {
+    client.comm.subscribe("mytopic");
 
-  client.comm.subscribe(serviceSpec.name);
-
-  client.comm.setReceivedMessageHandler(function(message, context) {
-    "use strict";
-    console.log(message);
-  });
+    client.comm.setReceivedMessageHandler(function(message, context) {
+        "use strict";
+        console.log(message);
+    });
 
 });
+
+function serviceFilter (serviceRecord) {
+    "use strict";
+    return true;
+}
