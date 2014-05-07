@@ -53,12 +53,11 @@ void callback(void *handle, int32_t error_code,CommServiceHandle *serviceHandle)
  */
 int main(void) {
 
-    void *handle;
 	puts("Sample program to test the Edison ZMQ req/rep plugin !!");
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
 
     if (serviceDescription)
-	    handle = advertiseService(serviceDescription, callback);
+	    WaitToAdvertiseService(serviceDescription, callback);
 
 	return 0;
 }

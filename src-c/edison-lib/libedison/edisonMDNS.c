@@ -351,7 +351,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 }
 
 // Discover the service from MDNS. Filtered by the filterCB
-void discoverServicesFiltered(ServiceQuery *queryDesc, 
+void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
 	    bool (*filterCB)(ServiceDescription *), 
 	    void (*callback)(void *, int32_t, void *))
 {
@@ -396,15 +396,15 @@ void discoverServicesFiltered(ServiceQuery *queryDesc,
 }
 
 // Discover the service from MDNS
-void discoverServices(ServiceQuery *queryDesc, 
+void WaitToDiscoverServices(ServiceQuery *queryDesc,
 	void (*callback)(void *, int32_t, void *) )
 {
-    discoverServicesFiltered(queryDesc, NULL, callback);
+    WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
 }
 
 // Advertise the service. Return an opaque object which is passed along to
 // callback
-void advertiseService(ServiceDescription *description,
+void WaitToAdvertiseService(ServiceDescription *description,
 	void (*callback)(void *, int32_t, void *))
 {		
     DNSServiceRef client;
@@ -482,7 +482,7 @@ void testAdvertise()
 {
     ServiceDescription *description = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
     if (description)
-	advertiseService(description, callback);
+	WaitToAdvertiseService(description, callback);
 
     printf ("Done advertise\n");
 }
@@ -492,7 +492,7 @@ void testDiscover()
 {
     ServiceQuery *query = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
     if (query)
-	discoverServices(query, callback);
+	WaitToDiscoverServices(query, callback);
     printf("Done discover\n");
 }
 

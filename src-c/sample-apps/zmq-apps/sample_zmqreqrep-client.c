@@ -52,8 +52,6 @@ void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
  */
 int main(void) {
 
-    void *handle;
-
 	puts("Sample program to test the Edison ZMQ req/rep plugin !!");
     ServiceQuery *query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
 
@@ -61,7 +59,7 @@ int main(void) {
         fprintf(stderr,"query host address %s\n",query->address);
         fprintf(stderr,"query host port %d\n",query->port);
         fprintf(stderr,"query service name %s\n",query->service_name);
-	    handle = (void *) discoverServices(query, callback);
+	    WaitToDiscoverServices(query, callback);
 	}
 
 	return 0;

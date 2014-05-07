@@ -71,8 +71,6 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
  */
 int main(void) {
 
-    void *handle;
-
 	puts("Sample program to publish topic \'/foo\' !!");
 
     srvDesc = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceMQTT.json");
@@ -83,7 +81,7 @@ int main(void) {
 
 
     if(srvDesc)
-	    advertiseService(srvDesc, callback);
+	    WaitToAdvertiseService(srvDesc, callback);
 
 	return 0;
 }

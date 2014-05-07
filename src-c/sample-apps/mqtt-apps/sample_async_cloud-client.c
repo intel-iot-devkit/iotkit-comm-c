@@ -73,14 +73,12 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
  */
 int main(void) {
 
-    void *handle;
-
 	puts("Sample program to test the Edison MQTT pub/sub plugin !!");
 
     query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceMQTT.json");
 
     if (query)
-	    discoverServices(query, callback);
+	    WaitToDiscoverServices(query, callback);
 
 	return 0;
 }
