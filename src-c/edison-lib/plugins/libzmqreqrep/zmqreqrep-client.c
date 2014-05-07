@@ -28,6 +28,8 @@
 #define DEBUG 0
 #endif
 
+char *interface = "edison-client-interface"; // specifies the plugin interface json
+
 /** @defgroup zmqreqrepclient
 *  This is ZMQ REQ REP Client
 

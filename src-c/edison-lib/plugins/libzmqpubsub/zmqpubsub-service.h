@@ -20,6 +20,8 @@
 
 #include "edisonapi.h"
 
+char *interface = "edison-service-interface"; // specifies the plugin interface json
+
 /** @defgroup zmqpubsubservice
 *
 *  @{

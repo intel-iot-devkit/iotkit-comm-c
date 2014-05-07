@@ -40,6 +40,7 @@ volatile int toStop = 0;
  volatile int sent = 0;
  volatile int delivery = 0;
 
+char *interface = "edison-client-interface"; // specifies the plugin interface json
 
 int init(void *serviceDesc);
 int send(char *message, Context context);

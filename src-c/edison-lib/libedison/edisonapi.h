@@ -12,6 +12,9 @@
  * more details.
  */
 
+#define FALSE 0
+#define TRUE 1
+
 typedef struct _Context {
     char *name;
     char *value;
@@ -19,6 +22,7 @@ typedef struct _Context {
 
 // handle to the client communication plugin
 typedef struct _CommClientHandle {
+    char **interface; // filename for pluing-interface json file
     int (*init)(void *);
     int (*send)(char *, Context context);	// int send(topic, context)
     int (*subscribe)(char *);	// int subscribe(topic)
@@ -30,6 +34,7 @@ typedef struct _CommClientHandle {
 
 // handle to the service communication plugin
 typedef struct _CommServiceHandle {
+    char **interface; // filename for pluing-interface json file
     int (*init)(void *);
     int (*sendTo)(void *, char *, Context context);	// int send(client, message, context) // for example, incase of mqtt... int sendTo(<<mqtt client>>, message, context);
     int (*publish)(char *,Context context); // int publish(message,context)
