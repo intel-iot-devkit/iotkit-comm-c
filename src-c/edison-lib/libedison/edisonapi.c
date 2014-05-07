@@ -38,9 +38,6 @@ static inline bool checkDLError() {
     return true;
 }
 
-// current working dir
-char *g_cwd;
-
 // configuration data
 typedef struct _ConfigFileData {
     char *pluginInterfaceDir;
@@ -546,21 +543,21 @@ int loadClientCommInterfaces(CommClientHandle *commHandle){
 CommClientHandle *createClient(ServiceQuery *queryDesc)
 {
     CommClientHandle *commHandle;
+    char *edisonlibcdir;
 
     char cwd_temp[1024];
-    // get current working directory
-    if (getcwd(cwd_temp, sizeof(cwd_temp))) 
-    {
-        strcat(cwd_temp, "/../../edison-lib/");
-        g_cwd = strdup(cwd_temp); 
-    } 
-    else 
-    {
-        g_cwd = strdup("./");
+    edisonlibcdir = getenv("edisonlibcdir");
+    if(edisonlibcdir == NULL){
+        fprintf(stderr,"Environment variable \'edisonlibcdir\' not defined. Please set it to \'edison-lib\' folder \n");
+        exit(0);
     }
 
+    if(*(edisonlibcdir + (strlen(edisonlibcdir)-1)) != '/')
+        strcat(edisonlibcdir, "/");
+
+
     // Parse configuration file
-    strcpy(cwd_temp, g_cwd);
+    strcpy(cwd_temp, edisonlibcdir);
     strcat(cwd_temp, "libedison/config.json");
     if (!parseConfigFile(cwd_temp)) freeGlobals();
 
@@ -581,7 +578,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, g_cwd);
+            strcpy(cwd_temp, edisonlibcdir);
         }
 
         strcat(cwd_temp, folderPath);
@@ -613,7 +610,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin interface file
         if(*folderPath != '/') { // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, g_cwd);
+            strcpy(cwd_temp, edisonlibcdir);
             strcat(cwd_temp, "libedison/");
         }
 
@@ -630,7 +627,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
 
     /*if(strstr(g_configData.pluginInterfaceDir, ":") == NULL){
     // Parse plugin interface file
-    strcpy(cwd_temp, g_cwd);
+    strcpy(cwd_temp, edisonlibcdir);
     strcat(cwd_temp, "libedison/");
     strcat(cwd_temp, g_configData.pluginInterfaceDir);
     strcat(cwd_temp, "/edison-client-interface.json");
@@ -643,7 +640,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
 
     commHandle->init(queryDesc);
 
-    /*strcpy(cwd_temp, g_cwd);
+    /*strcpy(cwd_temp, edisonlibcdir);
     strcat(cwd_temp, g_configData.pluginDir);
     strcat(cwd_temp, "/lib");
     strcat(cwd_temp, queryDesc->type.name);
@@ -670,22 +667,21 @@ int fileExists(char *absPath)
 // initialize the system
 CommServiceHandle *createService(ServiceDescription *description)
 {
-    CommServiceHandle *commHandle;
+    CommServiceHandle *commHandle = NULL;
+    char *edisonlibcdir;
 
     char cwd_temp[1024];
-    // get current working directory
-    if (getcwd(cwd_temp, sizeof(cwd_temp)))
-    {
-        strcat(cwd_temp, "/../../edison-lib/");
-        g_cwd = strdup(cwd_temp);
-    }
-    else
-    {
-        g_cwd = strdup("./");
+    edisonlibcdir = getenv("edisonlibcdir");
+    if(edisonlibcdir == NULL){
+        fprintf(stderr,"Environment variable \'edisonlibcdir\' not defined. Please set it to \'edison-lib\' folder \n");
+        exit(0);
     }
 
+    if(*(edisonlibcdir + (strlen(edisonlibcdir)-1)) != '/')
+        strcat(edisonlibcdir, "/");
+
     // Parse configuration file
-    strcpy(cwd_temp, g_cwd);
+    strcpy(cwd_temp, edisonlibcdir);
     strcat(cwd_temp, "libedison/config.json");
     if (!parseConfigFile(cwd_temp)) freeGlobals();
 
@@ -707,7 +703,7 @@ CommServiceHandle *createService(ServiceDescription *description)
 
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, g_cwd);
+            strcpy(cwd_temp, edisonlibcdir);
         }
         strcat(cwd_temp, folderPath);
         strcat(cwd_temp, "/lib");
@@ -738,7 +734,7 @@ CommServiceHandle *createService(ServiceDescription *description)
 
         // Parse plugin interface file
         if(*folderPath != '/') { // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, g_cwd);
+            strcpy(cwd_temp, edisonlibcdir);
             strcat(cwd_temp, "libedison/");
         }
         strcat(cwd_temp, folderPath);
