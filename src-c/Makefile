@@ -17,8 +17,15 @@ SUBDIRS = edison-lib/plugins/libmqttpubsub \
             edison-lib/plugins/libzmqpubsub \
             edison-lib/plugins/libzmqreqrep \
             sample-apps/mqtt-apps
-     
-subdirs:
+
+all: setup
+
+clean:     
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) clean -C $$dir; \
+	done
+
+setup:     
 	@for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir; \
 	done
