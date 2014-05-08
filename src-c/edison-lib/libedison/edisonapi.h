@@ -90,7 +90,7 @@ typedef struct _ServiceDescription {
     } type;
     char *address;
     int port;
-    struct {
+    struct { // TODO: comm_params should hold key value pairs
         char *ssl;
     } comm_params;
     int numProperties;
