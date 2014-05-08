@@ -45,7 +45,7 @@ char *getLastError() { return lastError; }
 // discover context we passing around which contains function pointers to
 // callback and Filter
 typedef struct _DiscoverContext {
-    bool (*filterCB)(ServiceDescription *);
+    bool (*filterCB)(ServiceQuery *, char *, uint16_t);
     void (*callback)(void *, int32_t, void *);
     void *serviceSpec;
 } DiscoverContext;
@@ -329,6 +329,11 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
 
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceQuery *query = discContext->serviceSpec;
+
+    // there is a filterCB, so calls it. If it returns false then donothing
+    	if (discContext->filterCB && discContext->filterCB(query, fullname, PortAsNumber) == false)
+    	    return;
+
     // check whether user has configured any host address
     if (query->address == NULL)
         query->address = hosttarget;
@@ -348,27 +353,26 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 				void *context)
 {
     DiscoverContext *discContext = (DiscoverContext *)context;
-    ServiceDescription desc;
+    ServiceDescription *desc = (ServiceDescription *) discContext->serviceSpec;
     DNSServiceErrorType err;
-
+    
 #if DEBUG
     printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
 #endif
     if (errorCode == kDNSServiceErr_NoError)
     {
 	if (flags & kDNSServiceFlagsAdd)
-	    desc.status = ADDED;
+	    desc->status = ADDED;
 	else
-	    desc.status = REMOVED;
-	desc.service_name = (char *)name;
+	    desc->status = REMOVED;
 
 #if DEBUG
-    printf("desc status %d\n", desc.status);
+    printf("desc status %d\n", desc->status);
 #endif
 
-	// there is a filterCB, so calls it. If it returns false then donothing
-	if (discContext->filterCB && discContext->filterCB(&desc) == false)
-	    return;
+	/*// there is a filterCB, so calls it. If it returns false then donothing
+	if (discContext->filterCB && discContext->filterCB(desc, client) == false)
+	    return;*/
 	err = DNSServiceResolve(&client, 0, interfaceIndex, name, regtype, domain, discover_resolve_reply, context);
 	    if (!client || err != kDNSServiceErr_NoError)
         {
@@ -392,7 +396,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 
 // Discover the service from MDNS. Filtered by the filterCB
 void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
-	    bool (*filterCB)(ServiceDescription *), 
+	    bool (*filterCB)(ServiceQuery *, char *, uint16_t),
 	    void (*callback)(void *, int32_t, void *))
 {
     
@@ -435,11 +439,57 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
     }
 }
 
+bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNumber){
+
+    bool isNameMatched = false;
+    bool isPortMatched = false;
+    bool isPropertiesMatched = true; // TODO:
+
+    // what we received from discover_resolve_reply is full name; so construct full name to compare an exact match (excluding the domain name)
+    int testFullNameSize = strlen(srvQry->service_name) + strlen(srvQry->type.name) + strlen(srvQry->type.protocol) + 6; // adding 6 for ._ and NULL characters
+    char *testfullName = (char *)malloc(sizeof(char) * testFullNameSize);
+
+    strcpy(testfullName, srvQry->service_name);
+    strcat(testfullName, "._");
+    strcat(testfullName, srvQry->type.name);
+    strcat(testfullName, "._");
+    strcat(testfullName, srvQry->type.protocol);
+    strcat(testfullName, ".");
+
+    // Now that, we have constructed fullName from Service Query; check whether it matches with service name reported by discover_resolve_reply
+    if(fullname == strstr(fullname, testfullName)){ // check whether
+    #if DEBUG
+        printf("Yes %s:matches with:%s\n", fullname, testfullName);
+    #endif
+        isNameMatched = true;
+    }
+
+    if(PortAsNumber == srvQry->port){
+    #if DEBUG
+        printf("Yes port:%u:matched with:%u\n", PortAsNumber, srvQry->port);
+    #endif
+        isPortMatched = true;
+    }
+
+    if(isNameMatched && isPortMatched && isPropertiesMatched){
+    #if DEBUG
+        printf("Returning TRUE --- Match found for service:%s\n", fullname);
+    #endif
+        return true;
+    }
+
+
+#if DEBUG
+    printf("Returning FALSE --- No Match found for service:%s\n", fullname);
+#endif
+    return false;
+}
+
 // Discover the service from MDNS
 void WaitToDiscoverServices(ServiceQuery *queryDesc,
 	void (*callback)(void *, int32_t, void *) )
 {
-    WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
+    WaitToDiscoverServicesFiltered(queryDesc, serviceQueryFilter, callback);
 }
 
 static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
