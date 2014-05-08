@@ -94,7 +94,7 @@ typedef struct _ServiceDescription {
         char *ssl;
     } comm_params;
     int numProperties;
-    Property *properties;
+    Property **properties;
     struct {
         char *locally;
         char *cloud;

@@ -45,7 +45,7 @@ char *getLastError() { return lastError; }
 // discover context we passing around which contains function pointers to
 // callback and Filter
 typedef struct _DiscoverContext {
-    bool (*filterCB)(ServiceQuery *, char *, uint16_t);
+    bool (*filterCB)(ServiceQuery *, char *, uint16_t, uint16_t, const unsigned char *);
     void (*callback)(void *, int32_t, void *);
     void *serviceSpec;
 } DiscoverContext;
@@ -169,20 +169,21 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 	    while (child) description->numProperties++, child=child->next;
 	    if (description->numProperties)
 	    {
-		description->properties = (Property *)malloc(
-					    description->numProperties*sizeof(Property));
-		i=0;
-		child = jitem->child;
-		while (child) {
-		    description->properties[i].key = strdup(child->string);
-		    description->properties[i].value = strdup(child->valuestring);
-		    #if DEBUG
-		    printf("properties key=%s value=%s\n", description->properties[i].key,
-			    description->properties[i].value);
-		    #endif
-		    i++;
-		    child=child->next;
-		}
+            description->properties = (Property **)malloc(sizeof(Property *) * description->numProperties);
+            i=0;
+            child = jitem->child;
+            while (child) {
+                description->properties[i] = (Property *)malloc(sizeof(Property));
+
+                description->properties[i]->key = strdup(child->string);
+                description->properties[i]->value = strdup(child->valuestring);
+                #if DEBUG
+                    printf("properties key=%s value=%s\n", description->properties[i]->key,
+                    description->properties[i]->value);
+                #endif
+                i++;
+                child=child->next;
+            }
 	    }
 
 	    child = cJSON_GetObjectItem(json, "comm_params"); // this is an optional parameter; so, ignore if absent
@@ -333,7 +334,7 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     ServiceQuery *query = discContext->serviceSpec;
 
     // there is a filterCB, so calls it. If it returns false then donothing
-    	if (discContext->filterCB && discContext->filterCB(query, fullname, PortAsNumber) == false)
+    	if (discContext->filterCB && discContext->filterCB(query, fullname, PortAsNumber, txtLen, txtRecord) == false)
     	    return;
 
     // check whether user has configured any host address
@@ -357,7 +358,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceDescription *desc = (ServiceDescription *) discContext->serviceSpec;
     DNSServiceErrorType err;
-    
+
 #if DEBUG
     printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
 #endif
@@ -398,7 +399,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 
 // Discover the service from MDNS. Filtered by the filterCB
 void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
-	    bool (*filterCB)(ServiceQuery *, char *, uint16_t),
+	    bool (*filterCB)(ServiceQuery *, char *, uint16_t, uint16_t, const unsigned char *),
 	    void (*callback)(void *, int32_t, void *))
 {
     
@@ -441,11 +442,13 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
     }
 }
 
-bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNumber){
+bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord){
 
     bool isNameMatched = false;
     bool isPortMatched = false;
-    bool isPropertiesMatched = true; // TODO:
+    bool isPropertiesMatched = false;
+
+    Property **properties;
 
     // what we received from discover_resolve_reply is full name; so construct full name to compare an exact match (excluding the domain name)
     int testFullNameSize = strlen(srvQry->service_name) + strlen(srvQry->type.name) + strlen(srvQry->type.protocol) + 6; // adding 6 for ._ and NULL characters
@@ -466,11 +469,53 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNum
         isNameMatched = true;
     }
 
-    if(PortAsNumber == srvQry->port){
-    #if DEBUG
-        printf("Yes port:%u:matched with:%u\n", PortAsNumber, srvQry->port);
-    #endif
+    if(srvQry->port){ // if port details present in discovery query
+        if(PortAsNumber == srvQry->port){
+        #if DEBUG
+            printf("Yes port:%u:matched with:%u\n", PortAsNumber, srvQry->port);
+        #endif
+            isPortMatched = true;
+        }
+    } else {
+        // port not defined by the service query; so consider as matched successfully
         isPortMatched = true;
+    }
+
+    uint16_t propertiesCountInTxtRecord = TXTRecordGetCount(txtLen, txtRecord);
+    int bufferKeySize = 256;
+    char bufferKey[bufferKeySize];
+    void *bufferValue;
+    uint8_t bufferValueSize;
+    int i, j;
+
+    properties = (Property **)malloc(sizeof(Property *) * propertiesCountInTxtRecord);
+    for(i = 0; i < propertiesCountInTxtRecord; i ++){
+        properties[i] = (Property *)malloc(sizeof(Property));
+
+        TXTRecordGetItemAtIndex(txtLen, txtRecord, i, bufferKeySize -1, bufferKey, &bufferValueSize, &bufferValue);
+
+        properties[i]->key = strdup(bufferKey);
+        properties[i]->value = strndup(bufferValue, bufferValueSize);
+
+        #if DEBUG
+            printf("READ Property:%s:%s; from TXT Record\n", properties[i]->key, properties[i]->value);
+        #endif
+    }
+
+    if(srvQry->numProperties > 0 && srvQry->properties != NULL){
+        // look for atleast one property match
+        for(i = 0; i < srvQry->numProperties; i ++){
+            for(j = 0; j < propertiesCountInTxtRecord; j ++){
+                if(strcmp(srvQry->properties[i]->key, properties[j]->key) == 0 && \
+                    strcmp(srvQry->properties[i]->value, properties[j]->value) == 0){
+                        isPropertiesMatched = true; // yes found atleast one matching property
+                        break;
+                    }
+            }
+        }
+    } else {
+        // there are no properties defined by the service query; so consider as matched successfully
+        isPropertiesMatched = true;
     }
 
     if(isNameMatched && isPortMatched && isPropertiesMatched){
@@ -481,9 +526,10 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNum
     }
 
 
-#if DEBUG
-    printf("Returning FALSE --- No Match found for service:%s\n", fullname);
-#endif
+    #if DEBUG
+        printf("Returning FALSE --- No Match found for service:%s\n", fullname);
+    #endif
+
     return false;
 }
 
@@ -608,9 +654,9 @@ void WaitToAdvertiseService(ServiceDescription *description,
 	TXTRecordCreate(&txtRecord, 0, NULL);
 	for (i=0; i<description->numProperties; i++) 
 	{
-	    txtLen = (uint8_t)strlen(description->properties[i].value);
-	    TXTRecordSetValue(&txtRecord, description->properties[i].key, 
-				    txtLen, description->properties[i].value );
+	    txtLen = (uint8_t)strlen(description->properties[i]->value);
+	    TXTRecordSetValue(&txtRecord, description->properties[i]->key,
+				    txtLen, description->properties[i]->value );
 	}
     }
 
