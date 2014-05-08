@@ -62,7 +62,12 @@ int init(void *serviceDesc) {
 
     // This is server side
     char addr[128];
-    sprintf(addr, "tcp://%s:%d", serviceDescription->address, serviceDescription->port);
+    if (serviceDescription->address != NULL) {
+        sprintf(addr, "tcp://%s:%d", serviceDescription->address, serviceDescription->port);
+    } else {
+        sprintf(addr, "tcp://*:%d", serviceDescription->port);
+    }
+
     #if DEBUG
         printf("going to bind %s\n",addr);
     #endif

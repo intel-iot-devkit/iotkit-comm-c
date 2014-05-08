@@ -24,8 +24,8 @@
 #include <dns_sd.h>
 #include <sys/types.h>
 #include <sys/time.h>
-
-
+#include <netdb.h>
+#include <arpa/inet.h>
 #include "util.h"
 #include "edisonapi.h"
 
@@ -143,13 +143,14 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 	    #endif
 
         jitem = cJSON_GetObjectItem(json, "address");
-	    if (!isJsonString(jitem)) handleParseError();
-
-        description->address = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("host address %s\n", description->address);
-	    #endif
-
+	    if (isJsonString(jitem)) {
+            description->address = strdup(jitem->valuestring);
+            #if DEBUG
+            printf("host address %s\n", description->address);
+            #endif
+        } else {
+            description->address = NULL;
+        }
 	    // must have a port
 	    jitem = cJSON_GetObjectItem(json, "port");
 	    if (!jitem || !isJsonNumber(jitem)) handleParseError();
@@ -202,6 +203,10 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
             if (isJsonString(jitem)){
                 description->advertise.cloud = strdup(jitem->valuestring);
             }
+             #if DEBUG
+                 printf("advertise locally=%s cloud=%s\n", description->advertise.locally,
+                 description->advertise.cloud);
+             #endif
         }
 
 
@@ -217,45 +222,41 @@ endParseSrvFile:
     return description;
 }
 
-static void DNSSD_API regReply(DNSServiceRef client,
-				const DNSServiceFlags flags, 
-				DNSServiceErrorType errorCode,
-				const char *name, 
-				const char *regtype, 
-				const char *domain, 
-				void *context)
-{
-    (void)flags;    // Unused
+char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
 
-    DiscoverContext *discContext = (DiscoverContext *)context;
-    ServiceDescription desc;
-    desc.service_name = (char *)name;
+    struct addrinfo hints;
+    struct addrinfo *result;
 
-#if DEBUG
-    printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
-#endif
-    if (errorCode == kDNSServiceErr_NoError)
-    {
-	desc.status = REGISTERED;
-	discContext->callback(client, errorCode,createService(discContext->serviceSpec));
-    }
-    else if (errorCode == kDNSServiceErr_NameConflict)
-    {
-        sprintf(lastError, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
-	desc.status = IN_USE;
-	discContext->callback(client, errorCode, NULL);
-    }
-    else 
-    {
-	sprintf(lastError, "MDNS unexpected error");
-	discContext->callback(client, errorCode, NULL);
-    }
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = 0; /* any type socket */
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;          /* Any protocol */
+
+   int s = getaddrinfo(hostname, PortAsNumber, &hints, &result);
+   if (s != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+        return NULL;
+   }
+
+	struct sockaddr_in *addr;
+   	addr = (struct sockaddr_in *)result->ai_addr;
+
+   	char *ipaddress = inet_ntoa((struct in_addr)addr->sin_addr);
+   	#if DEBUG
+	    printf("IP Address = %s\n",ipaddress);
+	#endif
+
+	return ipaddress;
 
 }
 
 // Handle events from DNS server
 void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *))
 {
+    #if DEBUG
+        printf("\n in handleevents now\n");
+    #endif
     int dns_sd_fd  = client  ? DNSServiceRefSockFD(client) : -1;
     int nfds = dns_sd_fd + 1;
     fd_set readfds;
@@ -310,6 +311,32 @@ void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *
     }
 }
 
+static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
+                                    const char *fullname, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
+{
+    union {
+    uint16_t s;
+    u_char b[2];
+    }port = { opaqueport };
+
+    uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
+
+    #if DEBUG
+        printf(stderr,"%s can be reached at %s:%u (interface %d)", fullname, hosttarget, PortAsNumber, ifIndex);
+    #endif
+    if (errorCode)
+        fprintf(stderr,"Error code %d\n", errorCode);
+
+    DiscoverContext *discContext = (DiscoverContext *)context;
+    ServiceQuery *query = discContext->serviceSpec;
+    // check whether user has configured any host address
+    if (query->address == NULL)
+        query->address = hosttarget;
+
+    query->port = PortAsNumber;
+    discContext->callback(client, errorCode, createClient(query));
+}
+
 // handle query reply
 static void DNSSD_API queryReply(DNSServiceRef client, 
 				DNSServiceFlags flags, 
@@ -322,6 +349,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 {
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceDescription desc;
+    DNSServiceErrorType err;
 
 #if DEBUG
     printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
@@ -341,7 +369,19 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 	// there is a filterCB, so calls it. If it returns false then donothing
 	if (discContext->filterCB && discContext->filterCB(&desc) == false)
 	    return;
-	discContext->callback(client, errorCode, createClient(discContext->serviceSpec));
+	err = DNSServiceResolve(&client, 0, interfaceIndex, name, regtype, domain, discover_resolve_reply, context);
+	    if (!client || err != kDNSServiceErr_NoError)
+        {
+            sprintf(lastError, "queryReply DNSServiceResolve call failed %ld\n", (long int)err);
+            discContext->callback(client, err, NULL);
+            if (client)  {
+                DNSServiceRefDeallocate(client);
+            }
+        }
+        else
+        {
+            handleEvents(client,discContext->callback);
+        }
     }
     else 
     {
@@ -382,14 +422,14 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
 	    queryReply, // callback
 	    context);	// param to pass as context into queryReply
 
-    if (!client || err != kDNSServiceErr_NoError) 
+    if (!client || err != kDNSServiceErr_NoError)
     {
 	sprintf(lastError, "DNSServiceBrowse call failed %ld\n", (long int)err);
 	callback(client, err, NULL);
-	if (client) 
+	if (client)
 	    DNSServiceRefDeallocate(client);
     }
-    else 
+    else
     {
 	handleEvents(client, callback);
     }
@@ -400,6 +440,92 @@ void WaitToDiscoverServices(ServiceQuery *queryDesc,
 	void (*callback)(void *, int32_t, void *) )
 {
     WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
+}
+
+static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
+                                    const char *fullname, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
+{
+    union {
+    uint16_t s;
+    u_char b[2];
+    }port = { opaqueport };
+
+    uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
+
+    #if DEBUG
+        printf("%s can be reached at %s:%u (interface %d)\n", fullname, hosttarget, PortAsNumber, ifIndex);
+    #endif
+
+    if (errorCode)
+        printf(stderr,"advertise_resolve_reply Error code %d\n", errorCode);
+
+    DiscoverContext *discContext = (DiscoverContext *)context;
+    ServiceDescription *description = discContext->serviceSpec;
+    // check whether user has explicitly specified the host address
+    if (description->address != NULL) {
+        char portarr[128];
+        sprintf(portarr, "%d",description->port);
+        char *ipaddress = getIPAddressFromHostName(description->address,portarr);
+        if (ipaddress != NULL) {
+            description->address = ipaddress;
+    	    discContext->callback(client, errorCode,createService(description));
+    	} else {
+    	    printf("\nIn advertise_resolve_reply Host Name to IP Address Conversion Failed\n");
+    	}
+    } else {
+        discContext->callback(client, errorCode,createService(description));
+    }
+
+}
+
+static void DNSSD_API regReply(DNSServiceRef client,
+				const DNSServiceFlags flags,
+				DNSServiceErrorType errorCode,
+				const char *name,
+				const char *regtype,
+				const char *domain,
+				void *context)
+{
+    (void)flags;    // Unused
+
+    DiscoverContext *discContext = (DiscoverContext *)context;
+    DNSServiceErrorType err;
+    ServiceDescription desc;
+    desc.service_name = (char *)name;
+
+#if DEBUG
+    printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
+#endif
+    if (errorCode == kDNSServiceErr_NoError)
+    {
+	desc.status = REGISTERED;
+	DNSServiceRef client1;
+	err = DNSServiceResolve(&client1, 0, 0, name, regtype, domain, advertise_resolve_reply, context);
+        if (!client1 || err != kDNSServiceErr_NoError)
+        {
+        sprintf(lastError, "regReply DNSServiceResolve call failed %ld\n", (long int)err);
+        discContext->callback(client1, err, NULL);
+        if (client)  {
+            DNSServiceRefDeallocate(client1);
+        }
+        }
+        else
+        {
+        handleEvents(client1,discContext->callback);
+        }
+    }
+    else if (errorCode == kDNSServiceErr_NameConflict)
+    {
+        sprintf(lastError, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
+	desc.status = IN_USE;
+	discContext->callback(client, errorCode, NULL);
+    }
+    else
+    {
+	sprintf(lastError, "MDNS unexpected error");
+	discContext->callback(client, errorCode, NULL);
+    }
+
 }
 
 // Advertise the service. Return an opaque object which is passed along to
@@ -456,14 +582,14 @@ void WaitToAdvertiseService(ServiceDescription *description,
 
     if (!client || err != kDNSServiceErr_NoError) 
     {
-	sprintf(lastError, "DNSServiceRegister call failed %ld\n", (long int)err);
-	callback(client, err, NULL);
-	if (client) 
-	    DNSServiceRefDeallocate(client);
+        sprintf(lastError, "DNSServiceRegister call failed %ld\n", (long int)err);
+        callback(client, err, NULL);
+        if (client)
+            DNSServiceRefDeallocate(client);
     }
     else 
     {
-	handleEvents(client, callback);
+        handleEvents(client, callback);
     }
 }
 

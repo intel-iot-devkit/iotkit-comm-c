@@ -54,7 +54,7 @@ publisher socket binds to the address and port to initiate communication.
 */
 int init(void *serviceDesc) {
 	#if DEBUG
-		printf("In createClient\n");
+		printf("In createService\n");
 	#endif
 	ServiceDescription *serviceDescription = (ServiceDescription *)serviceDesc;
 	zmqContainer.context = zmq_ctx_new();
@@ -63,7 +63,11 @@ int init(void *serviceDesc) {
 	#endif
     zmqContainer.publisher = zmq_socket(zmqContainer.context,ZMQ_PUB);
     char addr[128];
-    sprintf(addr, "tcp://%s:%d\n", serviceDescription->address, serviceDescription->port);
+    if (serviceDescription->address != NULL) {
+        sprintf(addr, "tcp://%s:%d", serviceDescription->address, serviceDescription->port);
+    } else {
+        sprintf(addr, "tcp://*:%d", serviceDescription->port);
+    }
     #if DEBUG
         printf("going to bind %s\n",addr);
     #endif
@@ -71,6 +75,7 @@ int init(void *serviceDesc) {
     #if DEBUG
         printf("bind completed\n");
     #endif
+
     return rc;
 }
 
