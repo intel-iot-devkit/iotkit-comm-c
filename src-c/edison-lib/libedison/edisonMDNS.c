@@ -107,7 +107,9 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
         description->type.name = NULL;
         description->type.protocol = NULL;
         description->address = NULL;
+        description->port = 0;
         description->comm_params.ssl = NULL;
+        description->numProperties = 0;
         description->properties = NULL;
         description->advertise.locally = NULL;
         description->advertise.cloud = NULL;
