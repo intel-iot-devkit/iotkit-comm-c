@@ -31,10 +31,23 @@ EdisonMDNS.prototype.name = "mdns";
 EdisonMDNS.prototype.component = "discovery";
 
 // public functions
+// expects serviceSpec.address is a resolved IPv4 address.
 EdisonMDNS.prototype.advertiseService = function (serviceSpec) {
   var serviceRecord = new ServiceRecord(serviceSpec);
-  var ad = mdns.createAdvertisement(serviceRecord.rawRecord.type, serviceRecord.rawRecord.port,
-    {txtRecord: serviceRecord.rawRecord.properties, name: serviceRecord.rawRecord.name});
+  var options, address;
+  if (serviceRecord.rawRecord.address) {
+    if (serviceRecord.rawRecord.address === exports.LOCAL_ADDR) {
+      address = mdns.loopbackInterface();
+    } else {
+      address = serviceRecord.rawRecord.address;
+    }
+    options = {txtRecord: serviceRecord.rawRecord.properties, name: serviceRecord.rawRecord.name,
+      networkInterface: address};
+  } else {
+    options = {txtRecord: serviceRecord.rawRecord.properties, name: serviceRecord.rawRecord.name};
+  }
+
+  var ad = mdns.createAdvertisement(serviceRecord.rawRecord.type, serviceRecord.rawRecord.port, options);
   ad.start();
 };
 
