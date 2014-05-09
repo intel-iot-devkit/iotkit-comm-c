@@ -350,7 +350,11 @@ int init(void *serviceDesc)
 //        if(strcmp(type, "ssl") == 0){
 //            sprintf(uri, "ssl://%s:%d", host, port);
 //        }else {
+        if(serviceQuery->address != NULL){
 	 	    sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
+	 	} else {
+	 	    sprintf(uri, "tcp://localhost:%d", serviceQuery->port);
+	 	}
 //	 	}
 		// Default settings:
 	 	int i=0;

@@ -53,7 +53,7 @@ void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
 int main(void) {
 
 	puts("Sample program to test the Edison ZMQ pub/sub plugin !!");
-    ServiceQuery *query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQPUBSUB.json");
+    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("../serviceQueries/temperatureServiceQueryZMQPUBSUB.json");
 
     if (query) {
         fprintf(stderr,"query host address %s\n",query->address);

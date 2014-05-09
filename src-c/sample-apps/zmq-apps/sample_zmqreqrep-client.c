@@ -53,7 +53,7 @@ void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
 int main(void) {
 
 	puts("Sample program to test the Edison ZMQ req/rep plugin !!");
-    ServiceQuery *query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
+    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("../serviceQueries/temperatureServiceQueryZMQREQREP.json");
 
     if (query) {
         fprintf(stderr,"query host address %s\n",query->address);

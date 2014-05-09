@@ -6,6 +6,6 @@ output/
 .DS_Store
 
 *.so
-a.out
+*.out
 *.swp
 *.o

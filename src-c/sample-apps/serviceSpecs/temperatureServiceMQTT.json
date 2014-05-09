@@ -4,7 +4,6 @@
     "name": "mqttpubsub",
     "protocol" : "tcp"
   },
-  "address" : "127.0.0.1",
   "port" : 1883,
   "properties" : {"dataType": "float", "keyFilePath":"../client.key", "crtFilePath":"../client.crt"},
   "comm_params": {"ssl": false},
