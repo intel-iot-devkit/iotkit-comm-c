@@ -28,7 +28,7 @@
 #include <arpa/inet.h>
 #include <regex.h>
 #include "util.h"
-#include "edisonapi.h"
+#include "edisonMDNS.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -46,7 +46,7 @@ char *getLastError() { return lastError; }
 // discover context we passing around which contains function pointers to
 // callback and Filter
 typedef struct _DiscoverContext {
-    bool (*filterCB)(ServiceQuery *, char *, uint16_t, uint16_t, const unsigned char *);
+    bool (*userFilterCB)(ServiceQuery *);
     void (*callback)(void *, int32_t, void *);
     void *serviceSpec;
 } DiscoverContext;
@@ -423,8 +423,12 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceQuery *query = discContext->serviceSpec;
 
-    // there is a filterCB, so calls it. If it returns false then donothing
-    	if (discContext->filterCB && discContext->filterCB(query, servicename, PortAsNumber, txtLen, txtRecord) == false)
+    // perform service filter
+    if(serviceQueryFilter(query, servicename, PortAsNumber, txtLen, txtRecord) == false)
+        return;
+
+    // there is a user filterCB, so call it. If it returns false then donothing
+    	if (discContext->userFilterCB && discContext->userFilterCB(query) == false)
     	    return;
 
     // check whether user has configured any host address
@@ -466,9 +470,6 @@ static void DNSSD_API queryReply(DNSServiceRef client,
     printf("desc status %d\n", desc->status);
 #endif
 
-	/*// there is a filterCB, so calls it. If it returns false then donothing
-	if (discContext->filterCB && discContext->filterCB(desc, client) == false)
-	    return;*/
 	err = DNSServiceResolve(&client, 0, interfaceIndex, name, regtype, domain, discover_resolve_reply, context);
 	    if (!client || err != kDNSServiceErr_NoError)
         {
@@ -492,7 +493,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 
 // Discover the service from MDNS. Filtered by the filterCB
 void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
-	    bool (*filterCB)(ServiceQuery *, char *, uint16_t, uint16_t, const unsigned char *),
+	    bool (*userFilterCB)(ServiceQuery *),
 	    void (*callback)(void *, int32_t, void *))
 {
     
@@ -502,7 +503,7 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
     char regtype[128];
     DiscoverContext *context = (DiscoverContext *)malloc(sizeof(DiscoverContext));
     if (!context) return;
-    context->filterCB = filterCB;
+    context->userFilterCB = userFilterCB;
     context->callback = callback;
     context->serviceSpec = queryDesc;
     
@@ -646,7 +647,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *servicename, uint16_t PortAs
 void WaitToDiscoverServices(ServiceQuery *queryDesc,
 	void (*callback)(void *, int32_t, void *) )
 {
-    WaitToDiscoverServicesFiltered(queryDesc, serviceQueryFilter, callback);
+    WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
 }
 
 static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,

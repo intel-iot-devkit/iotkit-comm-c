@@ -1,7 +1,7 @@
 {
-  "name" : ".*temperature$",
+  "name" : ".*temperature.*",
   "type" : {
-    "name": "mqtt",
+    "name": "mqttpubsub",
     "protocol" : "tcp"
   }
 }
