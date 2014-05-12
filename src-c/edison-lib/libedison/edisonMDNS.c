@@ -947,7 +947,9 @@ int setMyAddresses(){
         }
 
         myaddresses[j++] = strdup(inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr));
-        printf("Got IP Address:%s at %d\n", myaddresses[j-1], j-1);
+        #if DEBUG
+            printf("Got IP Address:%s\n", myaddresses[j-1]);
+        #endif
     }
     if_freenameindex(if_ni);
     close(iSocket);
