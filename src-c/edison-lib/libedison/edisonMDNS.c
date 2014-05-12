@@ -19,6 +19,12 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include <unistd.h>
+#include <net/if.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+
 #include <cJSON.h>
 #include <errno.h>              // For errno, EINTR
 #include <dns_sd.h>
@@ -59,6 +65,9 @@ typedef struct _DiscoverContext {
     fprintf(stderr,"invalid JSON format for %s file\n", service_desc_file);\
     goto endParseSrvFile;\
 }
+
+int myaddressesCount = 0;
+char **myaddresses = NULL;
 
 // parse the service description
 ServiceDescription *parseServiceDescription(char *service_desc_file)
@@ -335,7 +344,8 @@ char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
 	struct sockaddr_in *addr;
    	addr = (struct sockaddr_in *)result->ai_addr;
 
-   	char *ipaddress = inet_ntoa((struct in_addr)addr->sin_addr);
+    // duplicate the IP address so that subsequent calls to 'inet_ntoa' does not overwrite the value
+   	char *ipaddress = strdup(inet_ntoa((struct in_addr)addr->sin_addr));
    	#if DEBUG
 	    printf("IP Address = %s\n",ipaddress);
 	#endif
@@ -415,7 +425,7 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
 
     #if DEBUG
-        printf(stderr,"%s can be reached at %s:%u (interface %d)", servicename, hosttarget, PortAsNumber, ifIndex);
+        printf("%s can be reached at %s:%u (interface %d)\n", servicename, hosttarget, PortAsNumber, ifIndex);
     #endif
     if (errorCode)
         fprintf(stderr,"Error code %d\n", errorCode);
@@ -427,14 +437,20 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     if(serviceQueryFilter(query, servicename, PortAsNumber, txtLen, txtRecord) == false)
         return;
 
+    char *filteredServiceAddress = serviceAddressFilter(query, hosttarget, servicename, PortAsNumber);
+
+    if(!filteredServiceAddress)
+        return;
+
     // there is a user filterCB, so call it. If it returns false then donothing
-    	if (discContext->userFilterCB && discContext->userFilterCB(query) == false)
-    	    return;
+    if (discContext->userFilterCB && discContext->userFilterCB(query) == false)
+    	return;
 
-    // check whether user has configured any host address
+    /*// check whether user has configured any host address
     if (query->address == NULL)
-        query->address = hosttarget;
+        query->address = hosttarget;*/
 
+    query->address = filteredServiceAddress;
     query->port = PortAsNumber;
     #if DEBUG
         printf("\nquery->port: %d\n",query->port);
@@ -502,6 +518,10 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
     pthread_t tid;	    // thread to handle events from DNS server
     char regtype[128];
     DiscoverContext *context = (DiscoverContext *)malloc(sizeof(DiscoverContext));
+
+    setMyAddresses(); // initialize my IP Addresses
+
+
     if (!context) return;
     context->userFilterCB = userFilterCB;
     context->callback = callback;
@@ -563,6 +583,98 @@ bool  getServiceNameMatched(ServiceQuery *srvQry, char *servicename) {
 	    regfree(&regex);
 
 	    return false;
+}
+
+typedef struct _ServiceCache{
+    char *servicename;
+    char *address;
+    struct ServiceCache *next;
+} ServiceCache;
+
+ServiceCache *serviceCache = NULL;
+
+char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber){
+
+    if (!hosttarget || !fullname) {
+        if (!fullname) {
+          printf("WARN: Discovered a service without a name. Dropping.\n");
+        } else {
+          printf("WARN: Discovered a service without addresses. Dropping.\n");
+        }
+        return NULL;
+      }
+
+    char *serviceName;
+    char portAsChar[256];
+    sprintf(portAsChar, "%d", portAsNumber);
+
+    if(strstr(fullname, "._")){
+        //copy only the service name
+        serviceName = strndup(fullname, strstr(fullname, "._") - fullname);
+    } else {
+        // looks like we actually got the service name instead of fullname
+        serviceName = strdup(fullname);
+    }
+
+    char *address = getIPAddressFromHostName(hosttarget, portAsChar);
+
+    ServiceCache *traverse = serviceCache;
+    bool isPresentInCache = false;
+    bool isServiceSeenBefore = false;
+    while(traverse != NULL){
+        if(strcmp(traverse->servicename, serviceName) == 0){
+
+            if(strcmp(traverse->address, address) == 0){
+                isPresentInCache = true;
+            }else {
+                // service is already known; but got callback on new address/interface
+                isServiceSeenBefore = true;
+            }
+        }
+        traverse = traverse->next;
+    }
+
+    if(isPresentInCache == true){
+        return NULL;
+    }
+
+    ServiceCache *newService = (ServiceCache *)malloc(sizeof(ServiceCache));
+    newService->next = NULL;
+    newService->servicename = serviceName;
+    newService->address = address;
+
+    if(serviceCache == NULL){
+        serviceCache = newService;
+    } else {
+        traverse = serviceCache;
+        while(traverse->next != NULL){
+            traverse = traverse->next;
+        }
+
+        traverse->next = newService;
+    }
+
+    if(isServiceSeenBefore){
+        return NULL;
+    }
+
+    if(isServiceLocal(address)){
+        return LOCAL_ADDRESS;
+    }
+
+    // return the IP address of non-local host
+    return address;
+}
+
+bool isServiceLocal(const char *address){
+    int i;
+    for(i = 0; i < myaddressesCount; i ++){
+        if(strcmp(myaddresses[i], address) == 0){
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool serviceQueryFilter(ServiceQuery *srvQry, char *servicename, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord){
@@ -746,6 +858,8 @@ void WaitToAdvertiseService(ServiceDescription *description,
     char regtype[128];
     TXTRecordRef txtRecord;
 
+    setMyAddresses(); // initialize my IP Addresses
+
     DiscoverContext *context = (DiscoverContext *)malloc(sizeof(DiscoverContext));
     if (!context) return;
     context->callback = callback;
@@ -798,6 +912,64 @@ void WaitToAdvertiseService(ServiceDescription *description,
     {
         handleEvents(client, callback);
     }
+}
+
+int setMyAddresses(){
+
+    int iSocket;
+    struct if_nameindex *if_ni, *i;
+    int j;
+
+    if ((iSocket = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+      perror("socket");
+      return -1;
+    }
+
+    if_ni = if_nameindex();
+
+    // verify how many addresses do we have for the network interfaces
+    for (i = if_ni, myaddressesCount; ! (i->if_index == 0 && i->if_name == NULL); i++){
+        struct ifreq req;
+        strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
+        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0)
+        {
+            if (errno == EADDRNOTAVAIL)
+            {
+                continue;
+            }
+            perror("ioctl");
+            close(iSocket);
+            return -1;
+        }
+        myaddressesCount ++;
+    }
+
+    myaddresses = (char **)malloc(sizeof(char *) * myaddressesCount);
+
+    for (i = if_ni, j = 0; ! (i->if_index == 0 && i->if_name == NULL); i++)
+    {
+        struct ifreq req;
+        strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
+        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0)
+        {
+            if (errno == EADDRNOTAVAIL)
+            {
+                myaddresses[j] = NULL;
+                continue;
+            }
+            perror("ioctl");
+            close(iSocket);
+            return -1;
+        }
+
+        myaddresses[j++] = strdup(inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr));
+        printf("Got IP Address:%s at %d\n", myaddresses[j-1], j-1);
+    }
+    if_freenameindex(if_ni);
+    close(iSocket);
+
+    return 0;
 }
 
 #if DEBUG

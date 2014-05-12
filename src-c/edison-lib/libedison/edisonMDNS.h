@@ -17,6 +17,10 @@
 
 #include "edisonapi.h"
 
+#define LOCAL_ADDRESS "127.0.0.1"
+
 bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord);
+char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber);
+bool isServiceLocal(const char *address);
 
 #endif
