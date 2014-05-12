@@ -405,7 +405,7 @@ void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *
 }
 
 static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
-                                    const char *servicename, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
+                                    const char *fullservicename, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
 {
     union {
     uint16_t s;
@@ -415,7 +415,7 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
 
     #if DEBUG
-        printf("%s can be reached at %s:%u (interface %d)\n", servicename, hosttarget, PortAsNumber, ifIndex);
+        printf("%s can be reached at %s:%u (interface %d)", fullservicename, hosttarget, PortAsNumber, ifIndex);
     #endif
     if (errorCode)
         fprintf(stderr,"Error code %d\n", errorCode);
@@ -424,10 +424,10 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     ServiceQuery *query = discContext->serviceSpec;
 
     // perform service filter
-    if(serviceQueryFilter(query, servicename, PortAsNumber, txtLen, txtRecord) == false)
+    if(serviceQueryFilter(query, fullservicename, PortAsNumber, txtLen, txtRecord) == false)
         return;
 
-    char *filteredServiceAddress = serviceAddressFilter(query, hosttarget, servicename, PortAsNumber);
+    char *filteredServiceAddress = serviceAddressFilter(query, hosttarget, fullservicename, PortAsNumber);
 
     if(!filteredServiceAddress)
         return;
@@ -547,10 +547,31 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
 }
 
 // Matching the service name against the user supplied service query using regular expression
-bool  getServiceNameMatched(ServiceQuery *srvQry, char *servicename) {
+bool  getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
         regex_t regex;
         int res;
         char msgbuf[100];
+        #if DEBUG
+            printf("\nFull Service name %s\n",fullservicename);
+        #endif
+        // searching for character '.' where the service name ends
+        char *end = strchr(fullservicename,'.');
+        if (end == NULL) {
+            printf ("searched character NOT FOUND\n");
+            return false;
+        }
+
+        char servicename[256];
+        int i = 0;
+
+        while (fullservicename != end) {
+            servicename[i++] = *fullservicename++;
+        }
+        servicename[i] = '\0';
+
+        #if DEBUG
+            printf("\nReal Service name %s\n",servicename);
+        #endif
 
         /* Compile regular expression */
         res = regcomp(&regex, srvQry->service_name, REG_EXTENDED);
@@ -660,7 +681,7 @@ bool isServiceLocal(const char *address){
     return false;
 }
 
-bool serviceQueryFilter(ServiceQuery *srvQry, char *servicename, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord){
+bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord){
 
     bool isNameMatched = false;
     bool isPortMatched = false;
@@ -669,9 +690,9 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *servicename, uint16_t PortAs
     Property **properties;
 
     // check whether service name in ServiceQuery matches with service name reported by discover_resolve_reply
-    if(getServiceNameMatched(srvQry,servicename)){ // check whether
+    if(getServiceNameMatched(srvQry,fullservicename)){ // check whether
     #if DEBUG
-        printf("Yes %s:matches with:%s\n", servicename, srvQry->service_name);
+        printf("Yes %s:matches with:%s\n", fullservicename, srvQry->service_name);
     #endif
         isNameMatched = true;
     }
@@ -727,13 +748,13 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *servicename, uint16_t PortAs
 
     if(isNameMatched && isPortMatched && isPropertiesMatched){
     #if DEBUG
-        printf("Returning TRUE --- Match found for service:%s\n", servicename);
+        printf("Returning TRUE --- Match found for service:%s\n", fullservicename);
     #endif
         return true;
     }
 
 #if DEBUG
-    printf("Returning FALSE --- No Match found for service:%s\n", servicename);
+    printf("Returning FALSE --- No Match found for query %s with service name :%s\n",srvQry->service_name,fullservicename);
 #endif
     return false;
 }

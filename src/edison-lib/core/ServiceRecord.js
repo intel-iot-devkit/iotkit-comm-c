@@ -7,9 +7,9 @@ ServiceRecord.prototype.rawRecord = {};
 ServiceRecord.prototype.spec = {};
 ServiceRecord.prototype.suggestedAddresses = [];
 
-function ServiceRecord (serviceDescription) {
+function ServiceRecord (serviceSpec) {
   "use strict";
-  this.spec = serviceDescription;
+  this.spec = serviceSpec;
   makeServiceRecord.call(this);
 }
 
