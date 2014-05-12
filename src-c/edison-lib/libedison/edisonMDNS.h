@@ -19,6 +19,27 @@
 
 #define LOCAL_ADDRESS "127.0.0.1"
 
+
+// discover context we passing around which contains function pointers to
+// callback and Filter
+typedef struct _DiscoverContext {
+    bool (*userFilterCB)(ServiceQuery *);
+    void (*callback)(void *, int32_t, void *);
+    void *serviceSpec;
+} DiscoverContext;
+
+typedef struct _ServiceCache{
+    char *servicename;
+    char *address;
+    struct ServiceCache *next;
+} ServiceCache;
+
+
+ServiceCache *serviceCache = NULL;
+int myaddressesCount = 0;
+char **myaddresses = NULL;
+
+
 bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord);
 char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber);
 bool isServiceLocal(const char *address);

@@ -49,13 +49,6 @@ static volatile int timeOut = LONG_TIME;
 static char lastError[256];
 char *getLastError() { return lastError; }
 
-// discover context we passing around which contains function pointers to
-// callback and Filter
-typedef struct _DiscoverContext {
-    bool (*userFilterCB)(ServiceQuery *);
-    void (*callback)(void *, int32_t, void *);
-    void *serviceSpec;
-} DiscoverContext;
 
 // helper define
 #define handleParseError() \
@@ -65,9 +58,6 @@ typedef struct _DiscoverContext {
     fprintf(stderr,"invalid JSON format for %s file\n", service_desc_file);\
     goto endParseSrvFile;\
 }
-
-int myaddressesCount = 0;
-char **myaddresses = NULL;
 
 // parse the service description
 ServiceDescription *parseServiceDescription(char *service_desc_file)
@@ -585,13 +575,6 @@ bool  getServiceNameMatched(ServiceQuery *srvQry, char *servicename) {
 	    return false;
 }
 
-typedef struct _ServiceCache{
-    char *servicename;
-    char *address;
-    struct ServiceCache *next;
-} ServiceCache;
-
-ServiceCache *serviceCache = NULL;
 
 char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber){
 
