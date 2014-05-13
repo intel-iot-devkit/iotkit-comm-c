@@ -15,6 +15,10 @@
     "mqtt": ">=0.3.8",
     "zmq": ">=2.6.0"
   },
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*"
+  },
   "keywords": [
     "node.js",
     "eclipse",
