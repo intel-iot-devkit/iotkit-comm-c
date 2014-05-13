@@ -1,9 +1,8 @@
 var expect = require('chai').expect;
 var path = require('path');
 
-describe('ServiceSpec', function () {
-  describe('#goodspec', function () {
-    it("should validate this spec without throwing an error", function() {
+describe('[service specification]', function () {
+    it("should validate a correct spec without throwing an error", function() {
       var edisonLib = require('edisonapi');
 
       var validator = new edisonLib.ServiceSpecValidator();
@@ -12,5 +11,4 @@ describe('ServiceSpec', function () {
 
       expect(spec.name).to.be.a('string');
     });
-  });
 });
