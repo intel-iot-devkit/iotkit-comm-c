@@ -45,12 +45,16 @@ static uint32_t opinterface = kDNSServiceInterfaceIndexAny;
 #define SHORT_TIME 10000
 static volatile int timeOut = LONG_TIME;
 
-// Last error message
+
 static char lastError[256];
+
+/* Helper method to return the last error
+ */
 char *getLastError() { return lastError; }
 
 
-// helper define
+/* Helper snippet to handle JSON parse errors
+ */
 #define handleParseError() \
 {\
     if (description) free(description);\
@@ -59,7 +63,10 @@ char *getLastError() { return lastError; }
     goto endParseSrvFile;\
 }
 
-// parse the service description
+/** Parses service description.
+ * @param[in] service_desc_file file path to the service description JSON
+ * @return returns service description object upon successful parsing and NULL otherwise
+ */
 ServiceDescription *parseServiceDescription(char *service_desc_file)
 {
     ServiceDescription *description = NULL;
@@ -225,7 +232,10 @@ endParseSrvFile:
     return description;
 }
 
-// parse the service description
+/** Parses client query description.
+ * @param[in] service_desc_file file path to the query description JSON
+ * @return returns client query description object upon successful parsing and NULL otherwise
+ */
 ServiceQuery *parseClientServiceQuery(char *service_desc_file)
 {
     ServiceQuery *description = NULL;
@@ -314,6 +324,11 @@ endParseSrvFile:
     return description;
 }
 
+/** Retrives IP Address for a given host name.
+ * @param[in] hostname denotes the host name
+ * @param[in] port denotes the port information
+ * @return returns IP Address
+ */
 char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
 
     struct addrinfo hints;
@@ -344,7 +359,10 @@ char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
 
 }
 
-// Handle events from DNS server
+/** Handle events from DNS Server
+ * @param[in] client service ref object
+ * @param[in] callback callback function to be invoked upon any DNS errors
+ */
 void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *))
 {
     #if DEBUG
@@ -404,6 +422,18 @@ void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *
     }
 }
 
+/** Callback invoked upon resolving a service from DNS.
+ * @param[in] client service reference object
+ * @param[in] flags DNS serivce flags
+ * @param[in] ifIndex interface index
+ * @param[in] errorCode error code
+ * @param[in] fullservicename complete service name
+ * @param[in] hosttarget host on which the service is available
+ * @param[in] opaqueport port information
+ * @param[in] txtLen lenght of TXT Record
+ * @param[in] txtRecord TXT Record
+ * @param[in] context context information
+ */
 static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
                                     const char *fullservicename, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
 {
@@ -448,7 +478,16 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     discContext->callback(client, errorCode, createClient(query));
 }
 
-// handle query reply
+/** Callback invoked upon discovering a query reply from DNS.
+ * @param[in] client service reference object
+ * @param[in] flags DNS serivce flags
+ * @param[in] interfaceIndex interface index
+ * @param[in] errorCode error code
+ * @param[in] name service name
+ * @param[in] regtype registered type
+ * @param[in] domain domain information
+ * @param[in] context context information
+ */
 static void DNSSD_API queryReply(DNSServiceRef client, 
 				DNSServiceFlags flags, 
 				uint32_t interfaceIndex,
@@ -497,7 +536,12 @@ static void DNSSD_API queryReply(DNSServiceRef client,
     }
 }
 
-// Discover the service from MDNS. Filtered by the filterCB
+
+/** Browse or Discover a service from MDNS. This is a blocking call
+ * @param[in] queryDesc service description
+ * @param[in] userFilterCB callback method for user filter
+ * @param[in] callback callback to be invoked upon successful client creation
+ */
 void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
 	    bool (*userFilterCB)(ServiceQuery *),
 	    void (*callback)(void *, int32_t, void *))
@@ -546,7 +590,11 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
     }
 }
 
-// Matching the service name against the user supplied service query using regular expression
+
+/** Match the service name against user supplied service query by resolving regular expression (if any)
+ * @param[in] srvQry service query
+ * @param[in] fullservicename complete service name
+ */
 bool  getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
         regex_t regex;
         int res;
@@ -597,6 +645,12 @@ bool  getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
 }
 
 
+/** Address filtering for service available locally
+ * @param[in] srvQry service query
+ * @param[in] hosttarget target host name
+ * @param[in] fullname full name of the service
+ * @param[in] portAsNumber port information
+ */
 char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber){
 
     if (!hosttarget || !fullname) {
@@ -670,6 +724,10 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
     return address;
 }
 
+/** Verifies whether the service is available locally or not
+ * @param[in] address host address information
+ * @return returns true if local address and false otherwise
+ */
 bool isServiceLocal(const char *address){
     int i;
     for(i = 0; i < myaddressesCount; i ++){
@@ -681,6 +739,13 @@ bool isServiceLocal(const char *address){
     return false;
 }
 
+/** Service Query Filter
+ * @param[in] srvQry service query
+ * @param[in] fullservicename complete service name
+ * @param[in] PortAsNumber port information
+ * @param[in] txtLen length of TXT Record
+ * @param[in] txtRecord TXT Record
+ */
 bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord){
 
     bool isNameMatched = false;
@@ -759,13 +824,28 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
     return false;
 }
 
-// Discover the service from MDNS
+/** Browse or Discover a service from MDNS. This is a blocking call
+ * @param[in] queryDesc service description
+ * @param[in] callback callback to be invoked upon successful client creation
+ */
 void WaitToDiscoverServices(ServiceQuery *queryDesc,
 	void (*callback)(void *, int32_t, void *) )
 {
     WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
 }
 
+/** Callback invoked upon resolving an advertised service through DNS.
+ * @param[in] client service reference object
+ * @param[in] flags DNS serivce flags
+ * @param[in] ifIndex interface index
+ * @param[in] errorCode error code
+ * @param[in] fullname complete service name
+ * @param[in] hosttarget host on which the service is available
+ * @param[in] opaqueport port information
+ * @param[in] txtLen lenght of TXT Record
+ * @param[in] txtRecord TXT Record
+ * @param[in] context context information
+ */
 static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
                                     const char *fullname, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
 {
@@ -802,6 +882,15 @@ static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSSer
 
 }
 
+/** Callback invoked upon registering a service via DNS.
+ * @param[in] client service reference object
+ * @param[in] flags DNS serivce flags
+ * @param[in] errorCode error code
+ * @param[in] name service name
+ * @param[in] regtype registered type
+ * @param[in] domain domain information
+ * @param[in] context context information
+ */
 static void DNSSD_API regReply(DNSServiceRef client,
 				const DNSServiceFlags flags,
 				DNSServiceErrorType errorCode,
@@ -851,8 +940,12 @@ static void DNSSD_API regReply(DNSServiceRef client,
 
 }
 
-// Advertise the service. Return an opaque object which is passed along to
-// callback
+
+/** Advertise a service. Return an opaque object which is passed along to callback.
+ * Note: This is a blocking call
+ * @param[in] description service description
+ * @param[in] callback callback to be invoked upon successful service creation
+ */
 void WaitToAdvertiseService(ServiceDescription *description,
 	void (*callback)(void *, int32_t, void *))
 {		
@@ -918,6 +1011,8 @@ void WaitToAdvertiseService(ServiceDescription *description,
     }
 }
 
+/** Initialize local addresses on various network interfaces
+ */
 int setMyAddresses(){
 
     int iSocket;

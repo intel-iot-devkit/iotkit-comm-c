@@ -20,14 +20,18 @@
 #define LOCAL_ADDRESS "127.0.0.1"
 
 
-// discover context we passing around which contains function pointers to
-// callback and Filter
+/** Discover context to be passed around which contains function pointers to
+ * callback and user filter callback methods
+ */
 typedef struct _DiscoverContext {
     bool (*userFilterCB)(ServiceQuery *);
     void (*callback)(void *, int32_t, void *);
     void *serviceSpec;
 } DiscoverContext;
 
+
+/** Service cache to hold list of services discovered via DNS
+ */
 typedef struct _ServiceCache{
     char *servicename;
     char *address;
