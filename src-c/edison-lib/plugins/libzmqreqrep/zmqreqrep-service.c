@@ -115,7 +115,7 @@ int publish(char *message,Context context) {
 */
 int manageClient(void *client,Context context) {
     #if DEBUG
-        printf ("In manageClient\n"");
+        printf ("In manageClient\n");
     #endif
 }
 
