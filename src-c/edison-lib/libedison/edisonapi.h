@@ -32,69 +32,78 @@
 #define TRUE 1
 
 
-// configuration data
+/** System level Configuration data read from the config JSON
+ */
 typedef struct _ConfigFileData {
-    char *pluginInterfaceDir;
-    char *pluginDir;
-    char *clientFileSuffix;
-    char *serverFileSuffix;
-    char *plugin;
+    char *pluginInterfaceDir; // plugin interface directory
+    char *pluginDir; // plugin directory
+    char *clientFileSuffix; // client plugin suffix
+    char *serverFileSuffix; // service plugin suffix
+    char *plugin; // plugin directory where the plugin is present
 } ConfigFileData;
 
-
+/** Context to be passed around the callback methods as a name value pair
+ */
 typedef struct _Context {
     char *name;
     char *value;
 } Context;
 
 
-// handle to the client communication plugin
+/** Handle to the client communication plugin
+ */
 typedef struct _CommClientHandle {
-    char **interface; // filename for pluing-interface json file
-    int (*init)(void *);
+    char **interface; // specifies the filename for plugin-interface json file
+    int (*init)(void *); // initializes the plugin
     int (*send)(char *, Context context);	// int send(topic, context)
     int (*subscribe)(char *);	// int subscribe(topic)
     int (*unsubscribe)(char *);	// int unsubscribe(topic)
     int (*receive)(void (*)(char *, Context)); // int setReceivedMessageHandler(handler) // handler takes 2 parameters
     int (*done)();
-    void *handle;	// handle to the dll
+    void *handle;	// handle to the library
 } CommClientHandle;
 
-// handle to the service communication plugin
+
+/** Handle to the service communication plugin
+ */
 typedef struct _CommServiceHandle {
-    char **interface; // filename for pluing-interface json file
-    int (*init)(void *);
+    char **interface; // specifies the filename for plugin-interface json file
+    int (*init)(void *); // initializes the plugin
     int (*sendTo)(void *, char *, Context context);	// int send(client, message, context) // for example, incase of mqtt... int sendTo(<<mqtt client>>, message, context);
     int (*publish)(char *,Context context); // int publish(message,context)
     int (*manageClient)(void *,Context context); // int manageClient(client,context) // for example, incase of mqtt... int manageClient(<<mqtt client>>, context);
     int (*receive)(void (*)(void *, char *, Context context)); // int setReceivedMessageHandler(handler) // handler takes 3 parameters
     int (*done)();
-    void *handle;	// handle to the dll
+    void *handle;	// handle to the library
 } CommServiceHandle;
 
 
 //typedef enum { ADDED, REMOVED, UNKNOWN/home/skothurx/mango/edison-api/src-c/edison-lib/libedison/plugin-interfaces } ServiceStatus;
 
+/** Property stored as key value pair
+ */
 typedef struct _Prop {
     char *key;
     char *value;
 } Property;
 
-// service description
+
+/** service description
+ */
 typedef struct _ServiceDescription {
-    enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status;
+    enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status; // current status of the service/client
     char *service_name;	    // name of the service
     struct {
-	char *name;
-	char *protocol; // the protocol
+	char *name; // serive type name
+	char *protocol; // service protocol
     } type;
-    char *address;
-    int port;
+    char *address; // address where service is available
+    int port; // port at which service is running
     struct { // TODO: comm_params should hold key value pairs
         char *ssl;
     } comm_params;
-    int numProperties;
-    Property **properties;
+    int numProperties; // count of properties
+    Property **properties; // list of properties
     struct {
         char *locally;
         char *cloud;
@@ -104,16 +113,14 @@ typedef struct _ServiceDescription {
 
 ConfigFileData g_configData;
 
-// function signatures
+/** list of function signatures specified in the interface JSON
+ */
 char **g_funcSignatures;
 
 
-// Create client which returns a CommClientHandle
+
 CommClientHandle *createClient(ServiceQuery *);
-
-// Create service which returns a CommServiceHandle
 CommServiceHandle *createService(ServiceDescription *);
-
 
 void cleanUpClient(CommClientHandle *);
 void cleanUpService(CommServiceHandle *);

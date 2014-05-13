@@ -64,6 +64,11 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
     }
 }
 
+bool serviceFilter(ServiceQuery *srvQuery){
+
+    printf("Got into Service Filter\n");
+    return true;
+}
 
 /**
  * @name Starts the application
@@ -77,7 +82,7 @@ int main(void) {
     query = (ServiceQuery *) parseClientServiceQuery("../serviceQueries/temperatureServiceQueryMQTT.json");
 
     if (query)
-	    WaitToDiscoverServices(query, callback);
+	    WaitToDiscoverServicesFiltered(query, serviceFilter, callback);
 
 	return 0;
 }

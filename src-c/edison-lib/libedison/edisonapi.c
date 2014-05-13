@@ -18,6 +18,10 @@
     #define DEBUG 0
 #endif
 
+
+/** Reports dynamic link library errors. Checks for any recent error happened while loading an shared library
+ * @return boolean specifies whether an error was present or not
+ */
 static inline bool checkDLError() {
     char *error = dlerror();
     if (error != NULL) {
@@ -27,13 +31,19 @@ static inline bool checkDLError() {
     return true;
 }
 
-// helper define
+/*
+ * Helper snippet to print JSON parse errors.
+ */
 #define handleParseConfigError() \
 {\
     fprintf(stderr,"invalid JSON format for %s file\n", config_file);\
     goto endParseConfig;\
 }
 
+/** Considers user defined configuration. Loads and parses user defined configuration
+* '.edison-config.json' present in user's home directory for 'plugin interface' and
+* 'plugins' configuration properties and concats with edison configuration properties
+ */
 void concatUserDefinedConfigurations(){
     char *home, config_file[1024];
 
@@ -118,7 +128,9 @@ void concatUserDefinedConfigurations(){
            }
 }
 
-/* Parse config file */
+/** Parses edison configuration file
+ * @param[in] config_file path to the configuration file
+ */
 bool parseConfigFile(char *config_file)
 {
     char *out;
@@ -235,7 +247,10 @@ endParseConfig:
     return status;
 }
 
-// helper define
+
+/*
+ * Helper snippet to print JSON parse errors.
+ */
 #define handleParseInterfacesError() \
 {\
     status = false;\
@@ -243,7 +258,10 @@ endParseConfig:
     goto endParseInterfaces;\
 }
 
-// parse the plugin interfaces
+/** Parses plugin interfaces. Loads the function names present in the corresponding plugin defined in the service description JSON
+ * @param[in] inf_file file path for the plugin interface
+ * @return returns true upon successful parsing and false otherwise
+ */
 bool parsePluginInterfaces(char *inf_file) 
 {
     char *out;
@@ -320,7 +338,8 @@ endParseInterfaces:
     return status;
 }
 
-// Free all the memory allocated for global data
+/** Frees all the memory allocated for global data
+ */
 void freeGlobals()
 {
     if (g_funcSignatures) {
@@ -328,7 +347,9 @@ void freeGlobals()
     }
 }
 
-// clean up by freeing memory
+/** clean up by freeing globals and client handler
+ * @param[in] commHandle communication handle
+ */
 void cleanUpClient(CommClientHandle *commHandle)
 {
     freeGlobals();
@@ -341,7 +362,9 @@ void cleanUpClient(CommClientHandle *commHandle)
     }
 }
 
-// clean up by freeing memory
+/** clean up by freeing globals and service handler
+ * @param[in] commHandle communication handle
+ */
 void cleanUpService(CommServiceHandle *commHandle)
 {
     freeGlobals();
@@ -354,6 +377,11 @@ void cleanUpService(CommServiceHandle *commHandle)
     }
 }
 
+/** Initializes Service Communication handler. Loads the shared library and
+ * initializes Service communication handler with the specified functions defined in the plugin interface
+ * @param[out] commHandle Service communication handler
+ * @return returns true upon successful initializing and false otherwise
+ */
 int loadServiceCommInterfaces(CommServiceHandle *commHandle){
 
     void *handle = commHandle->handle;
@@ -385,7 +413,11 @@ int loadServiceCommInterfaces(CommServiceHandle *commHandle){
 	return TRUE;
 }
 
-// check signatures and load the service plugin
+/** Service Communication plugin loader. Loads the shared library and
+ * read the interface details
+ * @param[in] plugin_path path to plugin
+ * @return returns service handle upon successful and NULL otherwise
+ */
 CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
 {
     char *ptr;
@@ -435,7 +467,11 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
     }
 }
 
-// check signatures and load the client plugin
+/** Client Communication plugin loader. Loads the shared library and
+ * read the interface details
+ * @param[in] plugin_path path to plugin
+ * @return returns client handle upon successful and NULL otherwise
+ */
 CommClientHandle *loadClientCommPlugin(char *plugin_path)
 {
     char *ptr;
@@ -484,6 +520,11 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
     }
 }
 
+/** Initializes Client Communication handler. Loads the shared library and
+ * initializes client communication handler with the specified functions defined in the plugin interface
+ * @param[out] commHandle client communication handler
+ * @return returns true upon successful initializing and false otherwise
+ */
 int loadClientCommInterfaces(CommClientHandle *commHandle){
 
     void *handle = commHandle->handle;
@@ -515,7 +556,10 @@ int loadClientCommInterfaces(CommClientHandle *commHandle){
 	return TRUE;
 }
 
-// initialize the system
+/** Initializes Client object. Creates the client object and calls its init method for further initialization
+ * @param[in] queryDesc query description
+ * @return returns client handle upon successful and NULL otherwise
+ */
 CommClientHandle *createClient(ServiceQuery *queryDesc)
 {
     CommClientHandle *commHandle;
@@ -628,6 +672,11 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     return commHandle;
 }
 
+
+/** Checks for file existence
+ * @param[in] absPath absolute path of a file
+ * @return returns true if the file exists and false otherwise
+ */
 int fileExists(char *absPath)
 {
     FILE *fp;
@@ -640,7 +689,10 @@ int fileExists(char *absPath)
     return 0;
 }
 
-// initialize the system
+/** Initializes Service object. Creates the service object and calls its init method for further initialization
+ * @param[in] description service description
+ * @return returns service handle upon successful and NULL otherwise
+ */
 CommServiceHandle *createService(ServiceDescription *description)
 {
     CommServiceHandle *commHandle = NULL;
