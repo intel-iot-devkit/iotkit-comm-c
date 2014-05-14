@@ -28,14 +28,15 @@
 #define DEBUG 0
 #endif
 
-char *interface = "edison-client-interface"; // specifies the plugin interface json
-
 /** @defgroup zmqreqrepclient
 *  This is ZMQ REQ REP Client
 
 *  @{
 
 */
+
+char *interface = "edison-client-interface"; /**< specifies the plugin interface json */
+
 
 /** Structure which holds the context and requester handler
  */
@@ -48,17 +49,17 @@ struct ZMQReqRepClient {
  */
 struct ZMQReqRepClient zmqContainer;
 
-/** Creates the context object and requester socket. With the help of the ServiceQuery parameter the
-requester socket establishes connection to the address and port to initiate communication.
+/** Creates the context object and requester socket. With the help of the ServiceQuery parameter the requester socket
+establishes connection to the address and port to initiate communication.
 
-* @param servQuery an void pointer
+* @param requestClientQuery an void pointer
 * @return The result code
 */
-int init(void *servQuery) {
+int init(void *requestClientQuery) {
 	#if DEBUG
 		printf("context initialised\n");
 	#endif
-	ServiceQuery *serviceQuery = (ServiceQuery *)servQuery;
+	ServiceQuery *serviceQuery = (ServiceQuery *)requestClientQuery;
 	zmqContainer.context = zmq_ctx_new();
     int rc = -1;
     // This is client side
@@ -114,11 +115,11 @@ int unsubscribe(char *topic) {
 
 /** Receive the message. The client will be passing an handler which is used as a callback mechanism to pass the
 received message.
-* @param handler a callback handler which takes message and context object as params
+* @param requestClientHandler a callback handler which takes message and context object as params
 * @return The result code
 
 */
-int receive(void (*handler)(char *message, Context)) {
+int receive(void (*requestClientHandler)(char *message, Context context)) {
 	#if DEBUG
 		printf("In receive\n");
 	#endif
@@ -134,7 +135,7 @@ int receive(void (*handler)(char *message, Context)) {
     Context context;
     context.name = "event";
     context.value = "message";
-    handler(contents,context);
+    requestClientHandler(contents,context);
     free(contents);
 }
 

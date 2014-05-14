@@ -19,17 +19,18 @@
 
 #include "edisonapi.h"
 
-char *interface = "edison-client-interface"; // specifies the plugin interface json
-
 /** @defgroup zmqpubsubclient
 *
 *  @{
 */
-int init(void *servQuery);
+
+char *interface = "edison-client-interface"; /**< specifies the plugin interface json */
+
+int init(void *ClientServiceQuery);
 int send(char *message,Context context);
 int subscribe(char *topic);
 int unsubscribe(char *topic);
-int receive(void (*handler)(char *message, Context context));
+int receive(void (*subscribeClientHandler)(char *message, Context context));
 int done();
 
 /** @} */ // end of zmqpubsubclient

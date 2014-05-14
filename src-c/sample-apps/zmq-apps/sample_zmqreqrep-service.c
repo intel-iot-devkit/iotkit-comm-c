@@ -25,22 +25,29 @@
 #include "edisonapi.h"
 #include "util.h"
 
-/** a callback function to be invoked when it receives any messages from the client
+/** Callback function. To to be invoked when it receives any messages from the Client
+* @param client the client object
+* @param message the message received from client
+* @param context a context object
  */
-void message_callback(void *client, char *message, Context context) {
+void repMessageCallback(void *client, char *message, Context context) {
     fprintf(stderr,"Message received in Server: %s\n", message);
 }
 
-/** a callback function to be invoked when the service is advertised
+/** Callback function. Once the service is advertised this callback function will be invoked
+
+* @param servDesc the service description object
+* @param error_code the error code
+* @param serviceHandle the communication handle used to invoke the interfaces
  */
-void callback(void *handle, int32_t error_code,CommServiceHandle *serviceHandle)
+void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommServiceHandle *serviceHandle)
 {
         if (serviceHandle != NULL) {
 	    void *client;
 	    Context context;
 	    while(1) {
             serviceHandle->sendTo(client,"train bike car",context);
-            serviceHandle->receive(message_callback);
+            serviceHandle->receive(repMessageCallback);
             sleep(2);
         }
         } else {
@@ -49,15 +56,15 @@ void callback(void *handle, int32_t error_code,CommServiceHandle *serviceHandle)
 }
 
 
-/** The starting point of sample program
- */
+/** The starting point. Starts to advertise the given Service
+*/
 int main(void) {
 
 	puts("Sample program to test the Edison ZMQ req/rep plugin !!");
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
 
     if (serviceDescription)
-	    WaitToAdvertiseService(serviceDescription, callback);
+	    WaitToAdvertiseService(serviceDescription, repAdvertiseCallback);
 
 	return 0;
 }

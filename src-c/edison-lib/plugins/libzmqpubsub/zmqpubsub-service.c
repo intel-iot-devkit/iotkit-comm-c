@@ -46,17 +46,17 @@ struct ZMQPubSubService {
 struct ZMQPubSubService zmqContainer;
 
 
-/**  Creates the context object and publisher socket. With the help of the ServiceDescription parameter the
-publisher socket binds to the address and port to initiate communication.
+/** Creates the context object and publisher socket. With the help of the ServiceDescription parameter the publisher
+socket binds to the address and port to initiate communication.
 
-* @param serviceDesc an void pointer
+* @param publishServiceDesc an void pointer
 * @return The result code
 */
-int init(void *serviceDesc) {
+int init(void *publishServiceDesc) {
 	#if DEBUG
 		printf("In createService\n");
 	#endif
-	ServiceDescription *serviceDescription = (ServiceDescription *)serviceDesc;
+	ServiceDescription *serviceDescription = (ServiceDescription *)publishServiceDesc;
 	zmqContainer.context = zmq_ctx_new();
 	#if DEBUG
 		printf("context initialised\n");
@@ -130,11 +130,11 @@ int manageClient(void *client,Context context) {
 
 /** Empty function. This function is unimplemented since in ZMQ pub/sub service we use only
 publish
-* @param handler a callback handler which takes multiple params
+* @param publishServiceHandler a callback handler which takes multiple params
 * @return The result code
 
 */
-int receive(void (*handler)(void *client,char *message,Context)) {
+int receive(void (*publishServiceHandler)(void *client,char *message,Context context)) {
     #if DEBUG
         printf("In receive\n");
     #endif

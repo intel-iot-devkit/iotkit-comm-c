@@ -25,20 +25,25 @@
 #include "edisonapi.h"
 #include "util.h"
 
-/** a callback function to be invoked when it receives any messages for the subscribed topic
+/** Callback function. To to be invoked when it receives any messages for the subscribed topic
+* @param message the message received from service/publisher
+* @param context a context object
  */
-void message_callback(char *message, Context context){
+void clientMessageCallback(char *message, Context context){
     fprintf(stderr,"Message received in Client: %s\n", message);
 }
 
-/** a callback function to be invoked when the service is discovered
+/** Callback function. Once the service is discovered this callback function will be invoked
+* @param queryDesc the query description object
+* @param error_code the error code
+* @param commHandle the communication handle used to invoke the interfaces
  */
-void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
+void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommClientHandle *commHandle)
 {
     if (commHandle != NULL) {
         while (1) {
             commHandle->subscribe("vehicle");
-            commHandle->receive(message_callback);
+            commHandle->receive(clientMessageCallback);
             sleep(2);
         }
     } else {
@@ -48,7 +53,7 @@ void callback(void *handle, int32_t error_code, CommClientHandle *commHandle)
 }
 
 
-/** The starting point of sample program
+/** The starting point. Starts browsing for the given Service name
  */
 int main(void) {
 
@@ -59,7 +64,7 @@ int main(void) {
         fprintf(stderr,"query host address %s\n",query->address);
         fprintf(stderr,"query host port %d\n",query->port);
         fprintf(stderr,"query service name %s\n",query->service_name);
-	    WaitToDiscoverServices(query, callback);
+	    WaitToDiscoverServices(query, subDiscoveryCallback);
 	}
 
 	return 0;

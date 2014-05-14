@@ -20,17 +20,17 @@
 
 #include "edisonapi.h"
 
-char *interface = "edison-service-interface"; // specifies the plugin interface json
-
 /** @defgroup zmqreqrepservice
 *
 *  @{
 
 */
-int init(void *serviceDesc);
+char *interface = "edison-service-interface"; /**< specifies the plugin interface json */
+
+int init(void *responseServiceDesc);
 int sendTo(void *client,char *message,Context context);
 int publish(char *message,Context context);
 int manageClient(void *client,Context context);
-int receive(void (*handler)(void *client,char *message,Context context));
+int receive(void (*responseServiceHandler)(void *client,char *message,Context context));
 int done();
 /** @} */ // end of zmqreqrepservice

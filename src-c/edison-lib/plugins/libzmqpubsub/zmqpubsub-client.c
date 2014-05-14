@@ -44,17 +44,17 @@ struct ZMQPubSubClient {
  */
 struct ZMQPubSubClient zmqContainer;
 
-/** Creates the context object and subscriber socket. With the help of the ServiceQuery parameter the
-subscriber socket establishes connection to the address and port to initiate communication.
+/** Creates the context object and subscriber socket. With the help of the ServiceQuery parameter the subscriber socket
+establishes connection to the address and port to initiate communication.
 
-* @param servQuery an void pointer
+* @param ClientServiceQuery an void pointer
 * @return The result code
 */
-int init(void *servQuery) {
+int init(void *ClientServiceQuery) {
 	#if DEBUG
 		printf("In createClient\n");
 	#endif
-	ServiceQuery *serviceQuery = (ServiceQuery *)servQuery;
+	ServiceQuery *serviceQuery = (ServiceQuery *)ClientServiceQuery;
 	zmqContainer.context = zmq_ctx_new();
 	#if DEBUG
 		printf("context initialised\n");
@@ -103,11 +103,11 @@ int subscribe(char *topic) {
 
 /** Receive the message. The client will be passing an handler which is used as a callback mechanism to pass the
 received message.
-* @param handler a callback handler
+* @param subscribeClientHandler a callback handler
 * @return The result code
 
 */
-int receive(void (*handler)(char *message, Context context)) {
+int receive(void (*subscribeClientHandler)(char *message, Context context)) {
     #if DEBUG
         printf("In receive Waiting for the message\n");
     #endif

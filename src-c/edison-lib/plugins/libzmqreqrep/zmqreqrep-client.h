@@ -25,10 +25,10 @@
 *  @{
 
 */
-int init(void *serviceQuery);
+int init(void *requestClientQuery);
 int send(char *message, Context);
 int subscribe(char *topic);
 int unsubscribe(char *topic);
-int receive(void (*handler)(char *message, Context context));
+int receive(void (*requestClientHandler)(char *message, Context context));
 int done();
 /** @} */ // end of zmqreqrepclient

@@ -47,17 +47,17 @@ struct ZMQReqRepService {
  */
 struct ZMQReqRepService zmqContainer;
 
-/** Creates the context object and responder socket. With the help of the ServiceDescription parameter the
-responder socket binds connection to the address and port to initiate communication.
+/** Creates the context object and responder socket. With the help of the ServiceDescription parameter the responder
+socket binds connection to the address and port to initiate communication.
 
-* @param serviceDesc an void pointer
+* @param responseServiceDesc an void pointer
 * @return The result code
 */
-int init(void *serviceDesc) {
+int init(void *responseServiceDesc) {
 	#if DEBUG
 		printf("context initialised\n");
 	#endif
-	ServiceDescription *serviceDescription = (ServiceDescription *)serviceDesc;
+	ServiceDescription *serviceDescription = (ServiceDescription *)responseServiceDesc;
 	zmqContainer.context = zmq_ctx_new();
 
     // This is server side
@@ -123,11 +123,11 @@ int manageClient(void *client,Context context) {
 /** Receive the message. The service will be receiving an handler which is used as a callback mechanism to pass the
 received message.
 
-* @param handler a callback handler which takes a client,message,context object as params
+* @param responseServiceHandler a callback handler which takes a client,message,context object as params
 * @return The result code
 
 */
-int receive(void (*handler)(void *client,char *message,Context context)) {
+int receive(void (*responseServiceHandler)(void *client,char *message,Context context)) {
     #if DEBUG
         printf("In receive\n");
     #endif
@@ -144,7 +144,7 @@ int receive(void (*handler)(void *client,char *message,Context context)) {
     Context context;
     context.name = "event";
     context.value = "message";
-    handler(client,message,context);
+    responseServiceHandler(client,message,context);
     free(message);
 }
 
