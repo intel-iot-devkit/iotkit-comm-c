@@ -28,7 +28,7 @@ SET_TARGET_PROPERTIES(${ZMQ_REQ_CLIENT} PROPERTIES LINKER_LANGUAGE C)
 SET_TARGET_PROPERTIES(${ZMQ_REP_SERVICE} PROPERTIES LINKER_LANGUAGE C)
 
 # Link the executables
-TARGET_LINK_LIBRARIES(${ZMQ_SUB_CLIENT} libzmq.so libpthread.so libdns_sd.so libm.so libdl.so)
-TARGET_LINK_LIBRARIES(${ZMQ_PUB_SERVICE} libzmq.so libpthread.so libdns_sd.so libm.so libdl.so)
-TARGET_LINK_LIBRARIES(${ZMQ_REQ_CLIENT} libzmq.so libpthread.so libdns_sd.so libm.so libdl.so)
-TARGET_LINK_LIBRARIES(${ZMQ_REP_SERVICE} libzmq.so libpthread.so libdns_sd.so libm.so libdl.so)
+TARGET_LINK_LIBRARIES(${ZMQ_SUB_CLIENT} zmq pthread dns_sd m dl)
+TARGET_LINK_LIBRARIES(${ZMQ_PUB_SERVICE} zmq pthread dns_sd m dl)
+TARGET_LINK_LIBRARIES(${ZMQ_REQ_CLIENT} zmq pthread dns_sd m dl)
+TARGET_LINK_LIBRARIES(${ZMQ_REP_SERVICE} zmq pthread dns_sd m dl)

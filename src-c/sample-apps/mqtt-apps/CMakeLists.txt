@@ -18,5 +18,5 @@ SET_TARGET_PROPERTIES(${MQTT_CLIENT_NAME} PROPERTIES LINKER_LANGUAGE C)
 SET_TARGET_PROPERTIES(${MQTT_SERVICE_NAME} PROPERTIES LINKER_LANGUAGE C)
 
 # Link the shared library
-TARGET_LINK_LIBRARIES(${MQTT_CLIENT_NAME} libpaho-mqtt3as.so libpthread.so libdns_sd.so libm.so libdl.so)
-TARGET_LINK_LIBRARIES(${MQTT_SERVICE_NAME} libpaho-mqtt3as.so libpthread.so libdns_sd.so libm.so libdl.so)
+TARGET_LINK_LIBRARIES(${MQTT_CLIENT_NAME} paho-mqtt3as pthread dns_sd m dl)
+TARGET_LINK_LIBRARIES(${MQTT_SERVICE_NAME} paho-mqtt3as pthread dns_sd m dl)
