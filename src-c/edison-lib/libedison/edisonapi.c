@@ -382,35 +382,35 @@ void cleanUpService(CommServiceHandle *commHandle)
  * @param[out] commHandle Service communication handler
  * @return returns true upon successful initializing and false otherwise
  */
-int loadServiceCommInterfaces(CommServiceHandle *commHandle){
+bool loadServiceCommInterfaces(CommServiceHandle *commHandle){
 
     void *handle = commHandle->handle;
 
     dlerror();	/* Clear any existing error */
 	commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[1]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->publish = (int (*)(char *,Context)) dlsym(handle, g_funcSignatures[2]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->manageClient = (int (*)(void *,Context)) dlsym(handle, g_funcSignatures[3]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->receive = (int (*)(void (*)(void *, char *, Context))) dlsym(handle, g_funcSignatures[4]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
-	return TRUE;
+	return true;
 }
 
 /** Service Communication plugin loader. Loads the shared library and
@@ -525,35 +525,35 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
  * @param[out] commHandle client communication handler
  * @return returns true upon successful initializing and false otherwise
  */
-int loadClientCommInterfaces(CommClientHandle *commHandle){
+bool loadClientCommInterfaces(CommClientHandle *commHandle){
 
     void *handle = commHandle->handle;
 
     dlerror();	/* Clear any existing error */
 	commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[1]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->subscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[2]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->unsubscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[3]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->receive = (int (*)(void (*)(char *, Context))) dlsym(handle, g_funcSignatures[4]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
 	dlerror();	/* Clear any existing error */
 	commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
-	if (!checkDLError()) return FALSE;
+	if (!checkDLError()) return false;
 
-	return TRUE;
+	return true;
 }
 
 /** Initializes Client object. Creates the client object and calls its init method for further initialization
@@ -655,7 +655,7 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     }*/
 
 
-    if(loadClientCommInterfaces(commHandle) == FALSE)
+    if(loadClientCommInterfaces(commHandle) == false)
         cleanUpClient(commHandle);
 
     commHandle->init(queryDesc);
@@ -677,16 +677,16 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
  * @param[in] absPath absolute path of a file
  * @return returns true if the file exists and false otherwise
  */
-int fileExists(char *absPath)
+bool fileExists(char *absPath)
 {
     FILE *fp;
     if (fp = fopen(absPath, "r"))
     {
         fclose(fp);
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 /** Initializes Service object. Creates the service object and calls its init method for further initialization
@@ -776,7 +776,7 @@ CommServiceHandle *createService(ServiceDescription *description)
         }
     }while(substrStart = strstr(substrStart, ":") != NULL);
 
-    if(loadServiceCommInterfaces(commHandle) == FALSE)
+    if(loadServiceCommInterfaces(commHandle) == false)
             cleanUpService(commHandle);
 
     commHandle->init(description);

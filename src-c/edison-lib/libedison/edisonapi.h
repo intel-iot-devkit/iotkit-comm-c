@@ -28,10 +28,6 @@
 #include "util.h"
 
 
-#define FALSE 0
-#define TRUE 1
-
-
 /** System level Configuration data read from the config JSON
  */
 typedef struct _ConfigFileData {
