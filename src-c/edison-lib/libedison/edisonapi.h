@@ -121,4 +121,6 @@ CommServiceHandle *createService(ServiceDescription *);
 void cleanUpClient(CommClientHandle *);
 void cleanUpService(CommServiceHandle *);
 
+bool fileExists(char *absPath);
+
 #endif

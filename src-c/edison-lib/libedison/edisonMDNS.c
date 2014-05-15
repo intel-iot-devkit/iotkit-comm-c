@@ -1013,7 +1013,7 @@ void WaitToAdvertiseService(ServiceDescription *description,
 
 /** Initialize local addresses on various network interfaces
  */
-bool setMyAddresses(){
+bool setMyAddresses(void){
 
     int iSocket;
     struct if_nameindex *if_ni, *i;
