@@ -122,7 +122,7 @@ int receive(void (*subscribeClientHandler)(char *message, Context context)) {
     #if DEBUG
         printf ("calling handler\n");
     #endif
-    handler(contents,context);
+    subscribeClientHandler(contents,context);
     #if DEBUG
         printf ("\nfree the contents\n");
     #endif
