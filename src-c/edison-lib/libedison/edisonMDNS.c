@@ -1013,7 +1013,7 @@ void WaitToAdvertiseService(ServiceDescription *description,
 
 /** Initialize local addresses on various network interfaces
  */
-int setMyAddresses(){
+bool setMyAddresses(){
 
     int iSocket;
     struct if_nameindex *if_ni, *i;
@@ -1022,7 +1022,7 @@ int setMyAddresses(){
     if ((iSocket = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
     {
       perror("socket");
-      return -1;
+      return false;
     }
 
     if_ni = if_nameindex();
@@ -1039,7 +1039,7 @@ int setMyAddresses(){
             }
             perror("ioctl");
             close(iSocket);
-            return -1;
+            return false;
         }
         myaddressesCount ++;
     }
@@ -1059,7 +1059,7 @@ int setMyAddresses(){
             }
             perror("ioctl");
             close(iSocket);
-            return -1;
+            return false;
         }
 
         myaddresses[j++] = strdup(inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr));
@@ -1070,7 +1070,7 @@ int setMyAddresses(){
     if_freenameindex(if_ni);
     close(iSocket);
 
-    return 0;
+    return true;
 }
 
 #if DEBUG
