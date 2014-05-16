@@ -587,30 +587,38 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     char *substrEnd, *folderPath;
     do{
         if(*substrStart == ':') substrStart++;
-
+        #if DEBUG
+            printf("\nsubstrStart path %s\n",substrStart);
+        #endif
         substrEnd = strstr(substrStart, ":");
         if(substrEnd == NULL){
             folderPath = strdup(substrStart);
         } else {
             folderPath = strndup(substrStart, substrEnd - substrStart);
         }
-
+        #if DEBUG
+            printf("\nfolderPath %s\n",folderPath);
+        #endif
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
             strcpy(cwd_temp, edisonlibcdir);
         }
-
+        #if DEBUG
+            printf("\nedisonlibcdir path %s\n",edisonlibcdir);
+        #endif
         strcat(cwd_temp, folderPath);
         strcat(cwd_temp, "/lib");
         strcat(cwd_temp, queryDesc->type.name);
         strcat(cwd_temp, "-client.so");
-
+        #if DEBUG
+            printf("\nplugin name %s\n",cwd_temp);
+        #endif
         if(fileExists(cwd_temp)){
             commHandle = loadClientCommPlugin(cwd_temp);
             break;
         }
-    }while(substrStart = strstr(substrStart, ":") != NULL);
+    }while((substrStart = strstr(substrStart, ":")) != NULL);
 
     if (!commHandle) cleanUpClient(commHandle);
 
@@ -638,7 +646,9 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
         strcat(cwd_temp, "/");
         strcat(cwd_temp, *(commHandle->interface));
         strcat(cwd_temp, ".json");
-
+        #if DEBUG
+            printf("\ninterface file name %s\n",cwd_temp);
+        #endif
         if(fileExists(cwd_temp)){
             if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
             break;
@@ -742,7 +752,7 @@ CommServiceHandle *createService(ServiceDescription *description)
             commHandle = loadServiceCommPlugin(cwd_temp);
             break;
         }
-    }while(substrStart = strstr(substrStart, ":") != NULL);
+    }while((substrStart = strstr(substrStart, ":")) != NULL);
 
     if (!commHandle) cleanUpService(commHandle);
 
