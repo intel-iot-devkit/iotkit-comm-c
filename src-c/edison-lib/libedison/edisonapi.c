@@ -106,7 +106,6 @@ void concatUserDefinedConfigurations(){
                    jitem = cJSON_GetObjectItem(json, "pluginDirPaths");
                    if (!isJsonString(jitem)) handleParseConfigError();
 
-//                   g_configData.pluginDir = strdup(jitem->valuestring);
                     pathSize = strlen(g_configData.pluginDir) + strlen(jitem->valuestring) + 2;
                     char *pluginDirPaths = (char *)malloc(sizeof(char) * pathSize);
                    strcpy(pluginDirPaths, g_configData.pluginDir);
@@ -484,22 +483,6 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
     }
     else
     {
-        // Check to see if filepath has the right extension as ".so"
-        // TODO: verify path brokes when . appears in the path
-        /*if ((ptr = strrchr(plugin_path, '.')) != NULL)
-        {
-            if (strcmp(ptr, ".so") != 0)
-            {
-            fprintf(stderr, "Invalid plugin file %s\n", plugin_path);
-            *ptr = '\0';
-            strcat(plugin_path, ".so");
-            }
-        }
-        else
-        {
-            strcat(plugin_path, ".so");
-        }*/
-
         handle = dlopen(plugin_path, RTLD_LAZY);
         if (!handle)
         {
@@ -654,15 +637,6 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
             break;
         }
     }while(substrStart = strstr(substrStart, ":") != NULL);
-
-    /*if(strstr(g_configData.pluginInterfaceDir, ":") == NULL){
-    // Parse plugin interface file
-    strcpy(cwd_temp, edisonlibcdir);
-    strcat(cwd_temp, "libedison/");
-    strcat(cwd_temp, g_configData.pluginInterfaceDir);
-    strcat(cwd_temp, "/edison-client-interface.json");
-    if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
-    }*/
 
 
     if(loadClientCommInterfaces(commHandle) == false)
