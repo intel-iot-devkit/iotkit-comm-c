@@ -61,7 +61,7 @@ typedef struct {
     Interfaces **interfaces;
     int interfacesCount;
     void *handle;	// handle to the library
-} CommClientHandle, CommServiceHandle;
+} CommHandle;
 
 
 //typedef enum { ADDED, REMOVED, UNKNOWN/home/skothurx/mango/edison-api/src-c/edison-lib/libedison/plugin-interfaces } ServiceStatus;
@@ -106,11 +106,10 @@ int g_funcEntries;
 
 
 
-CommClientHandle *createClient(ServiceQuery *);
-CommServiceHandle *createService(ServiceDescription *);
+CommHandle *createClient(ServiceQuery *);
+CommHandle *createService(ServiceDescription *);
 
-void cleanUpClient(CommClientHandle *);
-void cleanUpService(CommServiceHandle *);
+void cleanUp(CommHandle *);
 
 bool fileExists(char *absPath);
 
