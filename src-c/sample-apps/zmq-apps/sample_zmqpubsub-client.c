@@ -38,12 +38,19 @@ void clientMessageCallback(char *message, Context context){
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommClientHandle *commHandle)
+void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle)
 {
+
+    int (**subscribe)(char *);
+    int (**receive)(void (*)(char *, Context));
+
+    subscribe = commInterfacesLookup(commHandle, "subscribe");
+    receive = commInterfacesLookup(commHandle, "receive");
+
     if (commHandle != NULL) {
         while (1) {
-            commHandle->subscribe("vehicle");
-            commHandle->receive(clientMessageCallback);
+            (*subscribe)("vehicle");
+            (*receive)(clientMessageCallback);
             sleep(2);
         }
     } else {

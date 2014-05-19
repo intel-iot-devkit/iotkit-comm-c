@@ -309,6 +309,7 @@ bool parsePluginInterfaces(char *inf_file)
             while (child) numentries++,child=child->next; 
             if (!numentries) handleParseInterfacesError();
 
+            g_funcEntries = numentries;
             g_funcSignatures = (char **)malloc(numentries*sizeof(char*));
             if (!g_funcSignatures) handleParseInterfacesError();
 
@@ -316,7 +317,7 @@ bool parsePluginInterfaces(char *inf_file)
             child=jitem->child;
             while (child)
             {
-		if (!isJsonString(child)) handleParseInterfacesError();
+		        if (!isJsonString(child)) handleParseInterfacesError();
 
                 g_funcSignatures[i] = strdup(child->valuestring);    
                 child = child->next;
@@ -349,7 +350,7 @@ void freeGlobals()
 /** clean up by freeing globals and client handler
  * @param[in] commHandle communication handle
  */
-void cleanUpClient(CommClientHandle *commHandle)
+void cleanUp(CommHandle *commHandle)
 {
     freeGlobals();
     if (commHandle) 
@@ -361,53 +362,35 @@ void cleanUpClient(CommClientHandle *commHandle)
     }
 }
 
-/** clean up by freeing globals and service handler
- * @param[in] commHandle communication handle
- */
-void cleanUpService(CommServiceHandle *commHandle)
-{
-    freeGlobals();
-    if (commHandle)
-    {
-	if (commHandle->handle) {
-	    dlclose(commHandle->handle);
-	}
-	free(commHandle);
-    }
-}
-
-/** Initializes Service Communication handler. Loads the shared library and
+/** Initializes Communication handler. Loads the shared library and
  * initializes Service communication handler with the specified functions defined in the plugin interface
  * @param[out] commHandle Service communication handler
  * @return returns true upon successful initializing and false otherwise
  */
-bool loadServiceCommInterfaces(CommServiceHandle *commHandle){
+bool loadCommInterfaces(CommHandle *commHandle){
 
     void *handle = commHandle->handle;
+    int i;
+
+    commHandle->interfacesCount = g_funcEntries;
+    commHandle->interfaces = (Interfaces **)malloc(sizeof(Interfaces *) * g_funcEntries);
 
     dlerror();	/* Clear any existing error */
-	commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
-	if (!checkDLError()) return false;
+    for(i = 0; i < g_funcEntries; i ++){
+        commHandle->interfaces[i] = (Interfaces *)malloc(sizeof(Interfaces));
 
-	dlerror();	/* Clear any existing error */
-	commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[1]);
-	if (!checkDLError()) return false;
+        commHandle->interfaces[i]->iname = g_funcSignatures[i]; // copy the function name
+        commHandle->interfaces[i]->iptr = dlsym(handle, g_funcSignatures[i]); // copy the function address - void pointer
+        if (!checkDLError()) return false;
+    }
 
-	dlerror();	/* Clear any existing error */
-	commHandle->publish = (int (*)(char *,Context)) dlsym(handle, g_funcSignatures[2]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->manageClient = (int (*)(void *,Context)) dlsym(handle, g_funcSignatures[3]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->receive = (int (*)(void (*)(void *, char *, Context))) dlsym(handle, g_funcSignatures[4]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
-	if (!checkDLError()) return false;
+    dlerror();	// Clear any existing error
+    // this is a special function to initialize the plugin;
+    // this function call takes Service Description as a parameter
+	commHandle->init = (int (*)(void *)) dlsym(handle, "init");
+	if (!checkDLError()) {
+	    commHandle->init = NULL;
+	}
 
 	return true;
 }
@@ -417,11 +400,11 @@ bool loadServiceCommInterfaces(CommServiceHandle *commHandle){
  * @param[in] plugin_path path to plugin
  * @return returns service handle upon successful and NULL otherwise
  */
-CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
+CommHandle *loadCommPlugin(char *plugin_path)
 {
     char *ptr;
     void *handle;
-    CommServiceHandle *commHandle = (CommServiceHandle *)malloc(sizeof(CommServiceHandle));
+    CommHandle *commHandle = (CommHandle *)malloc(sizeof(CommHandle));
     if (commHandle == NULL)
     {
 	fprintf(stderr,"Can't alloc memory for commHandle\n");
@@ -430,20 +413,6 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
     else
     {
     commHandle->handle = NULL;
-	// Check to see if filepath has the right extension as ".so"
-	if ((ptr = strrchr(plugin_path, '.')) != NULL) 
-	{
-	    if (strcmp(ptr, ".so") != 0) 
-	    {
-		fprintf(stderr, "Invalid plugin file %s\n", plugin_path);
-		*ptr = '\0';
-		strcat(plugin_path, ".so");
-	    }
-	}
-	else 
-	{
-	    strcat(plugin_path, ".so");
-	}
 
 	handle = dlopen(plugin_path, RTLD_LAZY);
 	if (!handle) 
@@ -466,86 +435,14 @@ CommServiceHandle *loadServiceCommPlugin(char *plugin_path)
     }
 }
 
-/** Client Communication plugin loader. Loads the shared library and
- * read the interface details
- * @param[in] plugin_path path to plugin
- * @return returns client handle upon successful and NULL otherwise
- */
-CommClientHandle *loadClientCommPlugin(char *plugin_path)
-{
-    char *ptr;
-    void *handle;
-    CommClientHandle *commHandle = (CommClientHandle *)malloc(sizeof(CommClientHandle));
-    if (commHandle == NULL)
-    {
-    	fprintf(stderr,"Can't alloc memory for commHandle\n");
-	    return NULL;
-    }
-    else
-    {
-        handle = dlopen(plugin_path, RTLD_LAZY);
-        if (!handle)
-        {
-            fprintf(stderr, "DL open error %s\n", dlerror());
-            commHandle->handle = NULL;
-            return NULL;
-        }
-        else
-        {
-
-            dlerror();	/* Clear any existing error */
-            commHandle->interface = (char **) dlsym(handle, "interface");
-            if (!checkDLError()) return NULL;
-
-            commHandle->handle = handle;
-        }
-    	return commHandle;
-    }
-}
-
-/** Initializes Client Communication handler. Loads the shared library and
- * initializes client communication handler with the specified functions defined in the plugin interface
- * @param[out] commHandle client communication handler
- * @return returns true upon successful initializing and false otherwise
- */
-bool loadClientCommInterfaces(CommClientHandle *commHandle){
-
-    void *handle = commHandle->handle;
-
-    dlerror();	/* Clear any existing error */
-	commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[1]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->subscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[2]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->unsubscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[3]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->receive = (int (*)(void (*)(char *, Context))) dlsym(handle, g_funcSignatures[4]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
-	if (!checkDLError()) return false;
-
-	return true;
-}
 
 /** Initializes Client object. Creates the client object and calls its init method for further initialization
  * @param[in] queryDesc query description
  * @return returns client handle upon successful and NULL otherwise
  */
-CommClientHandle *createClient(ServiceQuery *queryDesc)
+CommHandle *createClient(ServiceQuery *queryDesc)
 {
-    CommClientHandle *commHandle;
+    CommHandle *commHandle;
     char *edisonlibcdir;
 
     char cwd_temp[1024];
@@ -598,12 +495,12 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
             printf("\nplugin name %s\n",cwd_temp);
         #endif
         if(fileExists(cwd_temp)){
-            commHandle = loadClientCommPlugin(cwd_temp);
+            commHandle = loadCommPlugin(cwd_temp);
             break;
         }
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
-    if (!commHandle) cleanUpClient(commHandle);
+    if (!commHandle) cleanUp(commHandle);
 
     // Considers the last path and loads the plugin interface
     substrStart = g_configData.pluginInterfaceDir;
@@ -639,10 +536,12 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     }while(substrStart = strstr(substrStart, ":") != NULL);
 
 
-    if(loadClientCommInterfaces(commHandle) == false)
-        cleanUpClient(commHandle);
+    if(loadCommInterfaces(commHandle) == false)
+        cleanUp(commHandle);
 
-    commHandle->init(queryDesc);
+    if(commHandle->init){
+        commHandle->init(queryDesc);
+    }
 
     /*strcpy(cwd_temp, edisonlibcdir);
     strcat(cwd_temp, g_configData.pluginDir);
@@ -677,9 +576,9 @@ bool fileExists(char *absPath)
  * @param[in] description service description
  * @return returns service handle upon successful and NULL otherwise
  */
-CommServiceHandle *createService(ServiceDescription *description)
+CommHandle *createService(ServiceDescription *description)
 {
-    CommServiceHandle *commHandle = NULL;
+    CommHandle *commHandle = NULL;
     char *edisonlibcdir;
 
     char cwd_temp[1024];
@@ -723,12 +622,12 @@ CommServiceHandle *createService(ServiceDescription *description)
         strcat(cwd_temp, "-service.so");
 
         if(fileExists(cwd_temp)){
-            commHandle = loadServiceCommPlugin(cwd_temp);
+            commHandle = loadCommPlugin(cwd_temp);
             break;
         }
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
-    if (!commHandle) cleanUpService(commHandle);
+    if (!commHandle) cleanUp(commHandle);
 
     // Considers the last path and loads the plugin interface
     substrStart = g_configData.pluginInterfaceDir;
@@ -760,19 +659,35 @@ CommServiceHandle *createService(ServiceDescription *description)
         }
     }while(substrStart = strstr(substrStart, ":") != NULL);
 
-    if(loadServiceCommInterfaces(commHandle) == false)
-            cleanUpService(commHandle);
+    if(loadCommInterfaces(commHandle) == false)
+            cleanUp(commHandle);
 
-    commHandle->init(description);
+    if(commHandle->init){
+        commHandle->init(description);
+    }
 
     return commHandle;
 }
-    
+
+void* commInterfacesLookup(CommHandle *commHandle, char *funcname){
+
+    int i;
+
+    for(i = 0; i < commHandle->interfacesCount; i ++){
+        if(strcmp(commHandle->interfaces[i]->iname, funcname) == 0){
+            return &(commHandle->interfaces[i]->iptr);
+        }
+    }
+
+    return NULL;
+}
+
+
 #if DEBUG
 int main(int argc, char *argv[])
 {
     ServiceDescription *description = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
-    CommClientHandle *commHandle = createClient(description);
+    CommHandle *commHandle = createClient(description);
 
     if (commHandle) {
     Context context;
