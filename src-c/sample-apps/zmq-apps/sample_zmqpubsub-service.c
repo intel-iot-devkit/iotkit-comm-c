@@ -31,14 +31,19 @@
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
  */
-void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommServiceHandle *serviceHandle)
+void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommHandle *serviceHandle)
 {
 	    if (serviceHandle != NULL) {
-            Context context;
-            while(1) {
-                serviceHandle->publish("vehicle: car",context);
-                sleep(2);
-            }
+
+	    int (**publish)(char *,Context context);
+
+        publish = commInterfacesLookup(serviceHandle, "publish");
+
+        Context context;
+        while(1) {
+            (*publish)("vehicle: car",context);
+            sleep(2);
+        }
         } else {
             puts("\nComm Handle is NULL\n");
         }

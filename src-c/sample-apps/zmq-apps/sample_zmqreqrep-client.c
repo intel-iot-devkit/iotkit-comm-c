@@ -39,13 +39,20 @@ void reqMessageCallback(char *message, Context context) {
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void reqDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommClientHandle *commHandle)
+void reqDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle)
 {
         if (commHandle != NULL) {
+
+        int (**send)(char *, Context context);
+        int (**receive)(void (*)(char *, Context));
         Context context;
+
+        send = commInterfacesLookup(commHandle, "send");
+        receive = commInterfacesLookup(commHandle, "receive"); //(int (*)(void (*)(char *, Context)))
+
         while (1) {
-            commHandle->send("toys",context);
-            commHandle->receive(reqMessageCallback);
+            (*send)("toys",context);
+            (*receive)(reqMessageCallback);
             sleep(2);
         }
         } else {

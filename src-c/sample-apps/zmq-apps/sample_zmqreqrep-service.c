@@ -40,14 +40,20 @@ void repMessageCallback(void *client, char *message, Context context) {
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
  */
-void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommServiceHandle *serviceHandle)
+void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommHandle *serviceHandle)
 {
         if (serviceHandle != NULL) {
 	    void *client;
 	    Context context;
+	    void (**sendTo)(void *, char *, Context context);
+	    int (**receive)(void (*)(void *, char *, Context context));
+
+        sendTo = commInterfacesLookup(serviceHandle, "sendTo"); //(int (*)(void *, char *, Context))
+        receive = commInterfacesLookup(serviceHandle, "receive"); //(int (*)(void *, char *, Context))
+
 	    while(1) {
-            serviceHandle->sendTo(client,"train bike car",context);
-            serviceHandle->receive(repMessageCallback);
+            (*sendTo)(client,"train bike car",context);
+            (*receive)(repMessageCallback);
             sleep(2);
         }
         } else {
