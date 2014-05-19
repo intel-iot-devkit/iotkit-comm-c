@@ -1,8 +1,6 @@
-var path = require('path');
-var expect = require('chai').expect;
-
-exports.run = function (runAsTest, done) {
+exports.run = function () {
   "use strict";
+  var path = require('path');
   var edisonLib = require('edisonapi');
 
   var validator = new edisonLib.ServiceSpecValidator();
@@ -50,35 +48,13 @@ exports.run = function (runAsTest, done) {
           console.log(context.event);
       }
     });
-
-    if (runAsTest) {
-      expect(service.comm).to.not.be.undefined;
-      if (done) done();
-    }
-
   });
 };
 
-//exports.runTest = function () {
-//  "use strict";
-//
-//};
-
 if (process.argv[2] === 'dependency') { // running as a dependency to another test
-  console.log("running as dependency");
-  exports.run(false);
-} else {
-//  console.log("running as test");
-//  describe('#mqtt-mini-broker', function () {
-//    it("tests if mqtt mini broker started correctly", function(done) {
-//      "use strict";
-//
-//      try {
-//        exports.run(true, done);
-//      } catch (err) {
-//        console.log(err);
-//
-//      }
-//    });
-//  });
+  exports.run();
+} else if (process.argv[1] === __filename) { // running from command line
+  exports.run();
+} else { // run by mocha as a test
+  // do nothing
 }

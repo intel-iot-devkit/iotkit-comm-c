@@ -11,7 +11,12 @@ describe('[browse-services]', function () {
     mqttservice = spawn('node', [path.join(__dirname, 'mqtt-mini-broadcast-broker.js'), 'dependency']);
   });
 
-  it("should find a service for the given query", function(done) {
+  after(function() {
+    "use strict";
+    mqttservice.kill();
+  });
+
+  it("should be able to find a service for the given query", function(done) {
     var edisonLib = require('edisonapi');
 
     var query = new edisonLib.ServiceQuery();
