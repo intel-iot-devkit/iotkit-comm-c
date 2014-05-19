@@ -309,6 +309,7 @@ bool parsePluginInterfaces(char *inf_file)
             while (child) numentries++,child=child->next; 
             if (!numentries) handleParseInterfacesError();
 
+            g_funcEntries = numentries;
             g_funcSignatures = (char **)malloc(numentries*sizeof(char*));
             if (!g_funcSignatures) handleParseInterfacesError();
 
@@ -316,7 +317,7 @@ bool parsePluginInterfaces(char *inf_file)
             child=jitem->child;
             while (child)
             {
-		if (!isJsonString(child)) handleParseInterfacesError();
+		        if (!isJsonString(child)) handleParseInterfacesError();
 
                 g_funcSignatures[i] = strdup(child->valuestring);    
                 child = child->next;
@@ -384,30 +385,27 @@ void cleanUpService(CommServiceHandle *commHandle)
 bool loadServiceCommInterfaces(CommServiceHandle *commHandle){
 
     void *handle = commHandle->handle;
+    int i;
+
+    commHandle->interfacesCount = g_funcEntries;
+    commHandle->interfaces = (Interfaces **)malloc(sizeof(Interfaces *) * g_funcEntries);
 
     dlerror();	/* Clear any existing error */
-	commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
-	if (!checkDLError()) return false;
+    for(i = 0; i < g_funcEntries; i ++){
+        commHandle->interfaces[i] = (Interfaces *)malloc(sizeof(Interfaces));
 
-	dlerror();	/* Clear any existing error */
-	commHandle->sendTo = (int (*)(void *, char *, Context)) dlsym(handle, g_funcSignatures[1]);
-	if (!checkDLError()) return false;
+        commHandle->interfaces[i]->iname = g_funcSignatures[i]; // copy the function name
+        commHandle->interfaces[i]->iptr = dlsym(handle, g_funcSignatures[i]); // copy the function address - void pointer
+        if (!checkDLError()) return false;
+    }
 
-	dlerror();	/* Clear any existing error */
-	commHandle->publish = (int (*)(char *,Context)) dlsym(handle, g_funcSignatures[2]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->manageClient = (int (*)(void *,Context)) dlsym(handle, g_funcSignatures[3]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->receive = (int (*)(void (*)(void *, char *, Context))) dlsym(handle, g_funcSignatures[4]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
-	if (!checkDLError()) return false;
+    dlerror();	// Clear any existing error
+    // this is a special function to initialize the plugin;
+    // this function call takes Service Description as a parameter
+	commHandle->init = (int (*)(void *)) dlsym(handle, "init");
+	if (!checkDLError()) {
+	    commHandle->init = NULL;
+	}
 
 	return true;
 }
@@ -511,30 +509,27 @@ CommClientHandle *loadClientCommPlugin(char *plugin_path)
 bool loadClientCommInterfaces(CommClientHandle *commHandle){
 
     void *handle = commHandle->handle;
+    int i;
+
+    commHandle->interfacesCount = g_funcEntries;
+    commHandle->interfaces = (Interfaces **)malloc(sizeof(Interfaces *) * g_funcEntries);
 
     dlerror();	/* Clear any existing error */
-	commHandle->init = (int (*)(void *)) dlsym(handle, g_funcSignatures[0]);
-	if (!checkDLError()) return false;
+    for(i = 0; i < g_funcEntries; i ++){
+        commHandle->interfaces[i] = (Interfaces *)malloc(sizeof(Interfaces));
 
-	dlerror();	/* Clear any existing error */
-	commHandle->send = (int (*)(char *, Context)) dlsym(handle, g_funcSignatures[1]);
-	if (!checkDLError()) return false;
+        commHandle->interfaces[i]->iname = g_funcSignatures[i]; // copy the function name
+        commHandle->interfaces[i]->iptr = dlsym(handle, g_funcSignatures[i]); // copy the function address - void pointer
+        if (!checkDLError()) return false;
+    }
 
-	dlerror();	/* Clear any existing error */
-	commHandle->subscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[2]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->unsubscribe = (int (*)(char *)) dlsym(handle, g_funcSignatures[3]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->receive = (int (*)(void (*)(char *, Context))) dlsym(handle, g_funcSignatures[4]);
-	if (!checkDLError()) return false;
-
-	dlerror();	/* Clear any existing error */
-	commHandle->done = (int (*)()) dlsym(handle, g_funcSignatures[5]);
-	if (!checkDLError()) return false;
+    dlerror();	// Clear any existing error
+    // this is a special function to initialize the plugin;
+    // this function call takes Service Description as a parameter
+	commHandle->init = (int (*)(void *)) dlsym(handle, "init");
+	if (!checkDLError()) {
+	    commHandle->init = NULL;
+	}
 
 	return true;
 }
@@ -642,7 +637,9 @@ CommClientHandle *createClient(ServiceQuery *queryDesc)
     if(loadClientCommInterfaces(commHandle) == false)
         cleanUpClient(commHandle);
 
-    commHandle->init(queryDesc);
+    if(commHandle->init){
+        commHandle->init(queryDesc);
+    }
 
     /*strcpy(cwd_temp, edisonlibcdir);
     strcat(cwd_temp, g_configData.pluginDir);
@@ -763,11 +760,27 @@ CommServiceHandle *createService(ServiceDescription *description)
     if(loadServiceCommInterfaces(commHandle) == false)
             cleanUpService(commHandle);
 
-    commHandle->init(description);
+    if(commHandle->init){
+        commHandle->init(description);
+    }
 
     return commHandle;
 }
-    
+
+void* commInterfacesLookup(CommClientHandle *commHandle, char *funcname){
+
+    int i;
+
+    for(i = 0; i < commHandle->interfacesCount; i ++){
+        if(strcmp(commHandle->interfaces[i]->iname, funcname) == 0){
+            return &(commHandle->interfaces[i]->iptr);
+        }
+    }
+
+    return NULL;
+}
+
+
 #if DEBUG
 int main(int argc, char *argv[])
 {

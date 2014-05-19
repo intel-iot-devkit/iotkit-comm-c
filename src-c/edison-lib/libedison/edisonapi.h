@@ -46,32 +46,22 @@ typedef struct _Context {
 } Context;
 
 
-/** Handle to the client communication plugin
- */
-typedef struct _CommClientHandle {
-    char **interface; // specifies the filename for plugin-interface json file
-    int (*init)(void *); // initializes the plugin
-    int (*send)(char *, Context context);	// int send(topic, context)
-    int (*subscribe)(char *);	// int subscribe(topic)
-    int (*unsubscribe)(char *);	// int unsubscribe(topic)
-    int (*receive)(void (*)(char *, Context)); // int setReceivedMessageHandler(handler) // handler takes 2 parameters
-    int (*done)();
-    void *handle;	// handle to the library
-} CommClientHandle;
+typedef struct _Interfaces {
+    char *iname; // interface name
+    void *iptr; // interface or function address
+} Interfaces;
 
-
-/** Handle to the service communication plugin
+/** Handle to the communication plugin
  */
-typedef struct _CommServiceHandle {
+typedef struct {
     char **interface; // specifies the filename for plugin-interface json file
+
     int (*init)(void *); // initializes the plugin
-    int (*sendTo)(void *, char *, Context context);	// int send(client, message, context) // for example, incase of mqtt... int sendTo(<<mqtt client>>, message, context);
-    int (*publish)(char *,Context context); // int publish(message,context)
-    int (*manageClient)(void *,Context context); // int manageClient(client,context) // for example, incase of mqtt... int manageClient(<<mqtt client>>, context);
-    int (*receive)(void (*)(void *, char *, Context context)); // int setReceivedMessageHandler(handler) // handler takes 3 parameters
-    int (*done)();
+
+    Interfaces **interfaces;
+    int interfacesCount;
     void *handle;	// handle to the library
-} CommServiceHandle;
+} CommClientHandle, CommServiceHandle;
 
 
 //typedef enum { ADDED, REMOVED, UNKNOWN/home/skothurx/mango/edison-api/src-c/edison-lib/libedison/plugin-interfaces } ServiceStatus;
@@ -112,6 +102,7 @@ ConfigFileData g_configData;
 /** list of function signatures specified in the interface JSON
  */
 char **g_funcSignatures;
+int g_funcEntries;
 
 
 

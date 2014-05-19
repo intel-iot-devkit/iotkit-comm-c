@@ -55,10 +55,21 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
     if(serviceHandle != NULL && !serviceStarted){
         CommClientHandle *commHandle = (CommClientHandle *) serviceHandle;
+        int (**subscribe)(char *) = NULL;
+        int (**receive)(void (*)(char *, Context)) = NULL;
 
-    //    commHandle->init("localhost", query->port, "open", NULL);
-        commHandle->receive(message_callback);
-        commHandle->subscribe("/foo");
+        subscribe = commInterfacesLookup(commHandle, "subscribe");
+        if(subscribe == NULL){
+            printf("Function \'subscribe\' is not available; please verify the Plugin documentation !!\n");
+        }
+
+        receive = commInterfacesLookup(commHandle, "receive"); //(int (*)(void (*)(char *, Context)))
+        if(receive == NULL){
+            printf("Function \'receive\' is not available; please verify the Plugin documentation !!\n");
+        }
+
+        (*receive)(message_callback);
+        (*subscribe)("/foo");
 
         serviceStarted = 1;
     }
