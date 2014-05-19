@@ -1,3 +1,0 @@
-{
-    "functions": ["registerSensor", "sendTo", "publish", "manageClient", "setReceivedMessageHandler", "done"]
-}
