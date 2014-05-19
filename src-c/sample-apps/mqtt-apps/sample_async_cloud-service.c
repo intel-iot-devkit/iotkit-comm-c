@@ -47,7 +47,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
     char msg[256];
 
     if(serviceHandle != NULL){
-        CommServiceHandle *commHandle = (CommServiceHandle *)serviceHandle;
+        CommHandle *commHandle = (CommHandle *)serviceHandle;
 
         void (**sendTo)(void *, char *, Context context);
 

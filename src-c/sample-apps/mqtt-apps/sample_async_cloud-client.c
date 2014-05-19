@@ -54,7 +54,7 @@ int serviceStarted = 0; // temporary fix to avoid recreation of client due to fr
 void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
     if(serviceHandle != NULL && !serviceStarted){
-        CommClientHandle *commHandle = (CommClientHandle *) serviceHandle;
+        CommHandle *commHandle = (CommHandle *) serviceHandle;
         int (**subscribe)(char *) = NULL;
         int (**receive)(void (*)(char *, Context)) = NULL;
 
