@@ -1,0 +1,5 @@
+
+1) Json configuration file must be named as 'edison-config.json'. This file must be placed in the user's HOME directory location. This is the configuration file where the developer will be mentioning the  'path' of the 'plugin interfaces' and 'plugins' directories.
+3) Plugin directory name & its location. You can choose any name for the 'pluginDir' property which is mentioned in the 'edison-config.json' file.
+4) Plugin binary location. The binary executables of the developed plugin must be placed directly under the Plugin directory.
+

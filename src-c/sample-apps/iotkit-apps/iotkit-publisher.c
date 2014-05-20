@@ -27,7 +27,7 @@
 #include "util.h"
 
 #ifndef DEBUG
-    #define DEBUG 1
+    #define DEBUG 0
 #endif
 
 ServiceDescription *srvDesc = NULL;
