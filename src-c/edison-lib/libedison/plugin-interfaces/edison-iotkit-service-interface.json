@@ -1,0 +1,3 @@
+{
+    "functions": ["registerSensor", "sendTo", "publish", "manageClient", "receive", "done"]
+}
