@@ -533,7 +533,7 @@ CommHandle *createClient(ServiceQuery *queryDesc)
             if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
             break;
         }
-    }while(substrStart = strstr(substrStart, ":") != NULL);
+    }while((substrStart = strstr(substrStart, ":")) != NULL);
 
 
     if(loadCommInterfaces(commHandle) == false)
@@ -657,7 +657,7 @@ CommHandle *createService(ServiceDescription *description)
             if (!parsePluginInterfaces(cwd_temp)) freeGlobals();
             break;
         }
-    }while(substrStart = strstr(substrStart, ":") != NULL);
+    }while((substrStart = strstr(substrStart, ":")) != NULL);
 
     if(loadCommInterfaces(commHandle) == false)
             cleanUp(commHandle);
