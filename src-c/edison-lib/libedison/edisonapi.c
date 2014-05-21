@@ -442,7 +442,7 @@ CommHandle *loadCommPlugin(char *plugin_path)
  */
 CommHandle *createClient(ServiceQuery *queryDesc)
 {
-    CommHandle *commHandle;
+    CommHandle *commHandle = NULL;
     char *edisonlibcdir;
 
     char cwd_temp[1024];
@@ -500,7 +500,11 @@ CommHandle *createClient(ServiceQuery *queryDesc)
         }
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
-    if (!commHandle) cleanUp(commHandle);
+    if (!commHandle) {
+        fprintf(stderr, "Plugin library \"lib%s-client.so\" not found\n", queryDesc->type.name);
+        cleanUp(commHandle);
+        return NULL;
+    }
 
     // Considers the last path and loads the plugin interface
     substrStart = g_configData.pluginInterfaceDir;
@@ -627,7 +631,11 @@ CommHandle *createService(ServiceDescription *description)
         }
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
-    if (!commHandle) cleanUp(commHandle);
+    if (!commHandle) {
+        fprintf(stderr, "Plugin library \"lib%s-service.so\" not found\n", description->type.name);
+        cleanUp(commHandle);
+        return NULL;
+    }
 
     // Considers the last path and loads the plugin interface
     substrStart = g_configData.pluginInterfaceDir;
