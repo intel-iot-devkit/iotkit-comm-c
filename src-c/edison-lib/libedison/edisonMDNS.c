@@ -536,7 +536,18 @@ static void DNSSD_API queryReply(DNSServiceRef client,
     }
 }
 
+void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void *, int32_t, void *)){
+    if(queryDesc->address == NULL){
+        queryDesc->address = "127.0.0.1"; // defaults to localhost
+    }
 
+    if(queryDesc->port == 0){
+        fprintf(stderr, "Error: Unknown Port information\n");
+        return;
+    }
+
+    callback(NULL, 0, createClient(queryDesc));
+}
 /** Browse or Discover a service from MDNS. This is a blocking call
  * @param[in] queryDesc service description
  * @param[in] userFilterCB callback method for user filter
