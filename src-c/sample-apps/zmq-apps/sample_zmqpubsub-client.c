@@ -43,14 +43,25 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
 
     int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
+    int (**unsubscribe)(char *);
 
     subscribe = commInterfacesLookup(commHandle, "subscribe");
     receive = commInterfacesLookup(commHandle, "receive");
+    unsubscribe = commInterfacesLookup(commHandle, "unsubscribe");
 
     if (commHandle != NULL) {
+        int i = 0;
         while (1) {
-            (*subscribe)("vehicle");
-            (*receive)(clientMessageCallback);
+            i++;
+            if (i < 10) {
+                (*subscribe)("vehicle");
+                (*receive)(clientMessageCallback);
+            } else {
+                if (i == 10) {
+                    (*unsubscribe)("vehicle");
+                    puts("\nSuccessfully unsubscribed won't receive anymore messages on 'vehicle'\n");
+                }
+            }
             sleep(2);
         }
     } else {
