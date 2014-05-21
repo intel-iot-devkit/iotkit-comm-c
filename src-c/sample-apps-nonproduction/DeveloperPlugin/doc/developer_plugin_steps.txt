@@ -1,5 +1,27 @@
 
-1) Json configuration file must be named as 'edison-config.json'. This file must be placed in the user's HOME directory location. This is the configuration file where the developer will be mentioning the  'path' of the 'plugin interfaces' and 'plugins' directories.
-3) Plugin directory name & its location. You can choose any name for the 'pluginDir' property which is mentioned in the 'edison-config.json' file.
-4) Plugin binary location. The binary executables of the developed plugin must be placed directly under the Plugin directory.
+* Set the Environment variable 'edisonlibcdir' point to 'edison-lib' folder
+
+* Create a Json configuration file named as '.edison-config.json'. This is an hidden file & must be placed in the user's HOME directory location.
+This is the configuration file where the developer will be mentioning the  'path' of the 'plugin interfaces' and 'plugins' directories. The Json format
+should be in the below form
+        {
+            "pluginInterfaceDirPaths": "path of plugin interfaces directory",
+            "pluginDirPaths": "path of plugin directory",
+        }
+
+   The 'path' of the interface and plugin file must NOT end with their respective file names. It should just contain the location of the directory
+    where those files are present
+
+* Plugin interface file should be placed directly under the path mentioned in 'pluginInterfaceDirPaths'. The name of this file should
+  be used exactly as it is in the plugin source. It can be used by creating a global variable called "char *interface" and giving the name
+  of this plugin interface file name to it excluding its extension.
+         Example: char *interface= "myplugin-service-interface"; /** Here the plugin interface file name is 'myplugin-service-interface.json' */
+
+* Plugin shared library file should be placed directly under the path mentioned in 'pluginDirPaths'.
+
+* The Plugin names should follow the below pattern:
+          a) For a Client it should be as 'libnameoftheplugin-client.so'
+                       Example: libzmqpubsub-client.so
+          b) For a Service it should be as 'libnameoftheplugin-service.so'
+                       Example: libzmqpubsub-service.so
 
