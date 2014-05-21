@@ -5,7 +5,7 @@
     "protocol" : "tcp"
   },
   "port" : 1883,
-  "properties" : {"dataType": "float", "keyFilePath":"../client.key", "crtFilePath":"../client.crt"},
+  "properties" : {"dataType": "float"},
   "comm_params": {"ssl": false},
   "advertise": {"locally": true, "cloud": false}
 }
