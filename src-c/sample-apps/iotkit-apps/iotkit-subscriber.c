@@ -71,9 +71,6 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
         (*receive)(message_callback);
         (*subscribe)("data");
 
-        while(1){
-        sleep(1);
-        }
         serviceStarted = 1;
     }
 }
