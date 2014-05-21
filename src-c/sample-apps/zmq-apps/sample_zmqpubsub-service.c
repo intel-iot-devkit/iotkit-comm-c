@@ -56,7 +56,7 @@ void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommHa
 int main(void) {
 
 	puts("Sample program to test the Edison ZMQ pub/sub plugin !!");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQPUBSUB.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
     if (serviceDescription)
 	    WaitToAdvertiseService(serviceDescription, pubServiceCallback);
