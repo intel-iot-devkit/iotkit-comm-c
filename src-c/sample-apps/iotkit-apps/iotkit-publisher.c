@@ -49,23 +49,23 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
     if(serviceHandle != NULL){
         CommHandle *commHandle = (CommHandle *)serviceHandle;
 
-        void (**sendTo)(char *message,Context context);
+        int (**send)(char *message,Context context);
 
-        sendTo = commInterfacesLookup(commHandle, "sendTo"); //(int (*)(void *, char *, Context))
-        if(sendTo == NULL){
-            printf("Function \'sendTo\' is not available; please verify the Plugin documentation !!\n");
+        send = commInterfacesLookup(commHandle, "send");
+        if(send == NULL){
+            printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
         }
 
 
         context.name = "topic";
-        context.value = "/server/metric/43d7606c-4f07-4f3b-958a-974c4a403039/f0-de-f1-e4-75-bb";
+        context.value = "data";
 
         while(1){
         //{"n": "garage","v": i};
             sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
-            (*sendTo)(msg, context);
+            (*send)(msg, context);
             sleep(2);
         }
     }
@@ -79,7 +79,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
  */
 int main(void) {
 
-	puts("Sample program to publish topic \'/foo\' !!");
+	puts("Sample program to publish data to IoT Cloud !!");
 
     srvDesc = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceIoTKit.json");
 
@@ -88,8 +88,10 @@ int main(void) {
     #endif
 
 
-    if(srvDesc)
-	    WaitToAdvertiseService(srvDesc, callback);
+    if (srvDesc){
+        createClientForGivenService(srvDesc, callback);
+    }
+//	    WaitToAdvertiseService(srvDesc, callback);
 
 	return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * The IoT Kit Agent publishes data to Cloud through Edison API
+ * IoTKit client plugin to enable subscribe feature through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,6 +12,9 @@
  * more details.
  */
 
+#ifndef EDISON_IOTKIT_ASYNC_H_
+#define EDISON_IOTKIT_ASYNC_H_
+
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -19,29 +22,36 @@
 
 #include <MQTTAsync.h>
 
-char *interface = "edison-iotkit-service-interface";
-
-#define CLIENTID    "ExampleIoTKITPub"
+#define CLIENTID    "IoTClientSub"
 #define QOS         1
 #define TIMEOUT     10000L
 volatile MQTTAsync_token deliveredtoken;
 
 
 #ifndef DEBUG
-    #define DEBUG 1
+    #define DEBUG 0
 #endif
 
- volatile int toStop = 0;
+volatile int toStop = 0;
  volatile int finished = 0;
+ volatile int subscribed = 0;
  volatile int connected = 0;
  volatile int quietMode = 0;
  volatile int sent = 0;
  volatile int delivery = 0;
 
-int registerSensor(char *sensorname, char *type, char *unit);
+char *interface = "edison-iotkit-client-interface"; // specifies the plugin interface json
+
+void registerSensor(char *sensorname, char *type);
 int init(void *serviceDesc);
-int sendTo(char *message,Context context);
-int publish(char *topic, char *message);
-int manageClient(char *topic);
-int receive(void (*) (char *message, Context context));
+int send(char *message, Context context);
+int subscribe();
+int unsubscribe(char *topic);
+int receive(void (*) (char *topic, Context context));
+//values for type --> open, ssl
+//int createClient(char *host, int port, char *type, void *sslargs);
+//int createService();
 int done();
+
+
+#endif /* EDISON_IOTKIT_ASYNC_H_ */

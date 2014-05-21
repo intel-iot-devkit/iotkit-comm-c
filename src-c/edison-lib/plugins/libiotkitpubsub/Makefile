@@ -17,11 +17,11 @@ all: setup
 
 clean:
 	@if test -d output ; then rm -rf output ; fi
-	@if test -f ../iotkit-service.so ; then rm ../iotkit-service.so ; fi
+	@if test -f ../libiotkit-client.so ; then rm ../libiotkit-client.so ; fi
 	
 setup: *.c *.h 
 	@if ! test -d output; then mkdir output; fi
-	cc -g -fPIC -o ./output/iotkit-service.o -c iotkit-service.c -I../../libedison/ -I../../cJSON/
-	cc -g -shared -o ./output/libiotkit-service.so ./output/iotkit-service.o -lpaho-mqtt3as
-	cp ./output/libiotkit-service.so ..
+	cc -g -fPIC -o ./output/iotkit-client.o -c iotkit-client.c -I../../libedison/ -I../../cJSON/
+	cc -g -shared -o ./output/libiotkit-client.so ./output/iotkit-client.o -lpaho-mqtt3as
+	cp ./output/libiotkit-client.so ..
 

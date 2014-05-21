@@ -55,7 +55,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
 {
     if(serviceHandle != NULL && !serviceStarted){
         CommHandle *commHandle = (CommHandle *) serviceHandle;
-        int (**subscribe)(char *) = NULL;
+        int (**subscribe)() = NULL;
         int (**receive)(void (*)(char *, Context)) = NULL;
 
         subscribe = commInterfacesLookup(commHandle, "subscribe");
@@ -69,7 +69,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
         }
 
         (*receive)(message_callback);
-        (*subscribe)("data");
+        (*subscribe)();
 
         serviceStarted = 1;
     }
@@ -89,7 +89,7 @@ bool serviceFilter(ServiceQuery *srvQuery){
  */
 int main(void) {
 
-	puts("Sample program to test the Edison MQTT pub/sub plugin !!");
+	puts("Sample program to test the Edison IoT Cloud subscribe plugin !!");
     query = (ServiceQuery *) parseServiceDescription("../serviceSpecs/temperatureServiceIoTKit.json");
 
     if (query){
