@@ -951,6 +951,68 @@ static void DNSSD_API regReply(DNSServiceRef client,
 
 }
 
+/** Advertise a service. Return an opaque object.
+ * @param[in] description service description
+ * @param[in] callback callback to be invoked upon successful service creation
+ */
+bool advertiseService(ServiceDescription *description)
+{
+    DNSServiceRef client;
+    DNSServiceErrorType err;
+    pthread_t tid;	    // thread to handle events from DNS server
+    char regtype[128];
+    TXTRecordRef txtRecord;
+
+    setMyAddresses(); // initialize my IP Addresses
+
+    // register type
+    strcpy(regtype, "_");
+    strcat(regtype, description->type.name);
+    strcat(regtype, "._");
+    strcat(regtype, description->type.protocol);
+
+    if (description->numProperties)
+    {
+	uint8_t txtLen, i=0;
+	TXTRecordCreate(&txtRecord, 0, NULL);
+	for (i=0; i<description->numProperties; i++)
+	{
+	    txtLen = (uint8_t)strlen(description->properties[i]->value);
+	    TXTRecordSetValue(&txtRecord, description->properties[i]->key,
+				    txtLen, description->properties[i]->value );
+	}
+    }
+
+    err = DNSServiceRegister
+	    (&client,
+	    0,
+	    opinterface,
+	    description->service_name,  // service name
+	    regtype,			// registration type
+	    "",				// default = local
+	    NULL,	    // only needed when creating proxy registrations
+	    htons(description->port),   // Must have a port
+	    TXTRecordGetLength(&txtRecord),
+	    TXTRecordGetBytesPtr(&txtRecord),
+	    NULL,			// callback
+	    NULL);	    // param to pass as context into regReply
+
+    if (description->numProperties)  {
+	    TXTRecordDeallocate(&txtRecord);
+    }
+
+    if (!client || err != kDNSServiceErr_NoError)
+    {
+        sprintf(lastError, "DNSServiceRegister call failed %ld\n", (long int)err);
+        if (client)
+            DNSServiceRefDeallocate(client);
+
+        return false;
+    }
+
+    return true;
+}
+
 
 /** Advertise a service. Return an opaque object which is passed along to callback.
  * Note: This is a blocking call
