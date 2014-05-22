@@ -330,8 +330,6 @@ int receive(void (*handler) (char *topic, Context context)){
     }
 #endif
 
-int clientInstanceNumber = 0;
-
 /**
  * @name initialise the MQTT client
  * @brief initialises the plugin.
@@ -366,7 +364,7 @@ int init(void *serviceDesc)
 	 	quietMode = 0;
 
         char clientID[256];
-        sprintf(clientID, "%s%d", CLIENTID, clientInstanceNumber++);
+        sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
 	 	MQTTAsync_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
