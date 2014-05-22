@@ -49,10 +49,10 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
     if(serviceHandle != NULL){
         CommHandle *commHandle = (CommHandle *)serviceHandle;
 
-        void (**sendTo)(void *, char *, Context context);
+        int (**send)(char *, Context context);
 
-        sendTo = commInterfacesLookup(commHandle, "sendTo"); //(int (*)(void *, char *, Context))
-        if(sendTo == NULL){
+        send = commInterfacesLookup(commHandle, "send"); //(int (*)(void *, char *, Context))
+        if(send == NULL){
             printf("Function \'sendTo\' is not available; please verify the Plugin documentation !!\n");
         }
 
@@ -64,7 +64,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
             sprintf(msg, "This is a test message %d", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
-            (*sendTo)(NULL, msg, context);
+            (*send)(msg, context);
             sleep(2);
         }
     }
@@ -87,8 +87,18 @@ int main(void) {
     #endif
 
 
-    if(srvDesc)
-	    WaitToAdvertiseService(srvDesc, callback); // this is a blocking call
+
+    if(srvDesc){
+
+        if(!advertiseService(srvDesc)) {
+            fprintf(stderr, "Failed to advertise the service\n");
+
+            return 0;
+        }
+
+        createClientForGivenService(srvDesc, callback);
+    }
+//	    WaitToAdvertiseService(srvDesc, callback); // this is a blocking call
 
 	return 0;
 }
