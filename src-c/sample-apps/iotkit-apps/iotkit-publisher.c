@@ -81,7 +81,7 @@ int main(void) {
 
 	puts("Sample program to publish data to IoT Cloud !!");
 
-    srvDesc = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceIoTKit.json");
+    srvDesc = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceIoTKit.json");
 
     #if DEBUG
         printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);

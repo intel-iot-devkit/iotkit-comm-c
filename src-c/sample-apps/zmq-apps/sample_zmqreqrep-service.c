@@ -67,7 +67,7 @@ void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommH
 int main(void) {
 
 	puts("Sample program to test the Edison ZMQ req/rep plugin !!");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../serviceSpecs/temperatureServiceZMQREQREP.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceZMQREQREP.json");
 
     if (serviceDescription)
 	    WaitToAdvertiseService(serviceDescription, repAdvertiseCallback);

@@ -90,7 +90,7 @@ bool serviceFilter(ServiceQuery *srvQuery){
 int main(void) {
 
 	puts("Sample program to test the Edison MQTT pub/sub plugin !!");
-    query = (ServiceQuery *) parseClientServiceQuery("../serviceQueries/temperatureServiceQueryMQTT.json");
+    query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/temperatureServiceQueryMQTT.json");
 
     if (query)
 	    WaitToDiscoverServicesFiltered(query, serviceFilter, callback);
