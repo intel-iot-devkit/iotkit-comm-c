@@ -15,9 +15,9 @@
 all: setup
 
 clean:
-	@if test -f client.out ; then rm ./client.out ; fi
-	@if test -f service.out ; then rm service.out ; fi
+	@if test -f subscriber.out ; then rm ./subscriber.out ; fi
+	@if test -f publisher.out ; then rm publisher.out ; fi
 
 setup:
-	cc -g -o service.out sample_async_cloud-service.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
-	cc -g -o client.out sample_async_cloud-client.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
+	cc -g -o publisher.out publisher.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
+	cc -g -o subscriber.out subscriber.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
