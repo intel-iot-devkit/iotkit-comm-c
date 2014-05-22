@@ -13,8 +13,8 @@
  */
 
 /**
- * @file sample_async_cloud-client.c
- * @brief Sample to demonstrate MQTT subscriber through Edison API
+ * @file iotkit-subscriber.c
+ * @brief Sample to demonstrate IoTKit subscriber through Edison API
  *
  * Provides features to connect to an MQTT Broker and subscribe to a topic
  */

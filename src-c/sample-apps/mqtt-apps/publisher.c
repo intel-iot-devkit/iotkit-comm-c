@@ -13,7 +13,7 @@
  */
 
 /**
- * @file sample_async_cloud-service.c
+ * @file publisher.c
  * @brief Sample to demonstrate MQTT publisher through Edison API
  *
  * Provides features to connect to an MQTT Broker and publish a topic

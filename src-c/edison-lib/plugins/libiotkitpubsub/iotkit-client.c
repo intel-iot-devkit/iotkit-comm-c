@@ -13,8 +13,8 @@
  */
 
 /**
- * @file edison-mqtt_async-client.c
- * @brief Implementation of MQTT Async Client plugin for Edison API
+ * @file iotkit-client.c
+ * @brief Implementation of iotkit Async Client plugin for Edison API
  *
  * Provides features to connect to an MQTT Broker and subscribe to a topic
  */

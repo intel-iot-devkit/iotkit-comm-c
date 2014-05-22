@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['repadvertisecallback',['repAdvertiseCallback',['../sample__zmqreqrep-service_8c.html#a8f2a271bb36a32c147cf44ccfe9893da',1,'sample_zmqreqrep-service.c']]],
-  ['repmessagecallback',['repMessageCallback',['../sample__zmqreqrep-service_8c.html#a5fad2852c590448d71e40b9f665d2ecc',1,'sample_zmqreqrep-service.c']]],
-  ['reqdiscoverycallback',['reqDiscoveryCallback',['../sample__zmqreqrep-client_8c.html#af8b8bdda778b3a4064967c108fc85381',1,'sample_zmqreqrep-client.c']]],
-  ['reqmessagecallback',['reqMessageCallback',['../sample__zmqreqrep-client_8c.html#ab5bacf0c18aa06e7d303d6cc918a233c',1,'sample_zmqreqrep-client.c']]]
+  ['publisher_2ec',['publisher.c',['../publisher_8c.html',1,'']]],
+  ['pubservicecallback',['pubServiceCallback',['../sample__zmqpubsub-service_8c.html#a1d8153d43306bdc45a9011225063509b',1,'sample_zmqpubsub-service.c']]]
 ];

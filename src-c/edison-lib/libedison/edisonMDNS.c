@@ -12,6 +12,13 @@
  * more details.
  */
 
+/**
+ * @file edisonMDNS.c
+ * @brief Implementation of Edison MDNS
+ *
+ * Provides features to Advertise a Service, to Discover for the available Services with Filtering Mechanism
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -536,6 +543,10 @@ static void DNSSD_API queryReply(DNSServiceRef client,
     }
 }
 
+/** Creates a client for the given ServiceDescription object
+ * @param[in] queryDesc service description
+ * @param[in] callback callback to be invoked upon successful client creation
+ */
 void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void *, int32_t, void *)){
     if(queryDesc->address == NULL){
         queryDesc->address = "127.0.0.1"; // defaults to localhost

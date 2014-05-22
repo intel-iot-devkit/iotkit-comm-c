@@ -12,6 +12,13 @@
  * more details.
  */
 
+/**
+ * @file edisonMDNS.h
+ * @brief Implementation of Edison MDNS
+ *
+ * DataStructure of DiscoverContext, ServiceCache
+ */
+
 #ifndef __EDISON_MDNS_H__
 #define __EDISON_MDNS_H__
 

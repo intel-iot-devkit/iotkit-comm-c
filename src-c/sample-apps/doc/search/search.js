@@ -7,8 +7,8 @@
 
 var indexSectionsWithContent =
 {
-  0: "cmprs",
-  1: "s",
+  0: "cimprs",
+  1: "ips",
   2: "cmprs"
 };
 

@@ -1,10 +1,7 @@
 var searchData=
 [
-  ['sample_5fasync_5fcloud_2dclient_2ec',['sample_async_cloud-client.c',['../sample__async__cloud-client_8c.html',1,'']]],
-  ['sample_5fasync_5fcloud_2dservice_2ec',['sample_async_cloud-service.c',['../sample__async__cloud-service_8c.html',1,'']]],
-  ['sample_5fzmqpubsub_2dclient_2ec',['sample_zmqpubsub-client.c',['../sample__zmqpubsub-client_8c.html',1,'']]],
-  ['sample_5fzmqpubsub_2dservice_2ec',['sample_zmqpubsub-service.c',['../sample__zmqpubsub-service_8c.html',1,'']]],
-  ['sample_5fzmqreqrep_2dclient_2ec',['sample_zmqreqrep-client.c',['../sample__zmqreqrep-client_8c.html',1,'']]],
-  ['sample_5fzmqreqrep_2dservice_2ec',['sample_zmqreqrep-service.c',['../sample__zmqreqrep-service_8c.html',1,'']]],
-  ['subdiscoverycallback',['subDiscoveryCallback',['../sample__zmqpubsub-client_8c.html#ab6a9e556ff9f4b785974c12372910e28',1,'sample_zmqpubsub-client.c']]]
+  ['repadvertisecallback',['repAdvertiseCallback',['../sample__zmqreqrep-service_8c.html#ab84cd0dabc2f3712e5bf23ecdd0df703',1,'sample_zmqreqrep-service.c']]],
+  ['repmessagecallback',['repMessageCallback',['../sample__zmqreqrep-service_8c.html#a5fad2852c590448d71e40b9f665d2ecc',1,'sample_zmqreqrep-service.c']]],
+  ['reqdiscoverycallback',['reqDiscoveryCallback',['../sample__zmqreqrep-client_8c.html#ab3e116cc671e402eed39b5abeaa86aeb',1,'sample_zmqreqrep-client.c']]],
+  ['reqmessagecallback',['reqMessageCallback',['../sample__zmqreqrep-client_8c.html#ab5bacf0c18aa06e7d303d6cc918a233c',1,'sample_zmqreqrep-client.c']]]
 ];

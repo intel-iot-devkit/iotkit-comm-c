@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.7"/>
-<title>Edison API - C Library: edison-mqtt_async-service.c File Reference</title>
+<title>Edison API - C Library: iotkit-client.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -81,11 +81,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">edison-mqtt_async-service.c File Reference</div>  </div>
+<div class="title">iotkit-client.c File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of MQTT Async Service plugin for Edison API.  
+<p>Implementation of iotkit Async Client plugin for Edison API.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -143,22 +143,35 @@ void(*&#160;</td><td class="memItemRight" valign="bottom"><b>msgArrhandler</b> )
 <tr class="separator:ab223f8bfa8bc85f6421ed0727b88ae99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
-publish to a topic</h2></td></tr>
-<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp181429ebbb595265e342aabc2de74960"></a>publish to a topic with an MQTT broker</p>
+publish a message</h2></td></tr>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrpd242988701001049cfa424b128a48f0e"></a>used to send message to a broker</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">message</td><td>which needs to be subscribed to </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>to specify the topic </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">message</td><td>to be published </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>w.r.t topic the message required to be published </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>boolean specifies whether the message is successfully published or not </dd></dl>
 </td></tr>
-<tr class="memitem:a859c1b6c3ffa6ae5cc378bf6dc85291b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a859c1b6c3ffa6ae5cc378bf6dc85291b"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>sendTo</b> (void *client1, char *message, Context context)</td></tr>
-<tr class="separator:a859c1b6c3ffa6ae5cc378bf6dc85291b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9dc531623fc56accccbc648d32a8bc8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab9dc531623fc56accccbc648d32a8bc8"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>publish</b> (char *message, Context context)</td></tr>
-<tr class="separator:ab9dc531623fc56accccbc648d32a8bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e3e664717f6ed16eb47319292f184d1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3e3e664717f6ed16eb47319292f184d1"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>send</b> (char *message, Context context)</td></tr>
+<tr class="separator:a3e3e664717f6ed16eb47319292f184d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+subscribes to a topic</h2></td></tr>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp8a0bd4f45e99d6313d5efe6cf2902f6b"></a>subscribes to a topic with an MQTT broker</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">topic</td><td>which needs to be subscribed to </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>boolean which specifies whether successfully subscribed or not </dd></dl>
+</td></tr>
+<tr class="memitem:aad76a86c945cd84cb037c5dd58ab67fe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aad76a86c945cd84cb037c5dd58ab67fe"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>subscribe</b> ()</td></tr>
+<tr class="separator:aad76a86c945cd84cb037c5dd58ab67fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 cleanup the MQTT client</h2></td></tr>
@@ -170,6 +183,20 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>done</b> ()</td></tr>
 <tr class="separator:a13435accf32d1a09663d1aa81ec96d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+unsubscribe a topic</h2></td></tr>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp0f9c9b552c6d85336e293988aa94b56d"></a>discontinues the subscription to a topic</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">topic</td><td>which has been previously subscribed to </td></tr>
+  </table>
+  </dd>
+</dl>
+</td></tr>
+<tr class="memitem:ae4e224486222659212455d4981142e38"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae4e224486222659212455d4981142e38"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>unsubscribe</b> (char *topic)</td></tr>
+<tr class="separator:ae4e224486222659212455d4981142e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 subscribe to a topic</h2></td></tr>
 <tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp31a2accc4ac7df1ac2442fc58f14d4b2"></a>registers the client's callback to be invoked on receiving a message from MQTT broker</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -179,22 +206,22 @@ subscribe to a topic</h2></td></tr>
   </dd>
 </dl>
 </td></tr>
-<tr class="memitem:a119408d65ba2ab53ceed67f070f07b2c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a119408d65ba2ab53ceed67f070f07b2c"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>receive</b> (void(*handler)(void *client, char *topic, Context context))</td></tr>
-<tr class="separator:a119408d65ba2ab53ceed67f070f07b2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1165393669226fa7d1ac0bc6c088911"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad1165393669226fa7d1ac0bc6c088911"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>manageClient</b> (void *client, Context context)</td></tr>
-<tr class="separator:ad1165393669226fa7d1ac0bc6c088911"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67784782a99fb3bf050812292cb1fca9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a67784782a99fb3bf050812292cb1fca9"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>clientInstanceNumber</b> = 0</td></tr>
+<tr class="separator:a67784782a99fb3bf050812292cb1fca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acae546d670177574af6ee8494b14e297"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acae546d670177574af6ee8494b14e297"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>receive</b> (void(*handler)(char *topic, Context context))</td></tr>
+<tr class="separator:acae546d670177574af6ee8494b14e297"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e8270f57ad88bf9f2ae699228d56f01"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3e8270f57ad88bf9f2ae699228d56f01"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>handleTrace</b> (enum MQTTASYNC_TRACE_LEVELS level, char *message)</td></tr>
 <tr class="separator:a3e8270f57ad88bf9f2ae699228d56f01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
-initialise the MQTT service</h2></td></tr>
-<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp14e58661d7b01749aeaeb66ce798c6e6"></a>initialises the plugin.</p>
+initialise the MQTT client</h2></td></tr>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp0bc47e8e7ea9789d9435001e8005d258"></a>initialises the plugin.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">serviceDesc</td><td>is the service description being registered for </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">serviceDesc</td><td>is the service description being queried for </td></tr>
   </table>
   </dd>
 </dl>
@@ -204,14 +231,29 @@ initialise the MQTT service</h2></td></tr>
 <tr class="memitem:a9f1729c09e02905bc973b19147f77f3f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9f1729c09e02905bc973b19147f77f3f"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (void *serviceDesc)</td></tr>
 <tr class="separator:a9f1729c09e02905bc973b19147f77f3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+registers a sensor</h2></td></tr>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrpac9bd7c49475b7d0178df50291c661d7"></a>registers a sensor with IoT Cloud through IoTKit Agent</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">sensorname</td><td>is the name of the sensor on the device </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>denotes the datatype of the sensor values </td></tr>
+  </table>
+  </dd>
+</dl>
+</td></tr>
+<tr class="memitem:ac5f8ad78407b0818fd427acdc83556b5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac5f8ad78407b0818fd427acdc83556b5"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>registerSensor</b> (char *sensorname, char *type)</td></tr>
+<tr class="separator:ac5f8ad78407b0818fd427acdc83556b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Implementation of MQTT Async Service plugin for Edison API. </p>
+<div class="textblock"><p>Implementation of iotkit Async Client plugin for Edison API. </p>
 <p>Provides features to connect to an MQTT Broker and subscribe to a topic </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 14 2014 16:42:45 for Edison API - C Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu May 22 2014 12:24:49 for Edison API - C Library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

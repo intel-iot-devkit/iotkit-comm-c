@@ -12,6 +12,13 @@
  * more details.
  */
 
+/**
+ * @file edisonapi.c
+ * @brief Implementation of Edison Library
+ *
+ * Provides features to create client,service, to load communication interfaces as well as to load the Plugins.
+ */
+
 #include "edisonapi.h"
 
 #ifndef DEBUG
