@@ -5,11 +5,11 @@ INCLUDE_DIRECTORIES(
 )
 
 # set the executable names
-SET(MQTT_CLIENT_NAME "mqttasyncclient")
-SET(MQTT_SERVICE_NAME "mqttasyncservice")
+SET(MQTT_CLIENT_NAME "subscriber")
+SET(MQTT_SERVICE_NAME "publisher")
 
-SET(CLIENT_LIST sample_async_cloud-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
-SET(SERVICE_LIST sample_async_cloud-service.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(CLIENT_LIST subscriber.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(SERVICE_LIST publisher.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
 
 ADD_EXECUTABLE(${MQTT_CLIENT_NAME} ${CLIENT_LIST})
 ADD_EXECUTABLE(${MQTT_SERVICE_NAME} ${SERVICE_LIST})
