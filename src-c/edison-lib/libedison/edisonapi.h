@@ -30,11 +30,6 @@
 #include <dlfcn.h>
 #include <pwd.h>
 
-#include <cJSON.h>
-
-#include "util.h"
-
-
 /** System level Configuration data read from the config JSON
  */
 typedef struct _ConfigFileData {

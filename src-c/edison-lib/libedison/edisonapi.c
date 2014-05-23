@@ -21,6 +21,9 @@
 
 #include "edisonapi.h"
 
+#include "cJSON.h"
+#include "util.h"
+
 #ifndef DEBUG
     #define DEBUG 0
 #endif

@@ -16,7 +16,7 @@
 #define __EDISON_UTIL_H__
 
 #include <stdbool.h>
-#include <cJSON.h>
+#include "cJSON.h"
 
 /** @brief Check whether JSON item is a string. */
 static inline bool isJsonString(cJSON *item) {
