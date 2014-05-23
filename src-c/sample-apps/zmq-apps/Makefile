@@ -21,7 +21,7 @@ clean:
 	@if test -f repservice.out ; then rm repservice.out ; fi
 
 setup:
-	cc -o subclient.out sample_zmqpubsub-client.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lzmq -lpthread -ldns_sd -lm -ldl
-	cc -o pubservice.out sample_zmqpubsub-service.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lzmq -lpthread -ldns_sd -lm -ldl
-	cc -o reqclient.out sample_zmqreqrep-client.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lzmq -lpthread -ldns_sd -lm -ldl
-	cc -o repservice.out sample_zmqreqrep-service.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lzmq -lpthread -ldns_sd -lm -ldl
+	cc -o subclient.out sample_zmqpubsub-client.c -lzmq -liecfapi -lpthread -ldns_sd -lm -ldl
+	cc -o pubservice.out sample_zmqpubsub-service.c -lzmq -liecfapi -lpthread -ldns_sd -lm -ldl
+	cc -o reqclient.out sample_zmqreqrep-client.c -lzmq -liecfapi -lpthread -ldns_sd -lm -ldl
+	cc -o repservice.out sample_zmqreqrep-service.c -lzmq -liecfapi -lpthread -ldns_sd -lm -ldl

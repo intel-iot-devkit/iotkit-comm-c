@@ -19,11 +19,10 @@
  */
 
 #include <stdio.h>
-#include <cJSON.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "edisonapi.h"
-#include "util.h"
+#include "iecfapi/edisonapi.h"
+#include "iecfapi/util.h"
 
 /** Callback function. Once the service is advertised this callback function will be invoked
 

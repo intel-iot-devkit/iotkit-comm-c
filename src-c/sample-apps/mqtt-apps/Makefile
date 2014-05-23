@@ -19,5 +19,5 @@ clean:
 	@if test -f publisher.out ; then rm publisher.out ; fi
 
 setup:
-	cc -g -o publisher.out publisher.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
-	cc -g -o subscriber.out subscriber.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
+	cc -g -o publisher.out publisher.c -lpaho-mqtt3as -liecfapi -lpthread -ldns_sd -lm -ldl
+	cc -g -o subscriber.out subscriber.c -lpaho-mqtt3as -liecfapi -lpthread -ldns_sd -lm -ldl

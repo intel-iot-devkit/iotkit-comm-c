@@ -5,5 +5,5 @@ clean:
 	@test -e "publisher.out" || if [ -f publisher.out ]; then rm publisher.out; fi;
 	
 plugin: *.c 
-	cc -g -o subscriber.out iotkit-subscriber.c -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
-	cc -g -o publisher.out iotkit-publisher.c -lpaho-mqtt3as -I../../edison-lib/libedison/ -I../../edison-lib/cJSON/ ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c -lpaho-mqtt3as -lpthread -ldns_sd -lm -ldl
+	cc -g -o subscriber.out iotkit-subscriber.c -lpaho-mqtt3as -liecfapi -lpthread -ldns_sd -lm -ldl
+	cc -g -o publisher.out iotkit-publisher.c -lpaho-mqtt3as -liecfapi -lpthread -ldns_sd -lm -ldl

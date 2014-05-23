@@ -19,11 +19,10 @@
  */
 
 #include <stdio.h>
-#include <cJSON.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "edisonapi.h"
-#include "util.h"
+#include "iecfapi/edisonapi.h"
+#include "iecfapi/util.h"
 
 /** Callback function. To to be invoked when it receives any messages from the Client
 * @param client the client object
