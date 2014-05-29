@@ -2,7 +2,6 @@
 MESSAGE("Building the zmq reqrep plugin")
 
 INCLUDE_DIRECTORIES(
-  ../../cJSON
   ../../libedison
   ../inc/
 )

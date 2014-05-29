@@ -9,13 +9,24 @@ PROJECT(Edison-C-Library)
 
 MESSAGE("Building the root source C Folder")
 # add the sub-directories
-
-# Copy the plugins to its directory
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_SOURCE_DIR}/edison-lib/plugins)
-
-# Copy the sample apps executable to its directory
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_SOURCE_DIR}/sample-apps)
-
 ADD_SUBDIRECTORY(edison-lib)
 ADD_SUBDIRECTORY(sample-apps)
+
+# installedison target
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_installedison.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_installedison.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(installedison
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_installedison.cmake)
+
+# uninstall target
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 

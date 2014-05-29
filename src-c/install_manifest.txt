@@ -1,0 +1,16 @@
+/usr/include/iecfapi
+/usr/lib/libiecfapi.so
+/usr/lib/libiotkit-client.so
+/usr/lib/libmqttpubsub-client.so
+/usr/lib/libzmqpubsub-client.so
+/usr/lib/libzmqpubsub-service.so
+/usr/lib/libzmqreqrep-client.so
+/usr/lib/libzmqreqrep-service.so
+/sample-apps/iotkitclient
+/sample-apps/iotkitservice
+/sample-apps/publisher
+/sample-apps/subscriber
+/sample-apps/zmqpubservice
+/sample-apps/zmqsubclient
+/sample-apps/zmqrepservice
+/sample-apps/zmqreqclient

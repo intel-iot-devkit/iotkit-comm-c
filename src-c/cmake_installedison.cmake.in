@@ -1,0 +1,38 @@
+
+# Create the include directory /usr/include/iecfapi ifnot exists
+IF(NOT EXISTS "/usr/include/iecfapi")
+      EXEC_PROGRAM(
+       "@CMAKE_COMMAND@" ARGS "-E make_directory \"/usr/include/iecfapi\""
+        OUTPUT_VARIABLE rm_out
+        RETURN_VALUE rm_retval
+        )
+
+    IF(NOT "${rm_retval}" STREQUAL 0)
+      MESSAGE(FATAL_ERROR "Create directory failed \"/usr/include/iecfapi\" permission denied execute again using sudo")
+    ENDIF(NOT "${rm_retval}" STREQUAL 0)
+ENDIF(NOT EXISTS "/usr/include/iecfapi")
+
+# Copy the header files to /usr/include/iecfapi
+FILE(COPY "@CMAKE_SOURCE_DIR@/edison-lib/cJSON/cJSON.h" DESTINATION /usr/include/iecfapi)
+FILE(COPY "@CMAKE_SOURCE_DIR@/edison-lib/libedison/edisonapi.h" DESTINATION /usr/include/iecfapi)
+FILE(COPY "@CMAKE_SOURCE_DIR@/edison-lib/libedison/edisonMDNS.h" DESTINATION /usr/include/iecfapi)
+FILE(COPY "@CMAKE_SOURCE_DIR@/edison-lib/libedison/util.h" DESTINATION /usr/include/iecfapi)
+
+# Copy the shared libraries to /usr/lib
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/libedison/libiecfapi.so" DESTINATION /usr/lib/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/plugins/libiotkitpubsub/libiotkit-client.so" DESTINATION /usr/lib/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/plugins/libmqttpubsub/libmqttpubsub-client.so" DESTINATION /usr/lib/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/plugins/libzmqpubsub/libzmqpubsub-client.so" DESTINATION /usr/lib/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/plugins/libzmqpubsub/libzmqpubsub-service.so" DESTINATION /usr/lib/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/plugins/libzmqreqrep/libzmqreqrep-client.so" DESTINATION /usr/lib/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/edison-lib/plugins/libzmqreqrep/libzmqreqrep-service.so" DESTINATION /usr/lib/)
+
+# Copy the Sample apps executables
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/iotkit-apps/iotkitclient" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/iotkit-apps/iotkitservice" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/mqtt-apps/subscriber" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/mqtt-apps/publisher" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/zmq-apps/zmqsubclient" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/zmq-apps/zmqpubservice" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/zmq-apps/zmqreqclient" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
+FILE(COPY "@CMAKE_CURRENT_BINARY_DIR@/sample-apps/zmq-apps/zmqrepservice" DESTINATION @CMAKE_SOURCE_DIR@/sample-apps/)
