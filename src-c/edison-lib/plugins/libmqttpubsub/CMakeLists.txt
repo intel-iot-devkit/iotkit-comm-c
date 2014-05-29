@@ -2,7 +2,6 @@
 MESSAGE("Building the mqtt plugin")
 
 INCLUDE_DIRECTORIES(
-  ../../cJSON
   ../../libedison
   ../inc/
 )

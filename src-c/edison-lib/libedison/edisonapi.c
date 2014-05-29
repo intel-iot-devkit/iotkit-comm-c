@@ -492,13 +492,13 @@ CommHandle *createClient(ServiceQuery *queryDesc)
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, edisonlibcdir);
+            strcpy(cwd_temp, "/usr/lib/");
         }
         #if DEBUG
             printf("\nedisonlibcdir path %s\n",edisonlibcdir);
         #endif
-        strcat(cwd_temp, folderPath);
-        strcat(cwd_temp, "/lib");
+//        strcat(cwd_temp, folderPath);
+        strcat(cwd_temp, "lib");
         strcat(cwd_temp, queryDesc->type.name);
         strcat(cwd_temp, "-client.so");
         #if DEBUG
@@ -628,10 +628,10 @@ CommHandle *createService(ServiceDescription *description)
 
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, edisonlibcdir);
+            strcpy(cwd_temp, "/usr/lib/");
         }
-        strcat(cwd_temp, folderPath);
-        strcat(cwd_temp, "/lib");
+//        strcat(cwd_temp, folderPath);
+        strcat(cwd_temp, "lib");
         strcat(cwd_temp, description->type.name);
         strcat(cwd_temp, "-service.so");
 

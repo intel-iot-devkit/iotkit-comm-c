@@ -2,7 +2,6 @@
 MESSAGE("Building the zmq pubsub plugin")
 
 INCLUDE_DIRECTORIES(
-  ../../cJSON
   ../../libedison
   ../inc/
 )

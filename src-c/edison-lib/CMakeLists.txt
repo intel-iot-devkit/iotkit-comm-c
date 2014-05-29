@@ -1,5 +1,6 @@
 
-MESSAGE("Adding the sub-directory plugins")
+MESSAGE("Adding the sub-directory libedison & plugins")
 # add the sub-directories
 
+ADD_SUBDIRECTORY(libedison)
 ADD_SUBDIRECTORY(plugins)

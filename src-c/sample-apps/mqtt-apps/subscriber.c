@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "iecfapi/edisonapi.h"
-#include "iecfapi/util.h"
+#include "edisonapi.h"
+#include "util.h"
 
 ServiceQuery *query = NULL;
 
