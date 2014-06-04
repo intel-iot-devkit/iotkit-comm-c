@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.7"/>
-<title>Edison API - C Library: iotkit-client.c File Reference</title>
+<title>IoTKit-PublishSubscribe Plugin: iotkit-client.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">Edison API - C Library
+   <div id="projectname">IoTKit-PublishSubscribe Plugin
    </div>
   </td>
  </tr>
@@ -77,71 +77,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 </div><!-- top -->
 <div class="header">
-  <div class="summary">
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">iotkit-client.c File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of iotkit Async Client plugin for Edison API.  
+<p>Implementation of IoTKit Async Client plugin for Edison API.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:afce44477169c6e416fd569d3a14de2bf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afce44477169c6e416fd569d3a14de2bf"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>handleSignal</b> (int sig)</td></tr>
-<tr class="separator:afce44477169c6e416fd569d3a14de2bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fd799eb0fd9d1187f055e1c89091e8f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4fd799eb0fd9d1187f055e1c89091e8f"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>messageArrived</b> (void *ctx, char *topicName, int topicLen, MQTTAsync_message *message)</td></tr>
-<tr class="separator:a4fd799eb0fd9d1187f055e1c89091e8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85c5cfb76ce2a2f1f84661c96680f069"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85c5cfb76ce2a2f1f84661c96680f069"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onSubscribe</b> (void *context, MQTTAsync_successData *response)</td></tr>
-<tr class="separator:a85c5cfb76ce2a2f1f84661c96680f069"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abcbbe89c2105d9c97f4648ed6bc3ea9d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abcbbe89c2105d9c97f4648ed6bc3ea9d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onSubscribeFailure</b> (void *context, MQTTAsync_failureData *response)</td></tr>
-<tr class="separator:abcbbe89c2105d9c97f4648ed6bc3ea9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac6f94f3458cb7a286f806b4f8cbadb1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aac6f94f3458cb7a286f806b4f8cbadb1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onDisconnect</b> (void *context, MQTTAsync_successData *response)</td></tr>
-<tr class="separator:aac6f94f3458cb7a286f806b4f8cbadb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a447cc0429dac2d20c5804fe54825a490"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a447cc0429dac2d20c5804fe54825a490"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onSendFailure</b> (void *context, MQTTAsync_failureData *response)</td></tr>
-<tr class="separator:a447cc0429dac2d20c5804fe54825a490"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26407c0747d0626e8e5a9a4858a97028"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26407c0747d0626e8e5a9a4858a97028"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onSend</b> (void *context, MQTTAsync_successData *response)</td></tr>
-<tr class="separator:a26407c0747d0626e8e5a9a4858a97028"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab22632bbbcfa8c6c12db77f0d2eabff7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab22632bbbcfa8c6c12db77f0d2eabff7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>deliveryComplete</b> (void *context, MQTTAsync_token token)</td></tr>
-<tr class="separator:ab22632bbbcfa8c6c12db77f0d2eabff7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0c4081eba0ff17a508905722fa5b81b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae0c4081eba0ff17a508905722fa5b81b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onConnectFailure</b> (void *context, MQTTAsync_failureData *response)</td></tr>
-<tr class="separator:ae0c4081eba0ff17a508905722fa5b81b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c894887534f2f3f998839f7663d8cd8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7c894887534f2f3f998839f7663d8cd8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onConnect</b> (void *context, MQTTAsync_successData *response)</td></tr>
-<tr class="separator:a7c894887534f2f3f998839f7663d8cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9773c002bbd2c82380677c27af7a3d50"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9773c002bbd2c82380677c27af7a3d50"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>connectionLost</b> (void *context, char *cause)</td></tr>
-<tr class="separator:a9773c002bbd2c82380677c27af7a3d50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a81011b79683fab64ce3aff71114f8fdd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81011b79683fab64ce3aff71114f8fdd"></a>
-void *&#160;</td><td class="memItemRight" valign="bottom"><b>handle</b> =NULL</td></tr>
-<tr class="separator:a81011b79683fab64ce3aff71114f8fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a838a5b5da6ce426d8ff53c3031ebcd0f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a838a5b5da6ce426d8ff53c3031ebcd0f"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>err</b> =NULL</td></tr>
-<tr class="separator:a838a5b5da6ce426d8ff53c3031ebcd0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a183be8431917186865e4e73cce5eaed6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a183be8431917186865e4e73cce5eaed6"></a>
-MQTTAsync&#160;</td><td class="memItemRight" valign="bottom"><b>client</b></td></tr>
-<tr class="separator:a183be8431917186865e4e73cce5eaed6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb39dc71ee0e9a5f00cd4f2cf7bb7cd3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abb39dc71ee0e9a5f00cd4f2cf7bb7cd3"></a>
-MQTTAsync_connectOptions&#160;</td><td class="memItemRight" valign="bottom"><b>conn_opts</b> = MQTTAsync_connectOptions_initializer</td></tr>
-<tr class="separator:abb39dc71ee0e9a5f00cd4f2cf7bb7cd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab223f8bfa8bc85f6421ed0727b88ae99"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab223f8bfa8bc85f6421ed0727b88ae99"></a>
-void(*&#160;</td><td class="memItemRight" valign="bottom"><b>msgArrhandler</b> )(char *topic, Context context) = NULL</td></tr>
-<tr class="separator:ab223f8bfa8bc85f6421ed0727b88ae99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 publish a message</h2></td></tr>
 <tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrpd242988701001049cfa424b128a48f0e"></a>used to send message to a broker</p>
@@ -248,12 +191,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>registerSensor</b> (c
 <tr class="separator:ac5f8ad78407b0818fd427acdc83556b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Implementation of iotkit Async Client plugin for Edison API. </p>
+<div class="textblock"><p>Implementation of IoTKit Async Client plugin for Edison API. </p>
 <p>Provides features to connect to an MQTT Broker and subscribe to a topic </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu May 22 2014 12:24:49 for Edison API - C Library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jun 2 2014 14:49:37 for IoTKit-PublishSubscribe Plugin by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

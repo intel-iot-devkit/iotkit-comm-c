@@ -14,13 +14,10 @@
 
 /**
  * @file edisonMDNS.h
- * @brief Implementation of Edison MDNS
+ * @brief Header file of Edison MDNS
  *
  * DataStructure of DiscoverContext, ServiceCache
  */
-
-#ifndef __EDISON_MDNS_H__
-#define __EDISON_MDNS_H__
 
 #include "edisonapi.h"
 
@@ -55,5 +52,3 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNum
 char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber);
 bool isServiceLocal(const char *address);
 bool setMyAddresses(void);
-
-#endif

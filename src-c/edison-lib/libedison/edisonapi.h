@@ -14,13 +14,10 @@
 
 /**
  * @file edisonapi.h
- * @brief Implementation of Edison Library
+ * @brief Header file of Edison Library
  *
  * Data Structure of Service Description, Service Query, Communication Handle, Context
  */
-
-#ifndef __EDISON_API_H__
-#define __EDISON_API_H__
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -114,5 +111,3 @@ CommHandle *createService(ServiceDescription *);
 void cleanUp(CommHandle *);
 
 bool fileExists(char *absPath);
-
-#endif

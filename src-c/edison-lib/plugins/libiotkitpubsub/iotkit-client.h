@@ -12,8 +12,12 @@
  * more details.
  */
 
-#ifndef EDISON_IOTKIT_ASYNC_H_
-#define EDISON_IOTKIT_ASYNC_H_
+/**
+ * @file iotkit-client.h
+ * @brief Headers of iotkit Async Client plugin for Edison API
+ *
+ * Provides features to connect to an MQTT Broker and subscribe to a topic
+ */
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -33,12 +37,12 @@ volatile MQTTAsync_token deliveredtoken;
 #endif
 
 volatile int toStop = 0;
- volatile int finished = 0;
- volatile int subscribed = 0;
- volatile int connected = 0;
- volatile int quietMode = 0;
- volatile int sent = 0;
- volatile int delivery = 0;
+volatile int finished = 0;
+volatile int subscribed = 0;
+volatile int connected = 0;
+volatile int quietMode = 0;
+volatile int sent = 0;
+volatile int delivery = 0;
 
 char *interface = "edison-iotkit-client-interface"; // specifies the plugin interface json
 
@@ -48,10 +52,4 @@ int send(char *message, Context context);
 int subscribe();
 int unsubscribe(char *topic);
 int receive(void (*) (char *topic, Context context));
-//values for type --> open, ssl
-//int createClient(char *host, int port, char *type, void *sslargs);
-//int createService();
 int done();
-
-
-#endif /* EDISON_IOTKIT_ASYNC_H_ */

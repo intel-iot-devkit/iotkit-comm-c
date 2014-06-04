@@ -12,8 +12,13 @@
  * more details.
  */
 
-#ifndef EDISON_MQTT_ASYNC_H_
-#define EDISON_MQTT_ASYNC_H_
+/**
+ * @file edison-mqtt_async-client.h
+ * @brief Headers of MQTT Async Client plugin for Edison API
+ *
+ * Provides features to connect to an MQTT Broker and subscribe to a topic
+ */
+
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -33,12 +38,12 @@ volatile MQTTAsync_token deliveredtoken;
 #endif
 
 volatile int toStop = 0;
- volatile int finished = 0;
- volatile int subscribed = 0;
- volatile int connected = 0;
- volatile int quietMode = 0;
- volatile int sent = 0;
- volatile int delivery = 0;
+volatile int finished = 0;
+volatile int subscribed = 0;
+volatile int connected = 0;
+volatile int quietMode = 0;
+volatile int sent = 0;
+volatile int delivery = 0;
 
 char *interface = "edison-client-interface"; // specifies the plugin interface json
 
@@ -47,10 +52,4 @@ int send(char *message, Context context);
 int subscribe(char *topic);
 int unsubscribe(char *topic);
 int receive(void (*) (char *topic, Context context));
-//values for type --> open, ssl
-//int createClient(char *host, int port, char *type, void *sslargs);
-//int createService();
 int done();
-
-
-#endif /* EDISON_MQTT_ASYNC_H_ */
