@@ -1,0 +1,47 @@
+
+INCLUDE_DIRECTORIES(
+  ../../edison-lib/cJSON
+  ../../edison-lib/libedison
+  ../inc/
+)
+
+# set the source files list
+SET(ZMQREQREP_REP_SENDTO_FAIL test_zmqreqrep_rep_sendTo_fail.c ../../edison-lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(ZMQREQREP_REP_SOCKET_CONNECT_FAIL test_zmqreqrep_rep_socket_connect_fail.c ../../edison-lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(ZMQREQREP_REP_SOCKET_CONNECT_SUCCESS test_zmqreqrep_rep_socket_connect_success.c ../../edison-lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(ZMQREQREP_REQ_SEND_FAIL test_zmqreqrep_req_send_fail.c ../../edison-lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(ZMQREQREP_REQ_SOCKET_CONNECT_FAIL test_zmqreqrep_req_socket_connect_fail.c ../../edison-lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+SET(ZMQREQREP_REQ_SOCKET_CONNECT_SUCCESS test_zmqreqrep_req_socket_connect_success.c ../../edison-lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
+
+# create the executables
+ADD_EXECUTABLE(zmqreqrep_rep_sendTo_fail ${ZMQREQREP_REP_SENDTO_FAIL})
+ADD_EXECUTABLE(zmqreqrep_rep_socket_connect_fail ${ZMQREQREP_REP_SOCKET_CONNECT_FAIL})
+ADD_EXECUTABLE(zmqreqrep_rep_socket_connect_success ${ZMQREQREP_REP_SOCKET_CONNECT_SUCCESS})
+ADD_EXECUTABLE(zmqreqrep_req_send_fail ${ZMQREQREP_REQ_SEND_FAIL})
+ADD_EXECUTABLE(zmqreqrep_req_socket_connect_fail ${ZMQREQREP_REQ_SOCKET_CONNECT_FAIL})
+ADD_EXECUTABLE(zmqreqrep_req_socket_connect_success ${ZMQREQREP_REQ_SOCKET_CONNECT_SUCCESS})
+
+
+SET_TARGET_PROPERTIES(zmqreqrep_rep_sendTo_fail PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(zmqreqrep_rep_socket_connect_fail PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(zmqreqrep_rep_socket_connect_success PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(zmqreqrep_req_send_fail PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(zmqreqrep_req_socket_connect_fail PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(zmqreqrep_req_socket_connect_success PROPERTIES LINKER_LANGUAGE C)
+
+
+# Link the executables
+TARGET_LINK_LIBRARIES(zmqreqrep_rep_sendTo_fail zmq dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(zmqreqrep_rep_socket_connect_fail zmq dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(zmqreqrep_rep_socket_connect_success zmq dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(zmqreqrep_req_send_fail zmq dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(zmqreqrep_req_socket_connect_fail zmq dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(zmqreqrep_req_socket_connect_success zmq dns_sd m dl gcov)
+
+# Add the Test
+ADD_TEST(zmqreqrep_rep_sendTo_fail ${CTEST_BINARY_DIRECTORY}/zmqreqrep_rep_sendTo_fail)
+ADD_TEST(zmqreqrep_rep_socket_connect_fail ${CTEST_BINARY_DIRECTORY}/zmqreqrep_rep_socket_connect_fail)
+ADD_TEST(zmqreqrep_rep_socket_connect_success ${CTEST_BINARY_DIRECTORY}/zmqreqrep_rep_socket_connect_success)
+ADD_TEST(zmqreqrep_req_send_fail ${CTEST_BINARY_DIRECTORY}/zmqreqrep_req_send_fail)
+ADD_TEST(zmqreqrep_req_socket_connect_fail ${CTEST_BINARY_DIRECTORY}/zmqreqrep_req_socket_connect_fail)
+ADD_TEST(zmqreqrep_req_socket_connect_success ${CTEST_BINARY_DIRECTORY}/zmqreqrep_req_socket_connect_success)

@@ -1,0 +1,4 @@
+
+ADD_SUBDIRECTORY(libedison)
+ADD_SUBDIRECTORY(zmqpubsub)
+ADD_SUBDIRECTORY(zmqreqrep)
