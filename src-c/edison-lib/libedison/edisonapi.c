@@ -75,7 +75,7 @@ void concatUserDefinedConfigurations(){
 
            if (fp == NULL)
            {
-       	    fprintf(stderr,"Error can't open file %s\n", config_file);
+       	    fprintf(stderr,"Warning: Optional user config file not found. Continuing...\n");
            }
            else
            {
