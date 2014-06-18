@@ -350,7 +350,8 @@ char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
    int s = getaddrinfo(hostname, PortAsNumber, &hints, &result);
    if (s != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
-        return NULL;
+        fprintf(stderr, "Name resolution failed for %s. Exiting the application.\n", hostname);
+        exit(EXIT_FAILURE);
    }
 
 	struct sockaddr_in *addr;
