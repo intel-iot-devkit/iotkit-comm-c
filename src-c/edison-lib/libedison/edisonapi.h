@@ -27,6 +27,22 @@
 #include <dlfcn.h>
 #include <pwd.h>
 
+#ifndef LIB_CONFIG_DIRECTORY
+    #define LIB_CONFIG_DIRECTORY "/etc/iecfapi/"
+#endif
+
+#ifndef LIB_CONFIG_FILENAME
+    #define LIB_CONFIG_FILENAME "config.json"
+#endif
+
+#ifndef USER_CONFIG_FILENAME
+    #define USER_CONFIG_FILENAME ".edison-config.json"
+#endif
+
+#ifndef LIB_PLUGINS_DIRECTORY
+    #define LIB_PLUGINS_DIRECTORY "/usr/lib/"
+#endif
+
 /** System level Configuration data read from the config JSON
  */
 typedef struct _ConfigFileData {

@@ -58,13 +58,16 @@ void concatUserDefinedConfigurations(){
     char *home, config_file[1024];
 
     home = getenv("HOME");
-    if(home == NULL){
+    if(home == NULL || strlen(home) == 0){
         struct passwd *pw = getpwuid(getuid());
         home = pw->pw_dir;
     }
 
     strcpy(config_file, home);
-       strcat(config_file, "/.edison-config.json");
+    if(*(home + (strlen(home) - 1)) != '/')
+        strcat(config_file, "/");
+
+    strcat(config_file, USER_CONFIG_FILENAME);
 
        char *out;
            cJSON *json, *jitem;
@@ -456,8 +459,8 @@ CommHandle *createClient(ServiceQuery *queryDesc)
     char cwd_temp[1024];
 
     // Parse configuration file
-    strcpy(cwd_temp, "/etc/iecfapi/");
-    strcat(cwd_temp, "config.json");
+    strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
+    strcat(cwd_temp, LIB_CONFIG_FILENAME);
     if (!parseConfigFile(cwd_temp)) freeGlobals();
 
     // load the plugin
@@ -481,7 +484,7 @@ CommHandle *createClient(ServiceQuery *queryDesc)
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, "/usr/lib/");
+            strcpy(cwd_temp, LIB_PLUGINS_DIRECTORY);
         }
 
 //        strcat(cwd_temp, folderPath);
@@ -519,7 +522,7 @@ CommHandle *createClient(ServiceQuery *queryDesc)
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin interface file
         if(*folderPath != '/') { // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, "/etc/iecfapi/");
+            strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
         }
 
         strcat(cwd_temp, folderPath);
@@ -582,8 +585,8 @@ CommHandle *createService(ServiceDescription *description)
     char cwd_temp[1024];
 
     // Parse configuration file
-    strcpy(cwd_temp, "/etc/iecfapi/");
-    strcat(cwd_temp, "config.json");
+    strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
+    strcat(cwd_temp, LIB_CONFIG_FILENAME);
     if (!parseConfigFile(cwd_temp)) freeGlobals();
 
 // load the plugin
@@ -604,7 +607,7 @@ CommHandle *createService(ServiceDescription *description)
 
         // Parse plugin file
         if(*folderPath != '/'){ // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, "/usr/lib/");
+            strcpy(cwd_temp, LIB_PLUGINS_DIRECTORY);
         }
 //        strcat(cwd_temp, folderPath);
         strcat(cwd_temp, "lib");
@@ -639,7 +642,7 @@ CommHandle *createService(ServiceDescription *description)
 
         // Parse plugin interface file
         if(*folderPath != '/') { // if path is not absolute path; then consider edisonlib directory
-            strcpy(cwd_temp, "/etc/iecfapi/");
+            strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
         }
         strcat(cwd_temp, folderPath);
         strcat(cwd_temp, "/");
