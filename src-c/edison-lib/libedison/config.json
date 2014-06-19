@@ -7,12 +7,6 @@
         "pluginFileSuffixes": {
             "clientFileSuffix": "client",
             "serverFileSuffix": "service"
-        },
-        "plugins":
-            [
-                {"pluginName": "zmqpubsub"},
-                {"pluginName": "mqtt"},
-                {"pluginName": "zmqreqrep"}
-            ]
+        }
     }
 }

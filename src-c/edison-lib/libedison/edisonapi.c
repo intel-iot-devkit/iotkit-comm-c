@@ -224,27 +224,6 @@ bool parseConfigFile(char *config_file)
             printf("serverFileSuffix = %s\n", g_configData.serverFileSuffix);
             #endif
 
-            // TODO: We are considering only the last plugin specified under plugins array
-            jitem = cJSON_GetObjectItem(json, "communication");
-            if (!isJsonObject(json)) handleParseConfigError();
-
-            jitem = cJSON_GetObjectItem(jitem, "plugins");
-            if (!isJsonArray(jitem)) handleParseConfigError();
-
-            child=jitem->child;
-            while (child) 
-	    {
-		jitem = child;
-                child=child->next;
-            }
-
-	    if (!jitem) handleParseConfigError();
-            jitem = cJSON_GetObjectItem(jitem, "pluginName");
-	    if (!isJsonString(jitem)) handleParseConfigError();
-	    g_configData.plugin = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("plugin = %s\n", g_configData.plugin);
-	    #endif
 
 endParseConfig:
             cJSON_Delete(json);

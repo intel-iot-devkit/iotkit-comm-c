@@ -50,7 +50,6 @@ typedef struct _ConfigFileData {
     char *pluginDir; // plugin directory
     char *clientFileSuffix; // client plugin suffix
     char *serverFileSuffix; // service plugin suffix
-    char *plugin; // plugin directory where the plugin is present
 } ConfigFileData;
 
 /** Context to be passed around the callback methods as a name value pair
