@@ -1,5 +1,5 @@
 /*
- * IoTKit client plugin to enable subscribe feature through Edison API
+ * MQTT client plugin to enable subscribe feature through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -13,13 +13,14 @@
  */
 
 /**
- * @file iotkit-client.c
- * @brief Implementation of IoTKit Client plugin for Edison API
+ * @file edison-mqtt-client.c
+ * @brief Implementation of MQTT Client plugin for Edison API
  *
  * Provides features to connect to an MQTT Broker and subscribe to a topic
  */
 
-#include "iotkit-client.h"
+#include "edison-mqtt-client.h"
+
 
 void *handle=NULL;
 char *err=NULL;
@@ -148,16 +149,15 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
  * @param[in] topic which needs to be subscribed to
  * @return boolean which specifies whether successfully subscribed or not
  */
- int subscribe() {
-int rc = 0;
-    char *topic = "data";
+ int subscribe(char *topic) {
+    int rc = 0;
 
     if ((rc = MQTTClient_subscribe(client, topic, QOS)) != MQTTCLIENT_SUCCESS) {
         printf("Failed to subscribe, return code %d\n", rc);
         exit(-1);
     }
 
- 	return rc;
+    return rc;
  }
 
 /**
@@ -216,8 +216,6 @@ int receive(void (*handler) (char *topic, Context context)){
     return 1;
 }
 
-int clientInstanceNumber = 0;
-
 /**
  * @name initialise the MQTT client
  * @brief initialises the plugin.
@@ -236,14 +234,14 @@ int init(void *serviceDesc)
 //            sprintf(uri, "ssl://%s:%d", host, port);
 //        }else {
         if(serviceQuery->address != NULL){
-        sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
+            sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
         } else {
             sprintf(uri, "tcp://localhost:%d", serviceQuery->port);
         }
 //      }
         // Default settings:
         char clientID[256];
-        sprintf(clientID, "%s%d", CLIENTID, clientInstanceNumber++);
+        sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
         MQTTClient_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
         MQTTClient_setCallbacks(client, client, connectionLost, messageArrived, NULL);
@@ -268,20 +266,4 @@ int init(void *serviceDesc)
         }
 
     return rc;
-}
-
-/**
- * @name registers a sensor
- * @brief registers a sensor with IoT Cloud through IoTKit Agent
- * @param[in] sensorname is the name of the sensor on the device
- * @param[in] type denotes the datatype of the sensor values
- */
-void registerSensor(char *sensorname, char *type) {
-    char mesg[256];
-    Context context;
-    context.name = "topic";
-    context.value = "data";
-
-    sprintf(mesg, "{\"n\":%s,\"t\":%s}", sensorname,type);
-    send(mesg, context);
 }
