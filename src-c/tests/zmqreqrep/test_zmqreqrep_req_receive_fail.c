@@ -12,9 +12,9 @@
  * more details.
  */
 
-/** @file test_zmqreqrep_rep_sendTo_fail.c
+/** @file test_zmqreqrep_req_send_fail.c
 
-This file tests whether ZMQ Responder socket fails while sending message.
+This file tests whether ZMQ Requester socket fails while sending message.
 */
 
 #include <stdio.h>
@@ -23,23 +23,25 @@ This file tests whether ZMQ Responder socket fails while sending message.
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
+void handler(char *message,Context context) {
+    if (message == NULL) {
+        exit(EXIT_SUCCESS);
+    } else {
+        exit(EXIT_FAILURE);
+    }
+}
+
 int main (void)
 {
 
-    ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-    serviceDesc->address = "127.0.0.1";
-    serviceDesc->port = 1234;
-    init(serviceDesc);
-    int result = sendTo(NULL,"Hello World",NULL);
-    if (result == 0) {
-        printf("Sended Message Successfully\n");
-        done();
-        free(serviceDesc);
-        exit(EXIT_FAILURE);
-    } else {
-        printf("Failed: Sending Message\n");
-        done();
-        free(serviceDesc);
-        exit(EXIT_SUCCESS);
-    }
+    ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
+    serviceQuery->address = "127.0.0.1";
+    serviceQuery->port = 5560;
+    int result = init(serviceQuery);
+    if (result == -1)
+        printf("Requester init failed\n");
+    printf("waiting for message\n");
+    receive(handler);
+    done();
+    free(serviceQuery);
 }

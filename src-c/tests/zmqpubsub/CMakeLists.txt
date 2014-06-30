@@ -6,6 +6,7 @@ INCLUDE_DIRECTORIES(
 )
 
 # set the source files list
+SET(ZMQPUBSUB_CLIENT_RECEIVE_FAIL test_zmqpubsub_client_receive_fail.c ../../edison-lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
 SET(ZMQPUBSUB_CLIENT_SOCKET_CONNECT_FAIL test_zmqpubsub_client_socket_connect_fail.c ../../edison-lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
 SET(ZMQPUBSUB_CLIENT_SOCKET_CONNECT_SUCCESS test_zmqpubsub_client_socket_connect_success.c ../../edison-lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
 SET(ZMQPUBSUB_CLIENT_SUBSCRIBE_FAIL test_zmqpubsub_client_subscribe_fail.c ../../edison-lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
@@ -17,6 +18,7 @@ SET(ZMQPUBSUB_SERVICE_SOCKET_CONNECT_FAIL test_zmqpubsub_service_socket_connect_
 SET(ZMQPUBSUB_SERVICE_SOCKET_CONNECT_SUCCESS test_zmqpubsub_service_socket_connect_success.c ../../edison-lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../edison-lib/cJSON/cJSON.c ../../edison-lib/libedison/edisonapi.c ../../edison-lib/libedison/edisonMDNS.c)
 
 # create the executables
+ADD_EXECUTABLE(zmqpubsub_client_receive_fail ${ZMQPUBSUB_CLIENT_RECEIVE_FAIL})
 ADD_EXECUTABLE(zmqpubsub_client_socket_connect_fail ${ZMQPUBSUB_CLIENT_SOCKET_CONNECT_FAIL})
 ADD_EXECUTABLE(zmqpubsub_client_socket_connect_success ${ZMQPUBSUB_CLIENT_SOCKET_CONNECT_SUCCESS})
 ADD_EXECUTABLE(zmqpubsub_client_subscribe_fail ${ZMQPUBSUB_CLIENT_SUBSCRIBE_FAIL})
@@ -28,6 +30,7 @@ ADD_EXECUTABLE(zmqpubsub_service_socket_connect_fail ${ZMQPUBSUB_SERVICE_SOCKET_
 ADD_EXECUTABLE(zmqpubsub_service_socket_connect_success ${ZMQPUBSUB_SERVICE_SOCKET_CONNECT_SUCCESS})
 
 
+SET_TARGET_PROPERTIES(zmqpubsub_client_receive_fail PROPERTIES LINKER_LANGUAGE C)
 SET_TARGET_PROPERTIES(zmqpubsub_client_socket_connect_fail PROPERTIES LINKER_LANGUAGE C)
 SET_TARGET_PROPERTIES(zmqpubsub_client_socket_connect_success PROPERTIES LINKER_LANGUAGE C)
 SET_TARGET_PROPERTIES(zmqpubsub_client_subscribe_fail PROPERTIES LINKER_LANGUAGE C)
@@ -39,6 +42,7 @@ SET_TARGET_PROPERTIES(zmqpubsub_service_socket_connect_fail PROPERTIES LINKER_LA
 SET_TARGET_PROPERTIES(zmqpubsub_service_socket_connect_success PROPERTIES LINKER_LANGUAGE C)
 
 # Link the executables
+TARGET_LINK_LIBRARIES(zmqpubsub_client_receive_fail zmq dns_sd m dl gcov)
 TARGET_LINK_LIBRARIES(zmqpubsub_client_socket_connect_fail zmq dns_sd m dl gcov)
 TARGET_LINK_LIBRARIES(zmqpubsub_client_socket_connect_success zmq dns_sd m dl gcov)
 TARGET_LINK_LIBRARIES(zmqpubsub_client_subscribe_fail zmq dns_sd m dl gcov)
@@ -50,6 +54,7 @@ TARGET_LINK_LIBRARIES(zmqpubsub_service_socket_connect_fail zmq dns_sd m dl gcov
 TARGET_LINK_LIBRARIES(zmqpubsub_service_socket_connect_success zmq dns_sd m dl gcov)
 
 # Add the Test
+ADD_TEST(zmqpubsub_client_receive_fail ${CTEST_BINARY_DIRECTORY}/zmqpubsub_client_receive_fail)
 ADD_TEST(zmqpubsub_client_socket_connect_fail ${CTEST_BINARY_DIRECTORY}/zmqpubsub_client_socket_connect_fail)
 ADD_TEST(zmqpubsub_client_socket_connect_success ${CTEST_BINARY_DIRECTORY}/zmqpubsub_client_socket_connect_success)
 ADD_TEST(zmqpubsub_client_subscribe_fail ${CTEST_BINARY_DIRECTORY}/zmqpubsub_client_subscribe_fail)
