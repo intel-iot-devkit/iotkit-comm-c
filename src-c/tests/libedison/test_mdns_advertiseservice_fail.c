@@ -27,7 +27,7 @@
 
 int main (void)
 {
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../../../src-c/tests/libedison/invalidtemperatureServiceZMQPUBSUB.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./invalidtemperatureServiceZMQPUBSUB.json");
     if (serviceDescription) {
         printf("Waiting for the Service to Advertise\n");
         if (advertiseService(serviceDescription)) {

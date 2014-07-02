@@ -44,8 +44,8 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
 int main (void)
 {
 
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("../../../src-c/tests/libedison/temperatureServiceQueryMQTT.json");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../../../src-c/tests/libedison/temperatureServiceMQTT.json");
+    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceMQTT.json");
 
     if (serviceDescription) {
 	    if (query && advertiseService(serviceDescription)) {

@@ -26,7 +26,7 @@
 
 int main (void)
 {
-    if (parsePluginInterfaces("../../../src-c/edison-lib/libedison/plugin-interfaces/edison-client-interface.json")) {
+    if (parsePluginInterfaces("./edison-client-interface.json")) {
         puts("\nSuccess: Parsed Config File\n");
         exit(EXIT_SUCCESS);
     } else {

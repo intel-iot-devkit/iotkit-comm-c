@@ -26,7 +26,7 @@
 
 int main (void)
 {
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("../../../src-c/tests/libedison/invalidtemperatureServiceZMQPUBSUB.json");
+    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./invalidtemperatureServiceZMQPUBSUB.json");
     if (query && createClient(query)) {
          puts("\nSuccess: Created Client\n");
          exit(EXIT_FAILURE);

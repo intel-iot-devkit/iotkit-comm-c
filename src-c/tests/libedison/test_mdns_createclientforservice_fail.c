@@ -43,7 +43,7 @@ void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHan
 
 int main (void)
 {
-    ServiceQuery *query = (ServiceQuery *)parseClientServiceQuery("../../../src-c/tests/libedison/temperatureServiceQueryMQTT.json");
+    ServiceQuery *query = (ServiceQuery *)parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
     if (query) {
         createClientForGivenService(query, callback);
     }

@@ -44,7 +44,7 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
 int main (void)
 {
 
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../../../src-c/tests/libedison/temperatureServiceZMQPUBSUB.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceZMQPUBSUB.json");
     if (serviceDescription) {
         printf("Waiting for the Service to Advertise\n");
         WaitToAdvertiseService(serviceDescription, subDiscoveryCallback);

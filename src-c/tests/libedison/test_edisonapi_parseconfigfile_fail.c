@@ -26,7 +26,7 @@
 
 int main (void)
 {
-    if (parseConfigFile("../../../src-c/tests/libedison/invalidconfig.json")) {
+    if (parseConfigFile("./libedison/invalidconfig.json")) {
         puts("\nSuccess: Parsed Config File\n");
         exit(EXIT_FAILURE);
     } else {

@@ -26,7 +26,7 @@
 
 int main (void)
 {
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("../../../src-c/tests/libedison/temperatureServiceZMQPUBSUB.json");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceZMQPUBSUB.json");
     if (serviceDescription && createService(serviceDescription)) {
          puts("\nSuccess: Created Service\n");
          exit(EXIT_SUCCESS);

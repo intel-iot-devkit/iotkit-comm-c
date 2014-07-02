@@ -26,7 +26,7 @@
 
 int main (void)
 {
-    if (parsePluginInterfaces("../../../src-c/tests/libedison/invalid-edison-service-interface.json")) {
+    if (parsePluginInterfaces("./invalid-edison-service-interface.json")) {
         puts("\nSuccess: Parsed Config File\n");
         exit(EXIT_FAILURE);
     } else {

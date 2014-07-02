@@ -25,7 +25,7 @@
 int main (void)
 {
 
-    char *filepath = "../../../src-c/tests/libedison/temperatureServiceMQTT.json";
+    char *filepath = "./temperatureServiceMQTT.json";
     if (parseServiceDescription(filepath) != NULL) {
         printf("Success: Parse Service Description\n");
         exit(EXIT_SUCCESS);
