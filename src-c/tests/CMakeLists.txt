@@ -1,4 +1,6 @@
 
 ADD_SUBDIRECTORY(libedison)
+ADD_SUBDIRECTORY(iotkitpubsub)
+ADD_SUBDIRECTORY(mqttpubsub)
 ADD_SUBDIRECTORY(zmqpubsub)
 ADD_SUBDIRECTORY(zmqreqrep)
