@@ -25,15 +25,25 @@
 #include "edisonapi.h"
 #include "dlfcn.h"
 
-#include <MQTTClient.h>
+#include <MQTTAsync.h>
 
 #define CLIENTID    "IoTClient"
 #define QOS         1
 #define TIMEOUT     10000L
+volatile MQTTAsync_token deliveredtoken;
+
 
 #ifndef DEBUG
     #define DEBUG 0
 #endif
+
+volatile int toStop = 0;
+volatile int finished = 0;
+volatile int subscribed = 0;
+volatile int connected = 0;
+volatile int quietMode = 0;
+volatile int sent = 0;
+volatile int delivery = 0;
 
 char *interface = "edison-iotkit-client-interface"; // specifies the plugin interface json
 

@@ -30,7 +30,7 @@
 #endif
 
 ServiceDescription *srvDesc = NULL;
-int msgnumber = 0;
+int msgnumber = 40; // iotkit-agent does not accept zero as sensor value; so assigning a non-zero value
 
 /**
  * @name callback to handle the communication
@@ -60,7 +60,6 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
         context.value = "data";
 
         while(1){
-        //{"n": "garage","v": i};
             sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
@@ -90,8 +89,7 @@ int main(void) {
     if (srvDesc){
         createClientForGivenService(srvDesc, callback);
     }
-//	    WaitToAdvertiseService(srvDesc, callback);
 
-	return 0;
+    return 0;
 }
 

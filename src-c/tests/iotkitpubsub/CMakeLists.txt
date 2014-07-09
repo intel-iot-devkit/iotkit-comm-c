@@ -30,12 +30,12 @@ SET_TARGET_PROPERTIES(iotkitpubsub_client_subscribe_success PROPERTIES LINKER_LA
 SET_TARGET_PROPERTIES(iotkitpubsub_client_unsubscribe_success PROPERTIES LINKER_LANGUAGE C)
 
 # Link the executables
-TARGET_LINK_LIBRARIES(iotkitpubsub_client_publish_fail paho-mqtt3cs pthread dns_sd m dl gcov)
-TARGET_LINK_LIBRARIES(iotkitpubsub_client_publish_success paho-mqtt3cs pthread dns_sd m dl gcov)
-TARGET_LINK_LIBRARIES(iotkitpubsub_client_connect_success paho-mqtt3cs pthread dns_sd m dl gcov)
-TARGET_LINK_LIBRARIES(iotkitpubsub_client_subscribe_fail paho-mqtt3cs pthread dns_sd m dl gcov)
-TARGET_LINK_LIBRARIES(iotkitpubsub_client_subscribe_success paho-mqtt3cs pthread dns_sd m dl gcov)
-TARGET_LINK_LIBRARIES(iotkitpubsub_client_unsubscribe_success paho-mqtt3cs pthread dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(iotkitpubsub_client_publish_fail paho-mqtt3as pthread dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(iotkitpubsub_client_publish_success paho-mqtt3as pthread dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(iotkitpubsub_client_connect_success paho-mqtt3as pthread dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(iotkitpubsub_client_subscribe_fail paho-mqtt3as pthread dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(iotkitpubsub_client_subscribe_success paho-mqtt3as pthread dns_sd m dl gcov)
+TARGET_LINK_LIBRARIES(iotkitpubsub_client_unsubscribe_success paho-mqtt3as pthread dns_sd m dl gcov)
 
 # Add the Test
 ADD_TEST(iotkitpubsub_client_publish_fail ${CTEST_BINARY_DIRECTORY}/iotkitpubsub_client_publish_fail)
