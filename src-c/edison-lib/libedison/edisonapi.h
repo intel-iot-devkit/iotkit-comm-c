@@ -122,6 +122,7 @@ int g_funcEntries;
 
 CommHandle *createClient(ServiceQuery *);
 CommHandle *createService(ServiceDescription *);
+void *commInterfacesLookup(CommHandle *commHandle, char *funcname);
 
 void cleanUp(CommHandle *);
 

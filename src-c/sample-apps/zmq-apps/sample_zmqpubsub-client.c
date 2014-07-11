@@ -43,13 +43,13 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
     int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
     int (**unsubscribe)(char *);
-
-    subscribe = commInterfacesLookup(commHandle, "subscribe");
-    receive = commInterfacesLookup(commHandle, "receive");
-    unsubscribe = commInterfacesLookup(commHandle, "unsubscribe");
+    int i = 0;
 
     if (commHandle != NULL) {
-        int i = 0;
+        subscribe = commInterfacesLookup(commHandle, "subscribe");
+        receive = commInterfacesLookup(commHandle, "receive");
+        unsubscribe = commInterfacesLookup(commHandle, "unsubscribe");
+
         while (1) {
             i++;
             if (i < 10) {
