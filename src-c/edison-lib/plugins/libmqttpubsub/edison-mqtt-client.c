@@ -27,6 +27,7 @@ char *err=NULL;
 
 MQTTClient client;
 MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+MQTTClient_SSLOptions sslopts = MQTTClient_SSLOptions_initializer;
 
 
 void (*msgArrhandler) (char *topic, Context context) = NULL;
@@ -72,8 +73,7 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
 
  void connectionLost(void *context, char *cause)
  {
-    MQTTClient client = (MQTTClient)context;
-    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    ServiceQuery *serviceQuery = (ServiceQuery *)context;
     int rc;
 
     printf("Connection lost due to :%s\n", cause);
@@ -82,15 +82,6 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
     conn_opts.cleansession = 1;
     conn_opts.keepAliveInterval = 20;
     conn_opts.retryInterval = 1000;
-    //conn_opts.maxInflight= 30;
-
-    /*
-    // TODO: SSL based client needs to be implemented
-    conn_opts.ssl = &sslopts;
-    conn_opts.ssl->trustStore = "./certs/client.crt";
-    conn_opts.ssl->keyStore = "./certs/client.key";
-    conn_opts.ssl->enableServerCertAuth = 0;
-    */
 
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
     {
@@ -230,34 +221,46 @@ int init(void *serviceDesc)
     int rc = 0;
     char uri[256];
 
-//        if(strcmp(type, "ssl") == 0){
-//            sprintf(uri, "ssl://%s:%d", host, port);
-//        }else {
-        if(serviceQuery->address != NULL){
+    if(isPresentPropertyInCommParams(serviceQuery, "ssl") == true && \
+        strcasecmp(getValueInCommParams(serviceQuery, "ssl"), "true") == 0) {
+            sprintf(uri, "ssl://%s:%d", serviceQuery->address, serviceQuery->port);
+
+            conn_opts.ssl = &sslopts;
+
+            if(isPresentPropertyInCommParams(serviceQuery, "keyStore")) {
+                conn_opts.ssl->keyStore = getValueInCommParams(serviceQuery, "keyStore");
+            }
+            if(isPresentPropertyInCommParams(serviceQuery, "privateKey")) {
+                conn_opts.ssl->privateKey = getValueInCommParams(serviceQuery, "privateKey");
+            }
+            if(isPresentPropertyInCommParams(serviceQuery, "trustStore")) {
+                conn_opts.ssl->trustStore = getValueInCommParams(serviceQuery, "trustStore");
+            }
+
+            conn_opts.ssl->enableServerCertAuth = 0;
+    } else {
+        if(serviceQuery->address != NULL) {
             sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
         } else {
             sprintf(uri, "tcp://localhost:%d", serviceQuery->port);
         }
-//      }
+    }
         // Default settings:
         char clientID[256];
         sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
         MQTTClient_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-        MQTTClient_setCallbacks(client, client, connectionLost, messageArrived, NULL);
+        MQTTClient_setCallbacks(client, serviceQuery, connectionLost, messageArrived, NULL);
 
         conn_opts.cleansession = 0;
         conn_opts.keepAliveInterval = 20;
         conn_opts.retryInterval = 0;
-        //conn_opts.maxInflight= 30;
 
-        /*
-        // TODO: SSL based client needs to be implemented
-        conn_opts.ssl = &sslopts;
-        conn_opts.ssl->trustStore = "./certs/client.crt";
-        conn_opts.ssl->keyStore = "./certs/client.key";
-        conn_opts.ssl->enableServerCertAuth = 0;
-        */
+        if(isPresentPropertyInCommParams(serviceQuery, "username") == true && \
+        isPresentPropertyInCommParams(serviceQuery, "password") == true) {
+            conn_opts.username = getValueInCommParams(serviceQuery, "username");
+            conn_opts.password = getValueInCommParams(serviceQuery, "password");
+    }
 
         if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
         {

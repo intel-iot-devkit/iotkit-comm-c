@@ -99,9 +99,8 @@ typedef struct _ServiceDescription {
     } type;
     char *address; // address where service is available
     int port; // port at which service is running
-    struct { // TODO: comm_params should hold key value pairs
-        char *ssl;
-    } comm_params;
+    int commParamsCount; // count of comm params
+    Property **comm_params; // list of comm params
     int numProperties; // count of properties
     Property **properties; // list of properties
     struct {

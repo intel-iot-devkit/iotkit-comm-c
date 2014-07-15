@@ -109,7 +109,8 @@ ServiceDescription *parseServiceDescription(char *service_desc_file) {
             description->type.protocol = NULL;
             description->address = NULL;
             description->port = 0;
-            description->comm_params.ssl = NULL;
+            description->commParamsCount = 0;
+            description->comm_params = NULL;
             description->numProperties = 0;
             description->properties = NULL;
             description->advertise.locally = NULL;
@@ -194,14 +195,44 @@ ServiceDescription *parseServiceDescription(char *service_desc_file) {
                 }
             }
 
-            child = cJSON_GetObjectItem(json, "comm_params"); // this is an optional parameter; so, ignore if absent
-            if (isJsonObject(child)) {
-                jitem = cJSON_GetObjectItem(child, "ssl"); // this is an optional parameter; so, ignore if absent
-                if (isJsonString(jitem)) {
-                    description->comm_params.ssl = strdup(jitem->valuestring);
+            jitem = cJSON_GetObjectItem(json, "comm_params");
+            if (isJsonObject(jitem)) {
+
+                description->commParamsCount = 0;
+                child = jitem->child;
+                while (child && description->commParamsCount++ < MAX_PROPERTIES) {
+                    child=child->next;
+                }
+                if (description->commParamsCount) {
+                    description->comm_params = (Property **)malloc(sizeof(Property *) * description->commParamsCount);
+                    i=0;
+                    child = jitem->child;
+                    while (child && i < MAX_PROPERTIES) {
+                        description->comm_params[i] = (Property *)malloc(sizeof(Property));
+
+                        description->comm_params[i]->key = strdup(child->string);
+                        #if DEBUG
+                            printf("Value type is : %d\n", child->type);
+                            printf("String value is: %s\n", child->valuestring);
+                            printf("Int value is: %d\n", child->valueint);
+                            printf("Double value is: %f\n", child->valuedouble);
+                        #endif
+                        if(child->type == cJSON_False) {
+                            description->comm_params[i]->value = "false";
+                        } else if(child->type == cJSON_True) {
+                            description->comm_params[i]->value = "true";
+                        } else {
+                            description->comm_params[i]->value = strdup(child->valuestring);
+                        }
+                        #if DEBUG
+                            printf("Comm Param key=%s value=%s\n", description->comm_params[i]->key,
+                            description->comm_params[i]->value);
+                        #endif
+                        i++;
+                        child=child->next;
+                    }
                 }
             }
-
 
             child = cJSON_GetObjectItem(json, "advertise"); // this is an optional parameter; so, ignore if absent
             if (isJsonObject(child)) {
@@ -284,7 +315,8 @@ ServiceQuery *parseClientServiceQuery(char *service_desc_file) {
             description->type.protocol = NULL;
             description->address = NULL;
             description->port = 0;
-            description->comm_params.ssl = NULL;
+            description->commParamsCount = 0;
+            description->comm_params = NULL;
             description->numProperties = 0;
             description->properties = NULL;
             description->advertise.locally = NULL;
@@ -852,6 +884,42 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
     printf("Returning FALSE --- No Match found for query %s with service name :%s\n",srvQry->service_name,fullservicename);
 #endif
     return false;
+}
+
+/** Verify whether a property is present in communication parameters or not
+ * @param[in] srvQry service Query
+ * @param[in] paramName name of the property to be verified
+ * @return returns true if present and false otherwise
+ */
+bool isPresentPropertyInCommParams(ServiceQuery *srvQry, char *paramName){
+    int i;
+    if(srvQry->commParamsCount > 0 && srvQry->comm_params != NULL){
+        for(i = 0; i < srvQry->commParamsCount; i ++){
+            if(strcmp(srvQry->comm_params[i]->key, paramName) == 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/** Return the value of a property if present in communication parameters list
+ * @param[in] srvQry service Query
+ * @param[in] paramName name of the property to be verified
+ * @return returns value if property is present and NULL otherwise
+ */
+char* getValueInCommParams(ServiceQuery *srvQry, char *paramName){
+    int i;
+    if(srvQry->commParamsCount > 0 && srvQry->comm_params != NULL){
+        for(i = 0; i < srvQry->commParamsCount; i ++){
+            if(strcmp(srvQry->comm_params[i]->key, paramName) == 0) {
+                return srvQry->comm_params[i]->value;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 /** Browse or Discover a service from MDNS. This is a blocking call
