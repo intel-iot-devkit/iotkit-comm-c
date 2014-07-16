@@ -21,8 +21,21 @@
 
 #include "edisonapi.h"
 
-#define LOCAL_ADDRESS "127.0.0.1"
+#ifndef DEBUG
+    #define DEBUG 0
+#endif
 
+#define LOCAL_ADDRESS "127.0.0.1"
+#define MAX_PROPERTIES 128
+
+#define LONG_TIME 100000000
+#define SHORT_TIME 10000
+
+static uint32_t opinterface = kDNSServiceInterfaceIndexAny;
+static volatile int timeOut = LONG_TIME;
+int stopBlockingState = 0;
+
+static char lastError[256];
 
 /** Discover context to be passed around which contains function pointers to
  * callback and user filter callback methods

@@ -43,22 +43,11 @@
 #include "util.h"
 #include "edisonMDNS.h"
 
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-static uint32_t opinterface = kDNSServiceInterfaceIndexAny;
-#define LONG_TIME 100000000
-#define SHORT_TIME 10000
-static volatile int timeOut = LONG_TIME;
-
-
-static char lastError[256];
-
 /* Helper method to return the last error
  */
-char *getLastError() { return lastError; }
-
+char *getLastError() {
+    return lastError;
+}
 
 /* Helper snippet to handle JSON parse errors
  */
@@ -74,11 +63,10 @@ char *getLastError() { return lastError; }
  * @param[in] service_desc_file file path to the service description JSON
  * @return returns service description object upon successful parsing and NULL otherwise
  */
-ServiceDescription *parseServiceDescription(char *service_desc_file)
-{
+ServiceDescription *parseServiceDescription(char *service_desc_file) {
     ServiceDescription *description = NULL;
     char *out;
-    int i=0;
+    int i = 0;
     cJSON *json, *jitem, *child;
     bool status = true;
 
@@ -86,8 +74,7 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
     if (fp == NULL) {
         fprintf(stderr,"Error can't open file %s\n", service_desc_file);
     }
-    else
-    {
+    else {
         fseek(fp, 0, SEEK_END);
         long size = ftell(fp);
         rewind(fp);
@@ -98,133 +85,140 @@ ServiceDescription *parseServiceDescription(char *service_desc_file)
 
         // parse the file
         json = cJSON_Parse(buffer);
-	if (!json) {
+        if (!json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
-	}
-	else
-	{
+        }
+        else {
             #if DEBUG
-            out = cJSON_Print(json, 2);
-            printf("%s\n", out);
-            free(out);
+                out = cJSON_Print(json, 2);
+                printf("%s\n", out);
+                free(out);
             #endif
 
-            if (!isJsonObject(json)) handleParseError();
+            if (!isJsonObject(json))
+                handleParseError();
 
-	    description = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-	    if (description == NULL) {
-		fprintf(stderr, "Can't alloc memory for service description\n");
-		goto endParseSrvFile;
-	    }
+            description = (ServiceDescription *)malloc(sizeof(ServiceDescription));
+            if (description == NULL) {
+                fprintf(stderr, "Can't alloc memory for service description\n");
+                goto endParseSrvFile;
+            }
 
-        description->service_name = NULL;
-        description->type.name = NULL;
-        description->type.protocol = NULL;
-        description->address = NULL;
-        description->port = 0;
-        description->comm_params.ssl = NULL;
-        description->numProperties = 0;
-        description->properties = NULL;
-        description->advertise.locally = NULL;
-        description->advertise.cloud = NULL;
+            description->service_name = NULL;
+            description->type.name = NULL;
+            description->type.protocol = NULL;
+            description->address = NULL;
+            description->port = 0;
+            description->comm_params.ssl = NULL;
+            description->numProperties = 0;
+            description->properties = NULL;
+            description->advertise.locally = NULL;
+            description->advertise.cloud = NULL;
 
-	    // initially set status to UNKNOWN
-	    description->status = UNKNOWN;
+            // initially set status to UNKNOWN
+            description->status = UNKNOWN;
 
             jitem = cJSON_GetObjectItem(json, "name");
-	    if (!isJsonString(jitem)) handleParseError();
+            if (!isJsonString(jitem))
+                handleParseError();
 
             description->service_name = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("service name %s\n", description->service_name);
-	    #endif
+            #if DEBUG
+                printf("service name %s\n", description->service_name);
+            #endif
 
             child = cJSON_GetObjectItem(json, "type");
-	    if (!isJsonObject(child)) handleParseError();
+            if (!isJsonObject(child))
+                handleParseError();
 
-	    jitem = cJSON_GetObjectItem(child, "name");
-	    if (!isJsonString(jitem)) handleParseError();
+            jitem = cJSON_GetObjectItem(child, "name");
+            if (!isJsonString(jitem))
+                handleParseError();
 
-	    description->type.name = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("type name %s\n", description->type.name);
-	    #endif
+            description->type.name = strdup(jitem->valuestring);
+            #if DEBUG
+                printf("type name %s\n", description->type.name);
+            #endif
 
             jitem = cJSON_GetObjectItem(child, "protocol");
-	    if (!isJsonString(jitem)) handleParseError();
+            if (!isJsonString(jitem))
+                handleParseError();
 
             description->type.protocol = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("protocol %s\n", description->type.protocol);
-	    #endif
-
-        jitem = cJSON_GetObjectItem(json, "address");
-	    if (isJsonString(jitem)) {
-            description->address = strdup(jitem->valuestring);
             #if DEBUG
-            printf("host address %s\n", description->address);
+                printf("protocol %s\n", description->type.protocol);
             #endif
-        } else {
-            description->address = NULL;
-        }
-	    // must have a port
-	    jitem = cJSON_GetObjectItem(json, "port");
-	    if (!jitem || !isJsonNumber(jitem)) handleParseError();
-	    description->port = jitem->valueint;
-	    #if DEBUG
-	    printf("port %d\n", description->port);
-	    #endif
 
-	    jitem = cJSON_GetObjectItem(json, "properties");
-	    if (!isJsonObject(jitem)) handleParseError();
-
-	    description->numProperties = 0;
-	    child = jitem->child;
-	    while (child) description->numProperties++, child=child->next;
-	    if (description->numProperties)
-	    {
-            description->properties = (Property **)malloc(sizeof(Property *) * description->numProperties);
-            i=0;
-            child = jitem->child;
-            while (child) {
-                description->properties[i] = (Property *)malloc(sizeof(Property));
-
-                description->properties[i]->key = strdup(child->string);
-                description->properties[i]->value = strdup(child->valuestring);
+            jitem = cJSON_GetObjectItem(json, "address");
+            if (isJsonString(jitem)) {
+                description->address = strdup(jitem->valuestring);
                 #if DEBUG
-                    printf("properties key=%s value=%s\n", description->properties[i]->key,
-                    description->properties[i]->value);
+                    printf("host address %s\n", description->address);
                 #endif
-                i++;
-                child=child->next;
+            } else {
+                description->address = NULL;
             }
-	    }
+            // must have a port
+            jitem = cJSON_GetObjectItem(json, "port");
+            if (!jitem || !isJsonNumber(jitem))
+                handleParseError();
+            description->port = jitem->valueint;
+            #if DEBUG
+                printf("port %d\n", description->port);
+            #endif
 
-	    child = cJSON_GetObjectItem(json, "comm_params"); // this is an optional parameter; so, ignore if absent
-        if (isJsonObject(child)){
-            jitem = cJSON_GetObjectItem(child, "ssl"); // this is an optional parameter; so, ignore if absent
-            if (isJsonString(jitem)){
-                description->comm_params.ssl = strdup(jitem->valuestring);
+            jitem = cJSON_GetObjectItem(json, "properties");
+            if (!isJsonObject(jitem))
+                handleParseError();
+
+            description->numProperties = 0;
+            child = jitem->child;
+            while (child && description->numProperties++ < MAX_PROPERTIES) {
+                child = child->next;
             }
-        }
+            if (description->numProperties) {
+                description->properties = (Property **)malloc(sizeof(Property *) * description->numProperties);
+                i = 0;
+                child = jitem->child;
+                while (child && i < MAX_PROPERTIES) {
+                    description->properties[i] = (Property *)malloc(sizeof(Property));
 
-
-        child = cJSON_GetObjectItem(json, "advertise"); // this is an optional parameter; so, ignore if absent
-        if (isJsonObject(child)){
-            jitem = cJSON_GetObjectItem(child, "locally"); // this is an optional parameter; so, ignore if absent
-            if (isJsonString(jitem)){
-                description->advertise.locally = strdup(jitem->valuestring);
+                    description->properties[i]->key = strdup(child->string);
+                    description->properties[i]->value = strdup(child->valuestring);
+                    #if DEBUG
+                        printf("properties key=%s value=%s\n", description->properties[i]->key,
+                        description->properties[i]->value);
+                    #endif
+                    i++;
+                    child = child->next;
+                }
             }
 
-            jitem = cJSON_GetObjectItem(child, "cloud"); // this is an optional parameter; so, ignore if absent
-            if (isJsonString(jitem)){
-                description->advertise.cloud = strdup(jitem->valuestring);
+            child = cJSON_GetObjectItem(json, "comm_params"); // this is an optional parameter; so, ignore if absent
+            if (isJsonObject(child)) {
+                jitem = cJSON_GetObjectItem(child, "ssl"); // this is an optional parameter; so, ignore if absent
+                if (isJsonString(jitem)) {
+                    description->comm_params.ssl = strdup(jitem->valuestring);
+                }
             }
-             #if DEBUG
-                 printf("advertise locally=%s cloud=%s\n", description->advertise.locally,
-                 description->advertise.cloud);
-             #endif
-        }
+
+
+            child = cJSON_GetObjectItem(json, "advertise"); // this is an optional parameter; so, ignore if absent
+            if (isJsonObject(child)) {
+                jitem = cJSON_GetObjectItem(child, "locally"); // this is an optional parameter; so, ignore if absent
+                if (isJsonString(jitem)) {
+                    description->advertise.locally = strdup(jitem->valuestring);
+                }
+
+                jitem = cJSON_GetObjectItem(child, "cloud"); // this is an optional parameter; so, ignore if absent
+                if (isJsonString(jitem)) {
+                    description->advertise.cloud = strdup(jitem->valuestring);
+                }
+                 #if DEBUG
+                     printf("advertise locally=%s cloud=%s\n", description->advertise.locally,
+                     description->advertise.cloud);
+                 #endif
+            }
 
 
 
@@ -233,9 +227,10 @@ endParseSrvFile:
         }
 
         // free buffers
-	fclose(fp);
+        fclose(fp);
         free(buffer);
     }
+
     return description;
 }
 
@@ -243,11 +238,10 @@ endParseSrvFile:
  * @param[in] service_desc_file file path to the query description JSON
  * @return returns client query description object upon successful parsing and NULL otherwise
  */
-ServiceQuery *parseClientServiceQuery(char *service_desc_file)
-{
+ServiceQuery *parseClientServiceQuery(char *service_desc_file) {
     ServiceQuery *description = NULL;
     char *out;
-    int i=0;
+    int i = 0;
     cJSON *json, *jitem, *child;
     bool status = true;
 
@@ -255,8 +249,7 @@ ServiceQuery *parseClientServiceQuery(char *service_desc_file)
     if (fp == NULL) {
         fprintf(stderr,"Error can't open file %s\n", service_desc_file);
     }
-    else
-    {
+    else {
         fseek(fp, 0, SEEK_END);
         long size = ftell(fp);
         rewind(fp);
@@ -267,67 +260,79 @@ ServiceQuery *parseClientServiceQuery(char *service_desc_file)
 
         // parse the file
         json = cJSON_Parse(buffer);
-	if (!json) {
+        if (!json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
-	}
-	else
-	{
+        }
+        else {
             #if DEBUG
-            out = cJSON_Print(json, 2);
-            printf("%s\n", out);
-            free(out);
+                out = cJSON_Print(json, 2);
+                printf("%s\n", out);
+                free(out);
             #endif
 
-            if (!isJsonObject(json)) handleParseError();
+            if (!isJsonObject(json))
+                handleParseError();
 
-	    description = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-	    if (description == NULL) {
-		fprintf(stderr, "Can't alloc memory for service description\n");
-		goto endParseSrvFile;
-	    }
+            description = (ServiceQuery *)malloc(sizeof(ServiceQuery));
+            if (description == NULL) {
+                fprintf(stderr, "Can't alloc memory for service description\n");
+                goto endParseSrvFile;
+            }
 
-        description->service_name = NULL;
-        description->type.name = NULL;
-        description->type.protocol = NULL;
+            description->service_name = NULL;
+            description->type.name = NULL;
+            description->type.protocol = NULL;
+            description->address = NULL;
+            description->port = 0;
+            description->comm_params.ssl = NULL;
+            description->numProperties = 0;
+            description->properties = NULL;
+            description->advertise.locally = NULL;
+            description->advertise.cloud = NULL;
 
-	    // initially set status to UNKNOWN
-	    description->status = UNKNOWN;
+            // initially set status to UNKNOWN
+            description->status = UNKNOWN;
 
-        jitem = cJSON_GetObjectItem(json, "name");
-	    if (!isJsonString(jitem)) handleParseError();
+            jitem = cJSON_GetObjectItem(json, "name");
+            if (!isJsonString(jitem))
+                handleParseError();
 
-        description->service_name = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("service name %s\n", description->service_name);
-	    #endif
+            description->service_name = strdup(jitem->valuestring);
+            #if DEBUG
+                printf("service name %s\n", description->service_name);
+            #endif
 
-        child = cJSON_GetObjectItem(json, "type");
-	    if (!isJsonObject(child)) handleParseError();
+            child = cJSON_GetObjectItem(json, "type");
+            if (!isJsonObject(child))
+                handleParseError();
 
-	    jitem = cJSON_GetObjectItem(child, "name");
-	    if (!isJsonString(jitem)) handleParseError();
+            jitem = cJSON_GetObjectItem(child, "name");
+            if (!isJsonString(jitem))
+                handleParseError();
 
-	    description->type.name = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("type name %s\n", description->type.name);
-	    #endif
+            description->type.name = strdup(jitem->valuestring);
+            #if DEBUG
+                printf("type name %s\n", description->type.name);
+            #endif
 
-        jitem = cJSON_GetObjectItem(child, "protocol");
-	    if (!isJsonString(jitem)) handleParseError();
+            jitem = cJSON_GetObjectItem(child, "protocol");
+            if (!isJsonString(jitem))
+                handleParseError();
 
-        description->type.protocol = strdup(jitem->valuestring);
-	    #if DEBUG
-	    printf("protocol %s\n", description->type.protocol);
-	    #endif
+            description->type.protocol = strdup(jitem->valuestring);
+            #if DEBUG
+                printf("protocol %s\n", description->type.protocol);
+            #endif
 
 endParseSrvFile:
             cJSON_Delete(json);
         }
 
         // free buffers
-	    fclose(fp);
+        fclose(fp);
         free(buffer);
     }
+
     return description;
 }
 
@@ -354,25 +359,23 @@ char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
         exit(EXIT_FAILURE);
    }
 
-	struct sockaddr_in *addr;
-   	addr = (struct sockaddr_in *)result->ai_addr;
+    struct sockaddr_in *addr;
+    addr = (struct sockaddr_in *)result->ai_addr;
 
     // duplicate the IP address so that subsequent calls to 'inet_ntoa' does not overwrite the value
-   	char *ipaddress = strdup(inet_ntoa((struct in_addr)addr->sin_addr));
-   	#if DEBUG
-	    printf("IP Address = %s\n",ipaddress);
-	#endif
+    char *ipaddress = strdup(inet_ntoa((struct in_addr)addr->sin_addr));
+    #if DEBUG
+        printf("IP Address = %s\n",ipaddress);
+    #endif
 
-	return ipaddress;
-
+    return ipaddress;
 }
 
 /** Handle events from DNS Server
  * @param[in] client service ref object
  * @param[in] callback callback function to be invoked upon any DNS errors
  */
-void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *))
-{
+void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *)) {
     #if DEBUG
         printf("\n in handleevents now\n");
     #endif
@@ -380,53 +383,47 @@ void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *
     int nfds = dns_sd_fd + 1;
     fd_set readfds;
     struct timeval tv;
-    int result, stopNow = 0;
+    int result;
 
-    while (!stopNow)
-    {
-	// 1. Set up the fd_set as usual here.
-        FD_ZERO(&readfds);
+    // 1. Set up the fd_set as usual here.
+    FD_ZERO(&readfds);
 
-        // 2. Add the fd for our client(s) to the fd_set
-        if (client ) 
-	    FD_SET(dns_sd_fd , &readfds);
+    // 2. Add the fd for our client(s) to the fd_set
+    if (client)
+    FD_SET(dns_sd_fd , &readfds);
 
-        // 3. Set up the timeout.
-        tv.tv_sec  = timeOut;
-        tv.tv_usec = 0;
+    // 3. Set up the timeout.
+    tv.tv_sec  = timeOut;
+    tv.tv_usec = 0;
 
-        result = select(nfds, &readfds, (fd_set*)NULL, (fd_set*)NULL, &tv);
-        #if DEBUG
-	printf("select result = %d\n", result);
-	#endif
-        if (result > 0)
-        {
-	    DNSServiceErrorType err = kDNSServiceErr_NoError;
-            if (client  && FD_ISSET(dns_sd_fd , &readfds)) 
-		err = DNSServiceProcessResult(client );
-            if (err) { 
-		sprintf(lastError, "Failed waiting on DNS file descriptor");
-		callback(client, err, NULL);
-		stopNow = 1; 
-	    }
+    result = select(nfds, &readfds, (fd_set*)NULL, (fd_set*)NULL, &tv);
+    #if DEBUG
+        printf("select result = %d\n", result);
+    #endif
+    if (result > 0) {
+        DNSServiceErrorType err = kDNSServiceErr_NoError;
+        if (client  && FD_ISSET(dns_sd_fd , &readfds)) {
+            err = DNSServiceProcessResult(client );
         }
-        else if (result == 0)
-        {
-	    DNSServiceErrorType err = DNSServiceProcessResult(client);
-            if (err != kDNSServiceErr_NoError)
-            {
-                sprintf(lastError, "DNSService call failed");
-		callback(client, err, NULL);
-                stopNow = 1;
-            }
+        if (err) {
+            sprintf(lastError, "Failed waiting on DNS file descriptor");
+            callback(client, err, NULL);
+            stopBlockingState = 1;
         }
-        else
-        {
-	    sprintf(lastError, "select() returned %d errno %s", result, strerror(errno));
-	    callback(client, errno, NULL);
-            if (errno != EINTR)
-		stopNow = 1;
+    }
+    else if (result == 0) {
+        DNSServiceErrorType err = DNSServiceProcessResult(client);
+        if (err != kDNSServiceErr_NoError) {
+            sprintf(lastError, "DNSService call failed");
+            callback(client, err, NULL);
+            stopBlockingState = 1;
         }
+    }
+    else {
+        sprintf(lastError, "select() returned %d errno %s", result, strerror(errno));
+        callback(client, errno, NULL);
+        if (errno != EINTR)
+            stopBlockingState = 1;
     }
 }
 
@@ -443,11 +440,10 @@ void handleEvents(DNSServiceRef client, void (*callback)(void *, int32_t, void *
  * @param[in] context context information
  */
 static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
-                                    const char *fullservicename, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
-{
+                                    const char *fullservicename, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context) {
     union {
-    uint16_t s;
-    u_char b[2];
+        uint16_t s;
+        u_char b[2];
     }port = { opaqueport };
 
     uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
@@ -472,7 +468,7 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
 
     // there is a user filterCB, so call it. If it returns false then donothing
     if (discContext->userFilterCB && discContext->userFilterCB(query) == false)
-    	return;
+        return;
 
     /*// check whether user has configured any host address
     if (query->address == NULL)
@@ -497,50 +493,46 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
  * @param[in] context context information
  */
 static void DNSSD_API queryReply(DNSServiceRef client, 
-				DNSServiceFlags flags, 
-				uint32_t interfaceIndex,
-				DNSServiceErrorType errorCode,
-				const char *name, 
-				const char *regtype, 
-				const char *domain, 
-				void *context)
-{
+                DNSServiceFlags flags,
+                uint32_t interfaceIndex,
+                DNSServiceErrorType errorCode,
+                const char *name,
+                const char *regtype,
+                const char *domain,
+                void *context) {
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceDescription *desc = (ServiceDescription *) discContext->serviceSpec;
+    DNSServiceRef newclient;
     DNSServiceErrorType err;
 
 #if DEBUG
     printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
 #endif
-    if (errorCode == kDNSServiceErr_NoError)
-    {
-	if (flags & kDNSServiceFlagsAdd)
-	    desc->status = ADDED;
-	else
-	    desc->status = REMOVED;
+    if (errorCode == kDNSServiceErr_NoError) {
+        if (flags & kDNSServiceFlagsAdd)
+            desc->status = ADDED;
+        else
+            desc->status = REMOVED;
 
-#if DEBUG
-    printf("desc status %d\n", desc->status);
-#endif
+        #if DEBUG
+            printf("desc status %d\n", desc->status);
+        #endif
 
-	err = DNSServiceResolve(&client, 0, interfaceIndex, name, regtype, domain, discover_resolve_reply, context);
-	    if (!client || err != kDNSServiceErr_NoError)
-        {
+        err = DNSServiceResolve(&newclient, 0, interfaceIndex, name, regtype, domain, discover_resolve_reply, context);
+        if (!newclient || err != kDNSServiceErr_NoError) {
             sprintf(lastError, "queryReply DNSServiceResolve call failed %ld\n", (long int)err);
             discContext->callback(client, err, NULL);
-            if (client)  {
-                DNSServiceRefDeallocate(client);
+            if (newclient) {
+                DNSServiceRefDeallocate(newclient);
             }
         }
-        else
-        {
-            handleEvents(client,discContext->callback);
+        else {
+            handleEvents(newclient,discContext->callback);
         }
     }
-    else 
-    {
-	sprintf(lastError, "MDNS unexpected error");
-	discContext->callback(client, errorCode, NULL);
+    else {
+        sprintf(lastError, "MDNS unexpected error");
+        discContext->callback(newclient, errorCode, NULL);
     }
 }
 
@@ -548,12 +540,12 @@ static void DNSSD_API queryReply(DNSServiceRef client,
  * @param[in] queryDesc service description
  * @param[in] callback callback to be invoked upon successful client creation
  */
-void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void *, int32_t, void *)){
-    if(queryDesc->address == NULL){
+void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void *, int32_t, void *)) {
+    if(queryDesc->address == NULL) {
         queryDesc->address = "127.0.0.1"; // defaults to localhost
     }
 
-    if(queryDesc->port == 0){
+    if(queryDesc->port == 0) {
         fprintf(stderr, "Error: Unknown Port information\n");
         return;
     }
@@ -566,24 +558,20 @@ void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void 
  * @param[in] callback callback to be invoked upon successful client creation
  */
 void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
-	    bool (*userFilterCB)(ServiceQuery *),
-	    void (*callback)(void *, int32_t, void *))
-{
-    
+        bool (*userFilterCB)(ServiceQuery *),
+        void (*callback)(void *, int32_t, void *)) {
     DNSServiceRef client;
     DNSServiceErrorType err;
-    pthread_t tid;	    // thread to handle events from DNS server
+    pthread_t tid;      // thread to handle events from DNS server
     char regtype[128];
     DiscoverContext *context = (DiscoverContext *)malloc(sizeof(DiscoverContext));
 
     setMyAddresses(); // initialize my IP Addresses
 
-
     if (!context) return;
     context->userFilterCB = userFilterCB;
     context->callback = callback;
     context->serviceSpec = queryDesc;
-    
 
     // register type
     strcpy(regtype, "_");
@@ -592,24 +580,25 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
     strcat(regtype, queryDesc->type.protocol); 
 
     err = DNSServiceBrowse
-	    (&client, 
-	    0, 
-	    opinterface, 
-	    regtype,    // registration type
-	    "",		// domain (null = pick sensible default = local)
-	    queryReply, // callback
-	    context);	// param to pass as context into queryReply
+        (&client,
+        0,
+        opinterface,
+        regtype,    // registration type
+        "",     // domain (null = pick sensible default = local)
+        queryReply, // callback
+        context);   // param to pass as context into queryReply
 
-    if (!client || err != kDNSServiceErr_NoError)
-    {
-	sprintf(lastError, "DNSServiceBrowse call failed %ld\n", (long int)err);
-	callback(client, err, NULL);
-	if (client)
-	    DNSServiceRefDeallocate(client);
+    if (!client || err != kDNSServiceErr_NoError) {
+        sprintf(lastError, "DNSServiceBrowse call failed %ld\n", (long int)err);
+        callback(client, err, NULL);
+        if (client)
+            DNSServiceRefDeallocate(client);
     }
-    else
-    {
-	handleEvents(client, callback);
+    else {
+        stopBlockingState = 0;
+        while (!stopBlockingState) {
+            handleEvents(client, callback);
+        }
     }
 }
 
@@ -618,53 +607,55 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
  * @param[in] srvQry service query
  * @param[in] fullservicename complete service name
  */
-bool  getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
-        regex_t regex;
-        int res;
-        char msgbuf[100];
-        #if DEBUG
-            printf("\nFull Service name %s\n",fullservicename);
-        #endif
-        // searching for character '.' where the service name ends
-        char *end = strchr(fullservicename,'.');
-        if (end == NULL) {
-            printf ("searched character NOT FOUND\n");
-            return false;
-        }
+bool getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
+    regex_t regex;
+    int res;
+    char msgbuf[100];
+    #if DEBUG
+        printf("\nFull Service name %s\n",fullservicename);
+    #endif
+    // searching for character '.' where the service name ends
+    char *end = strchr(fullservicename,'.');
+    if (end == NULL) {
+        printf ("searched character NOT FOUND\n");
+        return false;
+    }
 
-        char servicename[256];
-        int i = 0;
+    char servicename[256];
+    int i = 0;
 
-        while (fullservicename != end) {
-            servicename[i++] = *fullservicename++;
-        }
-        servicename[i] = '\0';
+    while (fullservicename != end) {
+        servicename[i++] = *fullservicename++;
+    }
+    servicename[i] = '\0';
 
-        #if DEBUG
-            printf("\nReal Service name %s\n",servicename);
-        #endif
+    #if DEBUG
+        printf("\nReal Service name %s\n",servicename);
+    #endif
 
-        /* Compile regular expression */
-        res = regcomp(&regex, srvQry->service_name, REG_EXTENDED);
-        if(res ) { fprintf(stderr, "Could not compile regex\n");}
+    /* Compile regular expression */
+    res = regcomp(&regex, srvQry->service_name, REG_EXTENDED);
+    if(res ) {
+        fprintf(stderr, "Could not compile regex\n");
+    }
 
-        /* Execute regular expression */
-        res = regexec(&regex, servicename, 0, NULL, 0);
-        if( !res ) {
-            return true;
-        }
-        else if(res == REG_NOMATCH ) {
-            return false;
-        }
-        else {
-            regerror(res, &regex, msgbuf, sizeof(msgbuf));
-            fprintf(stderr, "Regex match failed: %s\n", msgbuf);
-        }
+    /* Execute regular expression */
+    res = regexec(&regex, servicename, 0, NULL, 0);
+    if( !res ) {
+        return true;
+    }
+    else if(res == REG_NOMATCH ) {
+        return false;
+    }
+    else {
+        regerror(res, &regex, msgbuf, sizeof(msgbuf));
+        fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+    }
 
-        /* Free compiled regular expression if you want to use the regex_t again */
-	    regfree(&regex);
+    /* Free compiled regular expression if you want to use the regex_t again */
+    regfree(&regex);
 
-	    return false;
+    return false;
 }
 
 
@@ -674,22 +665,22 @@ bool  getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
  * @param[in] fullname full name of the service
  * @param[in] portAsNumber port information
  */
-char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber){
+char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber) {
 
     if (!hosttarget || !fullname) {
         if (!fullname) {
-          printf("WARN: Discovered a service without a name. Dropping.\n");
+            printf("WARN: Discovered a service without a name. Dropping.\n");
         } else {
-          printf("WARN: Discovered a service without addresses. Dropping.\n");
+            printf("WARN: Discovered a service without addresses. Dropping.\n");
         }
         return NULL;
-      }
+    }
 
     char *serviceName;
     char portAsChar[256];
     sprintf(portAsChar, "%d", portAsNumber);
 
-    if(strstr(fullname, "._")){
+    if(strstr(fullname, "._")) {
         //copy only the service name
         serviceName = strndup(fullname, strstr(fullname, "._") - fullname);
     } else {
@@ -702,10 +693,10 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
     ServiceCache *traverse = serviceCache;
     bool isPresentInCache = false;
     bool isServiceSeenBefore = false;
-    while(traverse != NULL){
-        if(strcmp(traverse->servicename, serviceName) == 0){
+    while(traverse != NULL) {
+        if(strcmp(traverse->servicename, serviceName) == 0) {
 
-            if(strcmp(traverse->address, address) == 0){
+            if(strcmp(traverse->address, address) == 0) {
                 isPresentInCache = true;
             }else {
                 // service is already known; but got callback on new address/interface
@@ -715,7 +706,11 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
         traverse = traverse->next;
     }
 
-    if(isPresentInCache == true){
+    if(isPresentInCache == true) {
+        #if DEBUG
+            puts("Info: service info already present in cache");
+        #endif
+
         return NULL;
     }
 
@@ -724,24 +719,36 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
     newService->servicename = serviceName;
     newService->address = address;
 
-    if(serviceCache == NULL){
+    if(serviceCache == NULL) {
         serviceCache = newService;
     } else {
         traverse = serviceCache;
-        while(traverse->next != NULL){
+        while(traverse->next != NULL) {
             traverse = traverse->next;
         }
 
         traverse->next = newService;
     }
 
-    if(isServiceSeenBefore){
+    if(isServiceSeenBefore) {
+        #if DEBUG
+            puts("Info: service already seen before");
+        #endif
+
         return NULL;
     }
 
-    if(isServiceLocal(address)){
+    if(isServiceLocal(address)) {
+        #if DEBUG
+            puts("Info: This is a local service; so returning local address");
+        #endif
+
         return LOCAL_ADDRESS;
     }
+
+    #if DEBUG
+        printf("This is a non-local service; so returning IP address of non-local host:%s\n", address);
+    #endif
 
     // return the IP address of non-local host
     return address;
@@ -751,10 +758,10 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
  * @param[in] address host address information
  * @return returns true if local address and false otherwise
  */
-bool isServiceLocal(const char *address){
+bool isServiceLocal(const char *address) {
     int i;
-    for(i = 0; i < myaddressesCount; i ++){
-        if(strcmp(myaddresses[i], address) == 0){
+    for(i = 0; i < myaddressesCount; i++) {
+        if(strcmp(myaddresses[i], address) == 0) {
             return true;
         }
     }
@@ -769,7 +776,7 @@ bool isServiceLocal(const char *address){
  * @param[in] txtLen length of TXT Record
  * @param[in] txtRecord TXT Record
  */
-bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord){
+bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord) {
 
     bool isNameMatched = false;
     bool isPortMatched = false;
@@ -778,15 +785,15 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
     Property **properties;
 
     // check whether service name in ServiceQuery matches with service name reported by discover_resolve_reply
-    if(getServiceNameMatched(srvQry,fullservicename)){ // check whether
+    if(getServiceNameMatched(srvQry,fullservicename)) { // check whether
     #if DEBUG
         printf("Yes %s:matches with:%s\n", fullservicename, srvQry->service_name);
     #endif
         isNameMatched = true;
     }
 
-   if(srvQry->port){ // if port details present in discovery query
-        if(PortAsNumber == srvQry->port){
+   if(srvQry->port) { // if port details present in discovery query
+        if(PortAsNumber == srvQry->port) {
         #if DEBUG
             printf("Yes port:%u:matched with:%u\n", PortAsNumber, srvQry->port);
         #endif
@@ -796,7 +803,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
         // port not defined by the service query; so consider as matched successfully
         isPortMatched = true;
     }
-    
+
     uint16_t propertiesCountInTxtRecord = TXTRecordGetCount(txtLen, txtRecord);
     int bufferKeySize = 256;
     char bufferKey[bufferKeySize];
@@ -805,7 +812,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
     int i, j;
 
     properties = (Property **)malloc(sizeof(Property *) * propertiesCountInTxtRecord);
-    for(i = 0; i < propertiesCountInTxtRecord; i ++){
+    for(i = 0; i < propertiesCountInTxtRecord; i++) {
         properties[i] = (Property *)malloc(sizeof(Property));
 
         TXTRecordGetItemAtIndex(txtLen, txtRecord, i, bufferKeySize -1, bufferKey, &bufferValueSize, &bufferValue);
@@ -818,12 +825,12 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
         #endif
     }
 
-    if(srvQry->numProperties > 0 && srvQry->properties != NULL){
+    if(srvQry->numProperties > 0 && srvQry->properties != NULL) {
         // look for atleast one property match
-        for(i = 0; i < srvQry->numProperties; i ++){
-            for(j = 0; j < propertiesCountInTxtRecord; j ++){
+        for(i = 0; i < srvQry->numProperties; i++) {
+            for(j = 0; j < propertiesCountInTxtRecord; j++) {
                 if(strcmp(srvQry->properties[i]->key, properties[j]->key) == 0 && \
-                    strcmp(srvQry->properties[i]->value, properties[j]->value) == 0){
+                    strcmp(srvQry->properties[i]->value, properties[j]->value) == 0) {
                         isPropertiesMatched = true; // yes found atleast one matching property
                         break;
                     }
@@ -834,7 +841,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
         isPropertiesMatched = true;
     }
 
-    if(isNameMatched && isPortMatched && isPropertiesMatched){
+    if(isNameMatched && isPortMatched && isPropertiesMatched) {
     #if DEBUG
         printf("Returning TRUE --- Match found for service:%s\n", fullservicename);
     #endif
@@ -852,8 +859,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
  * @param[in] callback callback to be invoked upon successful client creation
  */
 void WaitToDiscoverServices(ServiceQuery *queryDesc,
-	void (*callback)(void *, int32_t, void *) )
-{
+    void (*callback)(void *, int32_t, void *)) {
     WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
 }
 
@@ -870,11 +876,10 @@ void WaitToDiscoverServices(ServiceQuery *queryDesc,
  * @param[in] context context information
  */
 static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSServiceFlags flags, uint32_t ifIndex, DNSServiceErrorType errorCode,
-                                    const char *fullname, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context)
-{
+                                    const char *fullname, const char *hosttarget, uint16_t opaqueport, uint16_t txtLen, const unsigned char *txtRecord, void *context) {
     union {
-    uint16_t s;
-    u_char b[2];
+        uint16_t s;
+        u_char b[2];
     }port = { opaqueport };
 
     uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
@@ -895,10 +900,10 @@ static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSSer
         char *ipaddress = getIPAddressFromHostName(description->address,portarr);
         if (ipaddress != NULL) {
             description->address = ipaddress;
-    	    discContext->callback(client, errorCode,createService(description));
-    	} else {
-    	    printf("\nIn advertise_resolve_reply Host Name to IP Address Conversion Failed\n");
-    	}
+            discContext->callback(client, errorCode,createService(description));
+        } else {
+            printf("\nIn advertise_resolve_reply Host Name to IP Address Conversion Failed\n");
+        }
     } else {
         discContext->callback(client, errorCode,createService(description));
     }
@@ -915,13 +920,12 @@ static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSSer
  * @param[in] context context information
  */
 static void DNSSD_API regReply(DNSServiceRef client,
-				const DNSServiceFlags flags,
-				DNSServiceErrorType errorCode,
-				const char *name,
-				const char *regtype,
-				const char *domain,
-				void *context)
-{
+                const DNSServiceFlags flags,
+                DNSServiceErrorType errorCode,
+                const char *name,
+                const char *regtype,
+                const char *domain,
+                void *context) {
     (void)flags;    // Unused
 
     DiscoverContext *discContext = (DiscoverContext *)context;
@@ -932,46 +936,39 @@ static void DNSSD_API regReply(DNSServiceRef client,
 #if DEBUG
     printf("Got a reply for %s.%s.%s\n", name, regtype, domain);
 #endif
-    if (errorCode == kDNSServiceErr_NoError)
-    {
-	desc.status = REGISTERED;
-	err = DNSServiceResolve(&client, 0, 0, name, regtype, domain, advertise_resolve_reply, context);
-        if (!client || err != kDNSServiceErr_NoError)
-        {
-        sprintf(lastError, "regReply DNSServiceResolve call failed %ld\n", (long int)err);
-        discContext->callback(client, err, NULL);
-        if (client)  {
-            DNSServiceRefDeallocate(client);
+    if (errorCode == kDNSServiceErr_NoError) {
+        desc.status = REGISTERED;
+        err = DNSServiceResolve(&client, 0, 0, name, regtype, domain, advertise_resolve_reply, context);
+        if (!client || err != kDNSServiceErr_NoError) {
+            sprintf(lastError, "regReply DNSServiceResolve call failed %ld\n", (long int)err);
+            discContext->callback(client, err, NULL);
+            if (client) {
+                DNSServiceRefDeallocate(client);
+            }
         }
-        }
-        else
-        {
-        handleEvents(client,discContext->callback);
+        else {
+            handleEvents(client,discContext->callback);
         }
     }
-    else if (errorCode == kDNSServiceErr_NameConflict)
-    {
+    else if (errorCode == kDNSServiceErr_NameConflict) {
         sprintf(lastError, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
-	desc.status = IN_USE;
-	discContext->callback(client, errorCode, NULL);
+        desc.status = IN_USE;
+        discContext->callback(client, errorCode, NULL);
     }
-    else
-    {
-	sprintf(lastError, "MDNS unexpected error");
-	discContext->callback(client, errorCode, NULL);
+    else {
+        sprintf(lastError, "MDNS unexpected error");
+        discContext->callback(client, errorCode, NULL);
     }
-
 }
 
 /** Advertise a service. Return an opaque object.
  * @param[in] description service description
  * @param[in] callback callback to be invoked upon successful service creation
  */
-bool advertiseService(ServiceDescription *description)
-{
+bool advertiseService(ServiceDescription *description) {
     DNSServiceRef client;
     DNSServiceErrorType err;
-    pthread_t tid;	    // thread to handle events from DNS server
+    pthread_t tid; // thread to handle events from DNS server
     char regtype[128];
     TXTRecordRef txtRecord;
 
@@ -983,38 +980,35 @@ bool advertiseService(ServiceDescription *description)
     strcat(regtype, "._");
     strcat(regtype, description->type.protocol);
 
-    if (description->numProperties)
-    {
-	uint8_t txtLen, i=0;
-	TXTRecordCreate(&txtRecord, 0, NULL);
-	for (i=0; i<description->numProperties; i++)
-	{
-	    txtLen = (uint8_t)strlen(description->properties[i]->value);
-	    TXTRecordSetValue(&txtRecord, description->properties[i]->key,
-				    txtLen, description->properties[i]->value );
-	}
+    if (description->numProperties) {
+        uint8_t txtLen, i = 0;
+        TXTRecordCreate(&txtRecord, 0, NULL);
+        for (i = 0; i<description->numProperties; i++) {
+            txtLen = (uint8_t)strlen(description->properties[i]->value);
+            TXTRecordSetValue(&txtRecord, description->properties[i]->key,
+                    txtLen, description->properties[i]->value );
+        }
     }
 
     err = DNSServiceRegister
-	    (&client,
-	    0,
-	    opinterface,
-	    description->service_name,  // service name
-	    regtype,			// registration type
-	    "",				// default = local
-	    NULL,	    // only needed when creating proxy registrations
-	    htons(description->port),   // Must have a port
-	    TXTRecordGetLength(&txtRecord),
-	    TXTRecordGetBytesPtr(&txtRecord),
-	    NULL,			// callback
-	    NULL);	    // param to pass as context into regReply
+        (&client,
+        0,
+        opinterface,
+        description->service_name,  // service name
+        regtype,    // registration type
+        "",     // default = local
+        NULL,   // only needed when creating proxy registrations
+        htons(description->port),   // Must have a port
+        TXTRecordGetLength(&txtRecord),
+        TXTRecordGetBytesPtr(&txtRecord),
+        NULL,   // callback
+        NULL);  // param to pass as context into regReply
 
-    if (description->numProperties)  {
-	    TXTRecordDeallocate(&txtRecord);
+    if (description->numProperties) {
+        TXTRecordDeallocate(&txtRecord);
     }
 
-    if (!client || err != kDNSServiceErr_NoError)
-    {
+    if (!client || err != kDNSServiceErr_NoError) {
         sprintf(lastError, "DNSServiceRegister call failed %ld\n", (long int)err);
         if (client)
             DNSServiceRefDeallocate(client);
@@ -1032,11 +1026,10 @@ bool advertiseService(ServiceDescription *description)
  * @param[in] callback callback to be invoked upon successful service creation
  */
 void WaitToAdvertiseService(ServiceDescription *description,
-	void (*callback)(void *, int32_t, void *))
-{		
+        void (*callback)(void *, int32_t, void *)) {
     DNSServiceRef client;
     DNSServiceErrorType err;
-    pthread_t tid;	    // thread to handle events from DNS server
+    pthread_t tid;      // thread to handle events from DNS server
     char regtype[128];
     TXTRecordRef txtRecord;
 
@@ -1053,92 +1046,85 @@ void WaitToAdvertiseService(ServiceDescription *description,
     strcat(regtype, "._");
     strcat(regtype, description->type.protocol); 
 
-    if (description->numProperties) 
-    {
-	uint8_t txtLen, i=0;
-	TXTRecordCreate(&txtRecord, 0, NULL);
-	for (i=0; i<description->numProperties; i++) 
-	{
-	    txtLen = (uint8_t)strlen(description->properties[i]->value);
-	    TXTRecordSetValue(&txtRecord, description->properties[i]->key,
-				    txtLen, description->properties[i]->value );
-	}
+    if (description->numProperties) {
+        uint8_t txtLen, i = 0;
+        TXTRecordCreate(&txtRecord, 0, NULL);
+        for (i = 0; i<description->numProperties; i++) {
+            txtLen = (uint8_t)strlen(description->properties[i]->value);
+            TXTRecordSetValue(&txtRecord, description->properties[i]->key,
+                    txtLen, description->properties[i]->value );
+        }
     }
 
     err = DNSServiceRegister
-	    (&client, 
-	    0, 
-	    opinterface, 
-	    description->service_name,  // service name
-	    regtype,			// registration type
-	    "",				// default = local
-	    NULL,	    // only needed when creating proxy registrations
-	    htons(description->port),   // Must have a port
-	    TXTRecordGetLength(&txtRecord), 
-	    TXTRecordGetBytesPtr(&txtRecord),
-	    regReply,			// callback
-	    context);	    // param to pass as context into regReply
+        (&client,
+        0,
+        opinterface,
+        description->service_name,  // service name
+        regtype,    // registration type
+        "",     // default = local
+        NULL,   // only needed when creating proxy registrations
+        htons(description->port),   // Must have a port
+        TXTRecordGetLength(&txtRecord),
+        TXTRecordGetBytesPtr(&txtRecord),
+        regReply,   // callback
+        context);   // param to pass as context into regReply
 
-    if (description->numProperties)  {
-	TXTRecordDeallocate(&txtRecord);
+    if (description->numProperties) {
+        TXTRecordDeallocate(&txtRecord);
     }
 
-    if (!client || err != kDNSServiceErr_NoError) 
-    {
+    if (!client || err != kDNSServiceErr_NoError) {
         sprintf(lastError, "DNSServiceRegister call failed %ld\n", (long int)err);
         callback(client, err, NULL);
         if (client)
             DNSServiceRefDeallocate(client);
     }
-    else 
-    {
-        handleEvents(client, callback);
+    else {
+        stopBlockingState = 0;
+        while (!stopBlockingState) {
+            handleEvents(client, callback);
+        }
     }
 }
 
 /** Initialize local addresses on various network interfaces
  */
-bool setMyAddresses(void){
+bool setMyAddresses(void) {
 
     int iSocket;
     struct if_nameindex *if_ni, *i;
     int j;
 
-    if ((iSocket = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-      perror("socket");
-      return false;
+    if ((iSocket = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("socket");
+        return false;
     }
 
     if_ni = if_nameindex();
 
     // verify how many addresses do we have for the network interfaces
-    for (i = if_ni, myaddressesCount; ! (i->if_index == 0 && i->if_name == NULL); i++){
+    for (i = if_ni, myaddressesCount; ! (i->if_index == 0 && i->if_name == NULL); i++) {
         struct ifreq req;
         strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
-        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0)
-        {
-            if (errno == EADDRNOTAVAIL)
-            {
+        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0) {
+            if (errno == EADDRNOTAVAIL) {
                 continue;
             }
             perror("ioctl");
             close(iSocket);
             return false;
         }
-        myaddressesCount ++;
+        myaddressesCount++;
     }
 
     myaddresses = (char **)malloc(sizeof(char *) * myaddressesCount);
 
-    for (i = if_ni, j = 0; ! (i->if_index == 0 && i->if_name == NULL); i++)
-    {
+    for (i = if_ni, j = 0; ! (i->if_index == 0 && i->if_name == NULL); i++) {
         struct ifreq req;
         strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
-        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0)
-        {
-            if (errno == EADDRNOTAVAIL)
-            {
+        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0) {
+            if (errno == EADDRNOTAVAIL) {
                 myaddresses[j] = NULL;
                 continue;
             }
@@ -1159,36 +1145,32 @@ bool setMyAddresses(void){
 }
 
 #if DEBUG
-void callback(void *handle, int32_t error_code, ServiceDescription *desc)
-{
+void callback(void *handle, int32_t error_code, ServiceDescription *desc) {
     printf("message error=%d error_string=%s\nservice status=%d service name=%s\n", 
-	    error_code, 
-	    getLastError(),
-	    desc ? desc->status : -1, 
-	    desc ? desc->service_name : "");
+        error_code,
+        getLastError(),
+        desc ? desc->status : -1,
+        desc ? desc->service_name : "");
 }
 
 // Test code for advertisement
-void testAdvertise() 
-{
+void testAdvertise() {
     ServiceDescription *description = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
     if (description)
-	WaitToAdvertiseService(description, callback);
+        WaitToAdvertiseService(description, callback);
 
     printf ("Done advertise\n");
 }
 
 // Test code for discover
-void testDiscover()
-{
+void testDiscover() {
     ServiceQuery *query = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
     if (query)
-	WaitToDiscoverServices(query, callback);
+        WaitToDiscoverServices(query, callback);
     printf("Done discover\n");
 }
 
-int main(void) 
-{
+int main(void) {
     //testAdvertise();
     testDiscover();
 }
