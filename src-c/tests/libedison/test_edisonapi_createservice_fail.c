@@ -17,21 +17,17 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
-#include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
+int main(void) {
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./invalidtemperatureServiceZMQPUBSUB.json");
     if (serviceDescription && createService(serviceDescription)) {
-         puts("\nSuccess: Created Service\n");
+         puts("Success: Created Service");
          exit(EXIT_FAILURE);
     } else {
-         puts("\nFailed: Create Service\n");
+         puts("Failed: Create Service");
          exit(EXIT_SUCCESS);
     }
 }

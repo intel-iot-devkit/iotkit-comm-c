@@ -17,11 +17,8 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
-#include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
 
@@ -30,23 +27,20 @@
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *serviceHandle)
-{
+void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *serviceHandle) {
      if (serviceHandle != NULL) {
-         puts("\nSuccess: Service Advertised\n");
+         puts("Success: Service Advertised");
          exit(EXIT_SUCCESS);
      } else {
-         puts("\nFail: Service Not Advertised\n");
+         puts("Fail: Service Not Advertised");
          exit(EXIT_FAILURE);
      }
 }
 
-int main (void)
-{
-
+int main(void) {
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceZMQPUBSUB.json");
     if (serviceDescription) {
-        printf("Waiting for the Service to Advertise\n");
+        puts("Waiting for the Service to Advertise");
         WaitToAdvertiseService(serviceDescription, subDiscoveryCallback);
     }
     return 0;

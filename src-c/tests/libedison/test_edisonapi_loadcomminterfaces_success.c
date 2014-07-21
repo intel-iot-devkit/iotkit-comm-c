@@ -17,21 +17,17 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
-#include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
+int main(void) {
     CommHandle *plugin = loadCommPlugin("/usr/lib/libzmqpubsub-client.so");
     if (plugin && loadCommInterfaces(plugin)) {
-        puts("\nSuccess: Plugin Communication Interfaces Loaded\n");
+        puts("Success: Plugin Communication Interfaces Loaded");
         exit(EXIT_SUCCESS);
     } else {
-        puts("\nFailed: Plugin Communication Interfaces Load\n");
+        puts("Failed: Plugin Communication Interfaces Load");
         exit(EXIT_FAILURE);
     }
 }

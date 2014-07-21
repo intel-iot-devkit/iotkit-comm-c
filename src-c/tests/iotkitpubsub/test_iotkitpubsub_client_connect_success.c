@@ -17,13 +17,10 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <MQTTAsync.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
-
+int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     serviceQuery->address = "localhost";
     serviceQuery->port = 1884;
@@ -36,6 +33,5 @@ int main (void)
     }
     done();
     free(serviceQuery);
-
     exit(EXIT_FAILURE);
 }

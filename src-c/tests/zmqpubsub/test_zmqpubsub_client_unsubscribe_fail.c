@@ -1,5 +1,5 @@
 /*
- * ZMQ PUB/SUB plugin through Edison API
+ * ZMQ PUB/SUB test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -17,20 +17,17 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
-
+int main(void) {
     int result = unsubscribe("service");
     if (result == 0) {
-        printf("UnSubscribed Successfully\n");
+        puts("UnSubscribed Successfully");
         exit(EXIT_FAILURE);
     } else {
-        printf("Failed: UnSubscription\n");
+        puts("Failed: UnSubscription");
         exit(EXIT_SUCCESS);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * ZMQ REQ/REP plugin through Edison API
+ * ZMQ REQ/REP test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -18,7 +18,6 @@ This file tests whether ZMQ Responder socket fails while sending message.
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <signal.h>
 #include <zmq.h>
 #include <zmq_utils.h>
@@ -33,31 +32,27 @@ void alarmHandler() {
     exit(EXIT_SUCCESS);
 }
 
-int main (void)
-{
-
+int main(void) {
     ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
     serviceDesc->address = "127.0.0.1";
     serviceDesc->port = 1234;
     init(serviceDesc);
-    void *ctx = zmq_ctx_new ();
-
-    void *req = zmq_socket (ctx, ZMQ_REQ);
-    int rc = zmq_connect (req, "tcp://127.0.0.1:1234");
+    void *ctx = zmq_ctx_new();
+    void *req = zmq_socket(ctx, ZMQ_REQ);
+    int rc = zmq_connect(req, "tcp://127.0.0.1:1234");
     if (rc == -1)
-        printf("client connect failed\n");
+        puts("client connect failed");
     //  Send message from client to server
-    rc = zmq_send (req, "rose", 4, -1);
+    rc = zmq_send(req, "rose", 4, -1);
     if (rc == -1)
-        printf("client send failed\n");
+        puts("client send failed");
     /* Establish a handler for SIGALRM signals. */
     signal(SIGALRM, alarmHandler);
     /* Set an alarm to go off*/
     alarm(3);
-    printf("waiting for message\n");
+    puts("waiting for message");
     receive(handler);
     done();
     free(serviceDesc);
     exit(EXIT_SUCCESS);
-
 }

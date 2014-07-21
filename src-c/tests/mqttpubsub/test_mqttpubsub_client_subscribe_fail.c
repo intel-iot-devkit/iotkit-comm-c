@@ -17,54 +17,46 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <MQTTAsync.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
 bool receivedMessage = false;
 
-void message_callback(char *message, Context context){
+void message_callback(char *message, Context context) {
     printf("Message received:%s\n", message);
     receivedMessage = true;
 }
 
-
-int main (void)
-{
+int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     serviceQuery->address = "localhost";
     serviceQuery->port = 1883;
     int result = init(serviceQuery);
     if (result == MQTTASYNC_SUCCESS) {
-        printf("Successfully Connected to an MQTT Broker\n");
-
+        puts("Successfully Connected to an MQTT Broker");
         receive(message_callback);
         result = subscribe("/topicnotfound"); //wrong topic
         if (result == 0) {
-            printf("Subscribed Successfully\n");
-
-            printf("Waiting for messages on subscribed topic\n");
+            puts("Subscribed Successfully");
+            puts("Waiting for messages on subscribed topic");
             int timerIndex = 0;
             while(timerIndex < 10 && !receivedMessage) { // Wait for 10 seconds
                 sleep(1);
                 timerIndex ++;
             }
-
-            if(receivedMessage){
-                printf("Test Failed: received message on subscribed topic\n");
+            if(receivedMessage) {
+                puts("Test Failed: received message on subscribed topic");
             } else {
-                printf("Test Passed: No message received on subscribed topic\n");
+                puts("Test Passed: No message received on subscribed topic");
                 exit(EXIT_SUCCESS);
             }
         } else {
-            printf("Test Failed: Could not subscribe\n");
+            puts("Test Failed: Could not subscribe");
         }
     } else {
-        printf("Test Failed: Could not connect to MQTT Broker\n");
+        puts("Test Failed: Could not connect to MQTT Broker");
     }
-
     done();
     free(serviceQuery);
-
     exit(EXIT_FAILURE);
 }

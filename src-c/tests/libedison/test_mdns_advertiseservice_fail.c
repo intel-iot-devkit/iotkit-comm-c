@@ -17,24 +17,20 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
-#include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
 
-int main (void)
-{
+int main(void) {
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./invalidtemperatureServiceZMQPUBSUB.json");
     if (serviceDescription) {
         printf("Waiting for the Service to Advertise\n");
         if (advertiseService(serviceDescription)) {
-             puts("\nSuccess: Service Advertised\n");
+             puts("Success: Service Advertised");
              exit(EXIT_FAILURE);
         } else {
-             puts("\nFailed: Service Advertise\n");
+             puts("Failed: Service Advertise");
              exit(EXIT_SUCCESS);
         }
     }

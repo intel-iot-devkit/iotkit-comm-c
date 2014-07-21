@@ -1,5 +1,5 @@
 /*
- * ZMQ REQ/REP plugin through Edison API
+ * ZMQ REQ/REP test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -18,14 +18,11 @@ This file tests whether ZMQ Responder socket is able to successfully connect.
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
-
+int main(void) {
     ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
     serviceDesc->address = "127.0.0.1";
     serviceDesc->port = 1080;
@@ -33,10 +30,10 @@ int main (void)
     done();
     free(serviceDesc);
     if (result == 0) {
-        printf("Publisher Socket Successfully Binded\n");
+        puts("Publisher Socket Successfully Binded");
         exit(EXIT_SUCCESS);
     } else {
-        printf("Failed: Publisher Socket Binding\n");
+        puts("Failed: Publisher Socket Binding");
         exit(EXIT_FAILURE);
     }
 }

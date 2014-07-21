@@ -1,5 +1,5 @@
 /*
- * ZMQ REQ/REP plugin through Edison API
+ * ZMQ REQ/REP test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -18,26 +18,23 @@ This file tests whether ZMQ Responder socket fails while sending message.
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
-
+int main(void) {
     ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
     serviceDesc->address = "127.0.0.1";
     serviceDesc->port = 1234;
     init(serviceDesc);
     int result = sendTo(NULL,"Hello World",NULL);
     if (result == 0) {
-        printf("Sended Message Successfully\n");
+        puts("Sended Message Successfully");
         done();
         free(serviceDesc);
         exit(EXIT_FAILURE);
     } else {
-        printf("Failed: Sending Message\n");
+        puts("Failed: Sending Message");
         done();
         free(serviceDesc);
         exit(EXIT_SUCCESS);

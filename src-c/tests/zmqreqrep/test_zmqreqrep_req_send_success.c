@@ -1,5 +1,5 @@
 /*
- * ZMQ REQ/REP plugin through Edison API
+ * ZMQ REQ/REP test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -27,37 +27,34 @@ void handler(char *message,Context context) {
     printf("Received message: %s\n",message);
 }
 
-int main (void)
-{
-
+int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     serviceQuery->address = "127.0.0.1";
     serviceQuery->port = 5560;
     int result = init(serviceQuery);
     if (result == -1)
-        printf("Requester init failed\n");
-
-    void *ctx = zmq_ctx_new ();
+        puts("Requester init failed");
+    void *ctx = zmq_ctx_new();
     assert (ctx);
-    void *pub = zmq_socket (ctx, ZMQ_REP);
+    void *pub = zmq_socket(ctx, ZMQ_REP);
     assert (pub);
-    int rc = zmq_bind (pub, "tcp://127.0.0.1:5560");
+    int rc = zmq_bind(pub, "tcp://127.0.0.1:5560");
     assert (rc == 0);
     result = send("apple",NULL);
     if (result == -1) {
-        printf("send failed\n");
-        rc = zmq_close (pub);
-        assert (rc == 0);
-        rc = zmq_ctx_term (ctx);
-        assert (rc == 0);
+        puts("send failed");
+        rc = zmq_close(pub);
+        assert(rc == 0);
+        rc = zmq_ctx_term(ctx);
+        assert(rc == 0);
         free(serviceQuery);
         exit(EXIT_FAILURE);
     } else {
-        printf("Requester Sent Message Successfully\n");
-        rc = zmq_close (pub);
+        puts("Requester Sent Message Successfully");
+        rc = zmq_close(pub);
         assert (rc == 0);
-        rc = zmq_ctx_term (ctx);
-        assert (rc == 0);
+        rc = zmq_ctx_term(ctx);
+        assert(rc == 0);
         free(serviceQuery);
         exit(EXIT_SUCCESS);
     }

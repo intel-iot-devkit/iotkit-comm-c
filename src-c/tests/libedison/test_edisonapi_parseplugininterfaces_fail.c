@@ -17,20 +17,16 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
-#include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
+int main(void) {
     if (parsePluginInterfaces("./invalid-edison-service-interface.json")) {
-        puts("\nSuccess: Parsed Config File\n");
+        puts("Success: Parsed Config File");
         exit(EXIT_FAILURE);
     } else {
-        puts("\nFailed: Parsing Config File\n");
+        puts("Failed: Parsing Config File");
         exit(EXIT_SUCCESS);
     }
 }

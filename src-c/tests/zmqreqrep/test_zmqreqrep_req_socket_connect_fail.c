@@ -1,5 +1,5 @@
 /*
- * ZMQ REQ/REP plugin through Edison API
+ * ZMQ REQ/REP test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -18,14 +18,11 @@ This file tests whether ZMQ Requester socket fails when we pass the Invalid IP A
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
-
+int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     serviceQuery->address = "127.0.0.123232132321323123232233";
     serviceQuery->port = 100;
@@ -33,10 +30,10 @@ int main (void)
     done();
     free(serviceQuery);
     if (result == 0) {
-        printf("Requester Socket Successfully Connected\n");
+        puts("Requester Socket Successfully Connected");
         exit(EXIT_FAILURE);
     } else {
-        printf("Failed: Requester Socket Binding\n");
+        puts("Failed: Requester Socket Binding");
         exit(EXIT_SUCCESS);
     }
 }

@@ -17,19 +17,17 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
+int main(void) {
     char *ipaddress = getIPAddressFromHostName("localhost","1080");
     if (ipaddress != NULL) {
         printf("Success: IPAddress is %s\n",ipaddress);
         exit(EXIT_SUCCESS);
     } else {
-        printf("Failure: Retrieving IPAddress Failed\n");
+        puts("Failure: Retrieving IPAddress Failed");
         exit(EXIT_FAILURE);
     }
 }

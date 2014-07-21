@@ -17,33 +17,29 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <MQTTAsync.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
+int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     serviceQuery->address = "localhost";
     serviceQuery->port = 1883;
     int result = init(serviceQuery);
     if (result == MQTTASYNC_SUCCESS) {
-        printf("Successfully Connected to an MQTT Broker\n");
+        puts("Successfully Connected to an MQTT Broker");
 
         Context context;
         context.name = "topic";
         context.value = "/foo";
         result = send("This is a test message", context);
-        if(result == MQTTASYNC_SUCCESS){
-            printf("Test Passed: Successfully published message\n");
+        if(result == MQTTASYNC_SUCCESS) {
+            puts("Test Passed: Successfully published message");
             exit(EXIT_SUCCESS);
         }
     } else {
-        printf("Test Failed: Could not connect to MQTT Broker\n");
+        puts("Test Failed: Could not connect to MQTT Broker");
     }
-
     done();
     free(serviceQuery);
-
     exit(EXIT_FAILURE);
 }

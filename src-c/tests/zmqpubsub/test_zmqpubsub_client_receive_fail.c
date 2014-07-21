@@ -1,5 +1,5 @@
 /*
- * ZMQ PUB/SUB plugin through Edison API
+ * ZMQ PUB/SUB test program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -17,36 +17,33 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
 void handler() {
-    printf("Didn't receive message\n");
+    puts("Didn't receive message");
     exit(EXIT_SUCCESS);
 }
-int main (void)
-{
 
+int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     serviceQuery->address = "localhost";
     serviceQuery->port = 5563;
     int result = init(serviceQuery);
     if (result == -1)
-        printf("client init failed\n");
+        puts("client init failed");
     result = subscribe("flower");
     if (result == -1)
-        printf("client subscribe failed\n");
+        puts("client subscribe failed");
     /* Establish a handler for SIGALRM signals. */
     signal(SIGALRM, handler);
     /* Set an alarm to go off*/
     alarm(3);
-
     result = receive(handler);
     if (result == -1)
-      printf("receive failed\n");
+        puts("receive failed");
     done();
     free(serviceQuery);
     exit(EXIT_FAILURE);

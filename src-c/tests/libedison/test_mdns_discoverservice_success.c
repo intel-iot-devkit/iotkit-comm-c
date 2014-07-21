@@ -17,10 +17,8 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
 
@@ -29,26 +27,22 @@
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle)
-{
-
+void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {
     if (commHandle != NULL) {
-        puts("\nSuccess: Service Found\n");
+        puts("Success: Service Found");
         exit(EXIT_SUCCESS);
     } else {
-        puts("\nFail: Service Not Found\n");
+        puts("Fail: Service Not Found");
         exit(EXIT_FAILURE);
     }
 }
 
-int main (void)
-{
-
+int main(void) {
     ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceMQTT.json");
 
     if (serviceDescription) {
-	    if (query && advertiseService(serviceDescription)) {
+        if (query && advertiseService(serviceDescription)) {
             fprintf(stderr,"query host address %s\n",query->address);
             fprintf(stderr,"query host port %d\n",query->port);
             fprintf(stderr,"query service name %s\n",query->service_name);

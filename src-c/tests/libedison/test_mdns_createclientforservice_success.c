@@ -17,16 +17,12 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include <stdlib.h>
-#include <signal.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
 
-void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHandle)
-{
+void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHandle) {
      if (clientHandle != NULL) {
          puts("\nSuccess: Client Created for the Given Service\n");
          exit(EXIT_SUCCESS);
@@ -36,9 +32,8 @@ void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHan
      }
 }
 
-int main (void)
-{
-    ServiceQuery *query = (ServiceQuery *)parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
+int main(void) {
+    ServiceQuery *query = (ServiceQuery *)parseClientServiceQuery("./temperatureServiceQueryZMQPUBSUB.json");
     if (query) {
         query->port = 1080;
         createClientForGivenService(query, callback);

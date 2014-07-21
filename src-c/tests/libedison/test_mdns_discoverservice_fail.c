@@ -17,7 +17,6 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include <stdlib.h>
@@ -30,15 +29,12 @@
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle)
-{
-    puts("\nFail: Service Not Found\n");
+void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {
+    puts("Fail: Service Not Found");
     exit(EXIT_SUCCESS);
 }
 
-int main (void)
-{
-
+int main(void) {
     ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
     ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceMQTT.json");
     /* Establish a handler for SIGALRM signals. */
@@ -46,7 +42,7 @@ int main (void)
     /* Set an alarm to go off*/
     alarm(5);
     if (serviceDescription) {
-	    if (query) {
+        if (query) {
             fprintf(stderr,"query host address %s\n",query->address);
             fprintf(stderr,"query host port %d\n",query->port);
             fprintf(stderr,"query service name %s\n",query->service_name);

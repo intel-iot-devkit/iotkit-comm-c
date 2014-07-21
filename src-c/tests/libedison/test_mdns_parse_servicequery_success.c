@@ -17,20 +17,17 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
 #include "../../edison-lib/libedison/edisonapi.h"
 
-int main (void)
-{
-
+int main(void) {
     char *filepath = "./temperatureServiceQueryMQTT.json";
     if (parseClientServiceQuery(filepath) != NULL) {
-        printf("Success: Parse Client Service Query Description\n");
+        puts("Success: Parse Client Service Query Description");
         exit(EXIT_SUCCESS);
     } else {
-        printf("Failure: Parse Client Service Query Description\n");
+        puts("Failure: Parse Client Service Query Description");
         exit(EXIT_FAILURE);
     }
 }
