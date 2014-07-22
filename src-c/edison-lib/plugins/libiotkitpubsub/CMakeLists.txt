@@ -2,8 +2,8 @@
 MESSAGE("Building the mqtt plugin")
 
 INCLUDE_DIRECTORIES(
-  ../../libedison
-  ../inc/
+    ../../libedison
+    ../inc/
 )
 
 # set the shared library name

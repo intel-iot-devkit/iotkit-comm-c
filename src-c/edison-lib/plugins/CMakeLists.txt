@@ -9,4 +9,3 @@ ADD_SUBDIRECTORY(libzmqreqrep)
 
 # set the compiler flags
 SET(CMAKE_C_FLAGS "-c -fPIC")
-

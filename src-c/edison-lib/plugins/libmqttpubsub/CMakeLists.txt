@@ -2,8 +2,8 @@
 MESSAGE("Building the mqtt plugin")
 
 INCLUDE_DIRECTORIES(
-  ../../libedison
-  ../inc/
+    ../../libedison
+    ../inc/
 )
 
 # set the shared library name
@@ -16,4 +16,3 @@ SET_TARGET_PROPERTIES(${MQTT_CLIENT_NAME} PROPERTIES LINKER_LANGUAGE C)
 
 # Link the shared library
 TARGET_LINK_LIBRARIES(${MQTT_CLIENT_NAME} paho-mqtt3cs)
-

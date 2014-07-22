@@ -2,8 +2,8 @@
 MESSAGE("Building the zmq reqrep plugin")
 
 INCLUDE_DIRECTORIES(
-  ../../libedison
-  ../inc/
+    ../../libedison
+    ../inc/
 )
 
 # set the shared library name

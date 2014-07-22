@@ -1,7 +1,7 @@
 {
-  "name" : ".*temperature.*",
-  "type" : {
-    "name": "zmqpubsub",
-    "protocol" : "tcp"
-  }
+    "name" : ".*temperature.*",
+    "type" : {
+        "name": "zmqpubsub",
+        "protocol" : "tcp"
+    }
 }

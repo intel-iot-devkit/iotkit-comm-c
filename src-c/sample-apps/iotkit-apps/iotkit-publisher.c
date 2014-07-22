@@ -1,23 +1,23 @@
 /*
- * Sample program to demonstrate IoTKit publish feature through Edison API
- * Copyright (c) 2014, Intel Corporation.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 2.1, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
- */
+* Sample program to demonstrate IoTKit publish feature through Edison API
+* Copyright (c) 2014, Intel Corporation.
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms and conditions of the GNU Lesser General Public License,
+* version 2.1, as published by the Free Software Foundation.
+*
+* This program is distributed in the hope it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+* more details.
+*/
 
 /**
- * @file iotkit-publisher.c
- * @brief Sample to demonstrate IoTKit publisher through Edison API
- *
- * Provides features to connect to an MQTT Broker and publish a topic
- */
+* @file iotkit-publisher.c
+* @brief Sample to demonstrate IoTKit publisher through Edison API
+*
+* Provides features to connect to an MQTT Broker and publish a topic
+*/
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -33,33 +33,31 @@ ServiceDescription *srvDesc = NULL;
 int msgnumber = 40; // iotkit-agent does not accept zero as sensor value; so assigning a non-zero value
 
 /**
- * @name callback to handle the communication
- * @brief handles the communication with an MQTT broker once the connection is established
- * @param[in] error_code specifies the error code is any
- * @param[in] serviceHandle is the client object initialized with the required APIs
- *
- * handles the communication such as publishing data to an MQTT broker once the connection is established
- */
-void callback(void *handle, int32_t error_code, void *serviceHandle)
-{
+* @name callback to handle the communication
+* @brief handles the communication with an MQTT broker once the connection is established
+* @param[in] error_code specifies the error code is any
+* @param[in] serviceHandle is the client object initialized with the required APIs
+*
+* handles the communication such as publishing data to an MQTT broker once the connection is established
+*/
+void callback(void *handle, int32_t error_code, void *serviceHandle) {
     Context context;
     char msg[256];
 
-    if(serviceHandle != NULL){
-        CommHandle *commHandle = (CommHandle *)serviceHandle;
+    if(serviceHandle != NULL) {
+        CommHandle *commHandle = (CommHandle *) serviceHandle;
 
-        int (**send)(char *message,Context context);
+        int (**send) (char *message,Context context);
 
         send = commInterfacesLookup(commHandle, "send");
-        if(send == NULL){
+        if(send == NULL) {
             printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
         }
-
 
         context.name = "topic";
         context.value = "data";
 
-        while(1){
+        while(1) {
             sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
@@ -70,14 +68,13 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
 }
 
 /**
- * @name Starts the application
- * @brief Starts the application to demonstrate publish for a topic
- *
- * Establishes the connection with an MQTT broker
- */
+* @name Starts the application
+* @brief Starts the application to demonstrate publish for a topic
+*
+* Establishes the connection with an MQTT broker
+*/
 int main(void) {
-
-	puts("Sample program to publish data to IoT Cloud !!");
+    puts("Sample program to publish data to IoT Cloud !!");
 
     srvDesc = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceIoTKit.json");
 
@@ -85,11 +82,9 @@ int main(void) {
         printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);
     #endif
 
-
     if (srvDesc){
         createClientForGivenService(srvDesc, callback);
     }
 
     return 0;
 }
-

@@ -1,23 +1,23 @@
 /*
- * Edison 'C' Library to load plugins on-demand
- * Copyright (c) 2014, Intel Corporation.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 2.1, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
- */
+* Edison 'C' Library to load plugins on-demand
+* Copyright (c) 2014, Intel Corporation.
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms and conditions of the GNU Lesser General Public License,
+* version 2.1, as published by the Free Software Foundation.
+*
+* This program is distributed in the hope it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+* more details.
+*/
 
 /**
- * @file edisonapi.h
- * @brief Header file of Edison Library
- *
- * Data Structure of Service Description, Service Query, Communication Handle, Context
- */
+* @file edisonapi.h
+* @brief Header file of Edison Library
+*
+* Data Structure of Service Description, Service Query, Communication Handle, Context
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,6 +26,10 @@
 #include <stdbool.h>
 #include <dlfcn.h>
 #include <pwd.h>
+
+#ifndef DEBUG
+    #define DEBUG 0
+#endif
 
 #ifndef LIB_CONFIG_DIRECTORY
     #define LIB_CONFIG_DIRECTORY "/etc/iecfapi/"
@@ -44,7 +48,7 @@
 #endif
 
 /** System level Configuration data read from the config JSON
- */
+*/
 typedef struct _ConfigFileData {
     char *pluginInterfaceDir; // plugin interface directory
     char *pluginDir; // plugin directory
@@ -53,12 +57,11 @@ typedef struct _ConfigFileData {
 } ConfigFileData;
 
 /** Context to be passed around the callback methods as a name value pair
- */
+*/
 typedef struct _Context {
     char *name;
     char *value;
 } Context;
-
 
 typedef struct _Interfaces {
     char *iname; // interface name
@@ -66,7 +69,7 @@ typedef struct _Interfaces {
 } Interfaces;
 
 /** Handle to the communication plugin
- */
+*/
 typedef struct {
     char **interface; // specifies the filename for plugin-interface json file
 
@@ -74,28 +77,24 @@ typedef struct {
 
     Interfaces **interfaces;
     int interfacesCount;
-    void *handle;	// handle to the library
+    void *handle; // handle to the library
 } CommHandle;
 
-
-//typedef enum { ADDED, REMOVED, UNKNOWN/home/skothurx/mango/edison-api/src-c/edison-lib/libedison/plugin-interfaces } ServiceStatus;
-
 /** Property stored as key value pair
- */
+*/
 typedef struct _Prop {
     char *key;
     char *value;
 } Property;
 
-
 /** service description
- */
+*/
 typedef struct _ServiceDescription {
     enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status; // current status of the service/client
-    char *service_name;	    // name of the service
+    char *service_name; // name of the service
     struct {
-	char *name; // serive type name
-	char *protocol; // service protocol
+        char *name; // serive type name
+        char *protocol; // service protocol
     } type;
     char *address; // address where service is available
     int port; // port at which service is running
@@ -109,20 +108,15 @@ typedef struct _ServiceDescription {
     } advertise;
 } ServiceDescription, ServiceQuery;
 
-
 ConfigFileData g_configData;
 
 /** list of function signatures specified in the interface JSON
- */
+*/
 char **g_funcSignatures;
 int g_funcEntries;
-
-
 
 CommHandle *createClient(ServiceQuery *);
 CommHandle *createService(ServiceDescription *);
 void *commInterfacesLookup(CommHandle *commHandle, char *funcname);
-
 void cleanUp(CommHandle *);
-
 bool fileExists(char *absPath);

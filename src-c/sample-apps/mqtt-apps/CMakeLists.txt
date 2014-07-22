@@ -1,7 +1,7 @@
 
 INCLUDE_DIRECTORIES(
-  ../../edison-lib/cJSON
-  ../../edison-lib/libedison
+    ../../edison-lib/cJSON
+    ../../edison-lib/libedison
 )
 
 # set the executable names

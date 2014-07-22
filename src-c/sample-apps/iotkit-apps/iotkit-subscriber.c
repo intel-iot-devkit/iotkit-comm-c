@@ -1,23 +1,23 @@
 /*
- * Sample program to demonstrate MQTT Async subscribe feature through Edison API
- * Copyright (c) 2014, Intel Corporation.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 2.1, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
- */
+* Sample program to demonstrate IotKit subscribe feature through Edison API
+* Copyright (c) 2014, Intel Corporation.
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms and conditions of the GNU Lesser General Public License,
+* version 2.1, as published by the Free Software Foundation.
+*
+* This program is distributed in the hope it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+* more details.
+*/
 
 /**
- * @file iotkit-subscriber.c
- * @brief Sample to demonstrate IoTKit subscriber through Edison API
- *
- * Provides features to connect to an MQTT Broker and subscribe to a topic
- */
+* @file iotkit-subscriber.c
+* @brief Sample to demonstrate IoTKit subscriber through Edison API
+*
+* Provides features to connect to an MQTT Broker and subscribe to a topic
+*/
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -28,42 +28,40 @@
 ServiceQuery *query = NULL;
 
 /**
- * @name message handler
- * @brief callback invoked upon receiving a message from an MQTT broker
- * @param[in] message received from an MQTT broker
- * @param[in] context with the topic information
- *
- * callback invoked upon receiving a message from an MQTT broker
- */
-void message_callback(char *message, Context context){
+* @name message handler
+* @brief callback invoked upon receiving a message from an MQTT broker
+* @param[in] message received from an MQTT broker
+* @param[in] context with the topic information
+*
+* callback invoked upon receiving a message from an MQTT broker
+*/
+void message_callback(char *message, Context context) {
     printf("Message received:%s\n", message);
 }
 
-// TODO: MDNS does frequent add/rem operations due to which multiple clients get created
-int serviceStarted = 0; // temporary fix to avoid recreation of client due to frequent MDNS add/rem operations
+int serviceStarted = 0;
 
 /**
- * @name callback to handle the communication
- * @brief handles the communication with an MQTT broker once the connection is established
- * @param[in] error_code specifies the error code is any
- * @param[in] serviceHandle is the client object initialized with the required APIs
- *
- * handles the communication with an MQTT broker once the connection is established
- */
-void callback(void *handle, int32_t error_code, void *serviceHandle)
-{
-    if(serviceHandle != NULL && !serviceStarted){
+* @name callback to handle the communication
+* @brief handles the communication with an MQTT broker once the connection is established
+* @param[in] error_code specifies the error code is any
+* @param[in] serviceHandle is the client object initialized with the required APIs
+*
+* handles the communication with an MQTT broker once the connection is established
+*/
+void callback(void *handle, int32_t error_code, void *serviceHandle) {
+    if(serviceHandle != NULL && !serviceStarted) {
         CommHandle *commHandle = (CommHandle *) serviceHandle;
         int (**subscribe)() = NULL;
         int (**receive)(void (*)(char *, Context)) = NULL;
 
         subscribe = commInterfacesLookup(commHandle, "subscribe");
-        if(subscribe == NULL){
+        if(subscribe == NULL) {
             printf("Function \'subscribe\' is not available; please verify the Plugin documentation !!\n");
         }
 
-        receive = commInterfacesLookup(commHandle, "receive"); //(int (*)(void (*)(char *, Context)))
-        if(receive == NULL){
+        receive = commInterfacesLookup(commHandle, "receive");
+        if(receive == NULL) {
             printf("Function \'receive\' is not available; please verify the Plugin documentation !!\n");
         }
 
@@ -74,28 +72,25 @@ void callback(void *handle, int32_t error_code, void *serviceHandle)
     }
 }
 
-bool serviceFilter(ServiceQuery *srvQuery){
-
+bool serviceFilter(ServiceQuery *srvQuery) {
     printf("Got into Service Filter\n");
     return true;
 }
 
 /**
- * @name Starts the application
- * @brief Starts the application to demonstrate subscription to an topic
- *
- * Establishes the connection with an MQTT broker
- */
+* @name Starts the application
+* @brief Starts the application to demonstrate subscription to an topic
+*
+* Establishes the connection with an MQTT broker
+*/
 int main(void) {
 
-	puts("Sample program to test the Edison IoT Cloud subscribe plugin !!");
+    puts("Sample program to test the Edison IoT Cloud subscribe plugin !!");
     query = (ServiceQuery *) parseServiceDescription("./serviceSpecs/temperatureServiceIoTKit.json");
 
     if (query){
         createClientForGivenService(query, callback);
     }
-//	    WaitToDiscoverServicesFiltered(query, serviceFilter, callback);
 
-	return 0;
+    return 0;
 }
-

@@ -2,7 +2,7 @@
 MESSAGE("Building the Edison Library")
 
 INCLUDE_DIRECTORIES(
-  ../cJSON
+    ../cJSON
 )
 
 # Set the shared library name

@@ -1,39 +1,27 @@
 /*
- * MQTT client plugin to enable subscribe feature through Edison API
- * Copyright (c) 2014, Intel Corporation.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 2.1, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
- */
+* MQTT client plugin to enable subscribe feature through Edison API
+* Copyright (c) 2014, Intel Corporation.
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms and conditions of the GNU Lesser General Public License,
+* version 2.1, as published by the Free Software Foundation.
+*
+* This program is distributed in the hope it will be useful, but WITHOUT ANY
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+* more details.
+*/
 
 /**
- * @file edison-mqtt-client.c
- * @brief Implementation of MQTT Client plugin for Edison API
- *
- * Provides features to connect to an MQTT Broker and subscribe to a topic
- */
+* @file edison-mqtt-client.c
+* @brief Implementation of MQTT Client plugin for Edison API
+*
+* Provides features to connect to an MQTT Broker and subscribe to a topic
+*/
 
 #include "edison-mqtt-client.h"
 
-
-void *handle=NULL;
-char *err=NULL;
-
-MQTTClient client;
-MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-MQTTClient_SSLOptions sslopts = MQTTClient_SSLOptions_initializer;
-
-
-void (*msgArrhandler) (char *topic, Context context) = NULL;
-
- int messageArrived(void *ctx, char *topicName, int topicLen, MQTTClient_message *message)
- {
+int messageArrived(void *ctx, char *topicName, int topicLen, MQTTClient_message *message) {
     char *payloadmsg;
     Context context;
 
@@ -45,8 +33,7 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
         printf("message:");
 
         payloadptr = message->payload;
-        for(i=0; i<message->payloadlen; i++)
-        {
+        for(i = 0; i < message->payloadlen; i++) {
             putchar(*payloadptr++);
         }
         putchar('\n');
@@ -56,23 +43,20 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
     strncpy(payloadmsg, message->payload, message->payloadlen);
     payloadmsg[message->payloadlen] = '\0';
 
-
     context.name = "topic";
     context.value = strdup(topicName);
-    if(msgArrhandler != NULL){
+    if (msgArrhandler != NULL) {
         msgArrhandler(payloadmsg, context);
     } else {
         printf("error: Receive Handler not set\n");
     }
 
-    //MQTTClient_freeMessage(&message);
     free(payloadmsg);
 
     return true;
- }
+}
 
- void connectionLost(void *context, char *cause)
- {
+void connectionLost(void *context, char *cause) {
     ServiceQuery *serviceQuery = (ServiceQuery *)context;
     int rc;
 
@@ -83,32 +67,29 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
     conn_opts.keepAliveInterval = 20;
     conn_opts.retryInterval = 1000;
 
-    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
-    {
+    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
         printf("Failed to start connect, return code %d\n", rc);
         exit(1);
     }
- }
+}
 
 /**
- * @name publish a message
- * @brief used to send message to a broker
- * @param[in] message to be published
- * @param[in] context w.r.t topic the message required to be published
- * @return boolean specifies whether the message is successfully published or not
- */
- int send(char *message, Context context) {
-
+* @name publish a message
+* @brief used to send message to a broker
+* @param[in] message to be published
+* @param[in] context w.r.t topic the message required to be published
+* @return boolean specifies whether the message is successfully published or not
+*/
+int send(char *message, Context context) {
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
     MQTTClient_deliveryToken token;
 
     int rc = 0;
     char *topic;
 
-    if(context.name != NULL && context.value != NULL && strcmp(context.name, "topic") == 0){
+    if (context.name != NULL && context.value != NULL && strcmp(context.name, "topic") == 0) {
         topic = context.value;
-    }
-    else {
+    } else {
         printf("Topic not available in the send command");
         return MQTTCLIENT_NULL_PARAMETER;
     }
@@ -128,19 +109,19 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
 
     rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
     #if DEBUG
-    printf("Message with delivery token %d delivered\n", token);
+        printf("Message with delivery token %d delivered\n", token);
     #endif
 
     return rc;
- }
+}
 
 /**
- * @name subscribes to a topic
- * @brief subscribes to a topic with an MQTT broker
- * @param[in] topic which needs to be subscribed to
- * @return boolean which specifies whether successfully subscribed or not
- */
- int subscribe(char *topic) {
+* @name subscribes to a topic
+* @brief subscribes to a topic with an MQTT broker
+* @param[in] topic which needs to be subscribed to
+* @return boolean which specifies whether successfully subscribed or not
+*/
+int subscribe(char *topic) {
     int rc = 0;
 
     if ((rc = MQTTClient_subscribe(client, topic, QOS)) != MQTTCLIENT_SUCCESS) {
@@ -149,18 +130,17 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
     }
 
     return rc;
- }
+}
 
 /**
- * @name cleanup the MQTT client
- * @brief used to close the connections and for cleanup activities
- * @return boolean which specifies whether the connection is disconnected or not
- */
- int done() {
+* @name cleanup the MQTT client
+* @brief used to close the connections and for cleanup activities
+* @return boolean which specifies whether the connection is disconnected or not
+*/
+int done() {
     int rc = 0;
 
-    if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS)
-    {
+    if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS) {
         printf("Failed to start disconnect, return code %d\n", rc);
         exit(-1);
     }
@@ -168,15 +148,14 @@ void (*msgArrhandler) (char *topic, Context context) = NULL;
     MQTTClient_destroy(&client);
 
     return rc;
- }
+}
 
 /**
- * @name unsubscribe a topic
- * @brief discontinues the subscription to a topic
- * @param[in] topic which has been previously subscribed to
- */
-int unsubscribe(char *topic){
-
+* @name unsubscribe a topic
+* @brief discontinues the subscription to a topic
+* @param[in] topic which has been previously subscribed to
+*/
+int unsubscribe(char *topic) {
     #if DEBUG
         printf("Invoked MQTT: unsubscribe()\n");
     #endif
@@ -192,12 +171,11 @@ int unsubscribe(char *topic){
 }
 
 /**
- * @name subscribe to a topic
- * @brief registers the client's callback to be invoked on receiving a message from MQTT broker
- * @param handler to be registered as a callback
- */
-int receive(void (*handler) (char *topic, Context context)){
-
+* @name subscribe to a topic
+* @brief registers the client's callback to be invoked on receiving a message from MQTT broker
+* @param handler to be registered as a callback
+*/
+int receive(void (*handler) (char *topic, Context context)) {
     #if DEBUG
         printf("Invoked MQTT: setReceivedMessageHandler()\n");
     #endif
@@ -208,65 +186,64 @@ int receive(void (*handler) (char *topic, Context context)){
 }
 
 /**
- * @name initialise the MQTT client
- * @brief initialises the plugin.
- * @param[in] serviceDesc is the service description being queried for
- * @return boolean which specifies whether the connection is successfully established or not
- *
- * Establishes the connection with an MQTT broker
- */
-int init(void *serviceDesc)
-{
-    ServiceQuery *serviceQuery = (ServiceQuery *)serviceDesc;
+* @name initialise the MQTT client
+* @brief initialises the plugin.
+* @param[in] serviceDesc is the service description being queried for
+* @return boolean which specifies whether the connection is successfully established or not
+*
+* Establishes the connection with an MQTT broker
+*/
+int init(void *serviceDesc) {
+    ServiceQuery *serviceQuery = (ServiceQuery *) serviceDesc;
     int rc = 0;
     char uri[256];
 
-    if(isPresentPropertyInCommParams(serviceQuery, "ssl") == true && \
+    if (isPresentPropertyInCommParams(serviceQuery, "ssl") == true && \
         strcasecmp(getValueInCommParams(serviceQuery, "ssl"), "true") == 0) {
-            sprintf(uri, "ssl://%s:%d", serviceQuery->address, serviceQuery->port);
+        sprintf(uri, "ssl://%s:%d", serviceQuery->address, serviceQuery->port);
 
-            conn_opts.ssl = &sslopts;
+        conn_opts.ssl = &sslopts;
 
-            if(isPresentPropertyInCommParams(serviceQuery, "keyStore")) {
-                conn_opts.ssl->keyStore = getValueInCommParams(serviceQuery, "keyStore");
-            }
-            if(isPresentPropertyInCommParams(serviceQuery, "privateKey")) {
-                conn_opts.ssl->privateKey = getValueInCommParams(serviceQuery, "privateKey");
-            }
-            if(isPresentPropertyInCommParams(serviceQuery, "trustStore")) {
-                conn_opts.ssl->trustStore = getValueInCommParams(serviceQuery, "trustStore");
-            }
+        if (isPresentPropertyInCommParams(serviceQuery, "keyStore")) {
+            conn_opts.ssl->keyStore = getValueInCommParams(serviceQuery, "keyStore");
+        }
+        if (isPresentPropertyInCommParams(serviceQuery, "privateKey")) {
+            conn_opts.ssl->privateKey = getValueInCommParams(serviceQuery, "privateKey");
+        }
+        if (isPresentPropertyInCommParams(serviceQuery, "trustStore")) {
+            conn_opts.ssl->trustStore = getValueInCommParams(serviceQuery, "trustStore");
+        }
 
-            conn_opts.ssl->enableServerCertAuth = 0;
+        conn_opts.ssl->enableServerCertAuth = 0;
     } else {
-        if(serviceQuery->address != NULL) {
+        if (serviceQuery->address != NULL) {
             sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
         } else {
             sprintf(uri, "tcp://localhost:%d", serviceQuery->port);
         }
     }
-        // Default settings:
-        char clientID[256];
-        sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
-        MQTTClient_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-        MQTTClient_setCallbacks(client, serviceQuery, connectionLost, messageArrived, NULL);
+    // Default settings:
+    char clientID[256];
+    sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
-        conn_opts.cleansession = 0;
-        conn_opts.keepAliveInterval = 20;
-        conn_opts.retryInterval = 0;
+    MQTTClient_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+    MQTTClient_setCallbacks(client, serviceQuery, connectionLost, messageArrived, NULL);
 
-        if(isPresentPropertyInCommParams(serviceQuery, "username") == true && \
+    conn_opts.cleansession = 0;
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.retryInterval = 0;
+
+    if (isPresentPropertyInCommParams(serviceQuery, "username") == true && \
         isPresentPropertyInCommParams(serviceQuery, "password") == true) {
-            conn_opts.username = getValueInCommParams(serviceQuery, "username");
-            conn_opts.password = getValueInCommParams(serviceQuery, "password");
+        conn_opts.username = getValueInCommParams(serviceQuery, "username");
+        conn_opts.password = getValueInCommParams(serviceQuery, "password");
     }
 
-        if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
-        {
-            printf("Failed to start connect, return code %d\n", rc);
-            exit(1);
-        }
+    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
+        printf("Failed to start connect, return code %d\n", rc);
+        exit(1);
+    }
 
     return rc;
 }
