@@ -1,22 +1,22 @@
 /*
-* MDNS Plugin to handle addition and removal of MDNS Service Records
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * MDNS Plugin to handle addition and removal of MDNS Service Records
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file edisonMDNS.h
-* @brief Header file of Edison MDNS
+* @brief Header file of Edison MDNS.
 *
-* DataStructure of DiscoverContext, ServiceCache
+* DataStructure of DiscoverContext and ServiceCache.
 */
 
 #include "edisonapi.h"
@@ -37,9 +37,9 @@ int stopBlockingState = 0;
 
 static char lastError[256];
 
-/** Discover context to be passed around which contains function pointers to
-* callback and user filter callback methods
-*/
+/** Discover context to be passed around, which contains function pointers to
+ * callback and user filter callback methods.
+ */
 typedef struct _DiscoverContext {
     bool (*userFilterCB) (ServiceQuery *);
     void (*callback) (void *, int32_t, void *);
@@ -47,7 +47,7 @@ typedef struct _DiscoverContext {
 } DiscoverContext;
 
 
-/** Service cache to hold list of services discovered via DNS
+/** Service cache to hold list of services discovered via DNS.
 */
 typedef struct _ServiceCache {
     char *servicename;

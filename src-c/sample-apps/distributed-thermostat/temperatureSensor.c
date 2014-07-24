@@ -1,5 +1,5 @@
 /*
- * ZMQ PUB/SUB sample program through Edison API
+ * Distributed Thermostat sample program through Edison API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -12,49 +12,53 @@
  * more details.
  */
 
-/** @file sample_zmqpubsub-service.c
-    Sample service program of ZMQ publisher.
+/** @file temperatureSensor.c
+
+    Sample client program of temperature sensor based on ZMQ Pub/Sub
 */
 
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
+#include <math.h>
 #include "edisonapi.h"
 #include "util.h"
 
-/** Callback function. Once the service is advertised, this callback function will be invoked.
+/** Callback function. Once the service is advertised this callback function will be invoked
+
 * @param servDesc the service description object
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
-*/
+ */
 void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommHandle *serviceHandle) {
+
     if (serviceHandle != NULL) {
         int (**publish)(char *,Context context);
-
         publish = commInterfacesLookup(serviceHandle, "publish");
         if (publish != NULL) {
             Context context;
             while(1) {
-                (*publish)("vehicle: car",context);
+                char addr[128];
+                double random = floor(rand() % 90 + 60);
+                sprintf(addr, "mytemp: %f",random);
+                (*publish)(addr,context);
                 sleep(2);
             }
-        } {
-            puts("Interface lookup failed");
+        } else {
+            fprintf(stderr, "Interface lookup failed\n");
         }
     } else {
-        puts("\nComm Handle is NULL\n");
+        fprintf(stderr, "Comm Handle is NULL\n");
     }
 }
 
-/** The starting point. Starts to advertise the given Service.
+/** The starting point. Starts to advertise the given Service
 */
 int main(void) {
-    puts("Sample program to test the Edison ZMQ pub/sub plugin !!");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
-    if (serviceDescription) {
+    puts("Temperature sensor publishing its temperature data !!");
+    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperature-sensor-spec.json");
+    if (serviceDescription)
         WaitToAdvertiseService(serviceDescription, pubServiceCallback);
-    }
-
     return 0;
 }

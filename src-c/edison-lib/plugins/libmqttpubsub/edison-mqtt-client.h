@@ -1,22 +1,22 @@
 /*
-* MQTT client plugin to enable subscribe feature through Edison API
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * MQTT client plugin to enable subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file edison-mqtt_async-client.h
-* @brief Headers of MQTT Async Client plugin for Edison API
+* @brief Headers of MQTT Async Client plugin for Edison API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic
+* Provides features to connect to an MQTT Broker and subscribe to a topic.
 */
 
 #include <stdio.h>

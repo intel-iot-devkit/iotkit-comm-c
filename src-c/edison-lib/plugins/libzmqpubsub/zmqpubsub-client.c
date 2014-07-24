@@ -1,31 +1,29 @@
 /*
-* ZMQ PUB/SUB plugin to enable subscribe feature through Edison API
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * ZMQ PUB/SUB plugin to enable subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /** @file zmqpubsub-client.c
-
-This class provides functions to subscribe on a topic,to receive messages on a topic,to
-unsubscribe from a topic.
+    Provides functions to subscribe on a topic, receive messages on a topic, unsubscribe from a topic.
 */
 
 #include "zmqpubsub-client.h"
 
 /** @defgroup zmqpubsubclient
-*   This is ZMQ PUB/SUB Client
+*   This is ZMQ subscribe client.
 *  @{
 */
 
-/** Creates the context object and subscriber socket. With the help of the ServiceQuery parameter the subscriber socket
+/** Creates the context object and subscriber socket. With the help of the ServiceQuery parameter, the subscriber socket
 establishes connection to the address and port to initiate communication.
 
 * @param ClientServiceQuery an void pointer
@@ -53,21 +51,14 @@ int init(void *ClientServiceQuery) {
     return rc;
 }
 
-/** Empty function. This function is unimplemented since in ZMQ pub/sub client we use only
-subscribe and receive
-* @param message a string message
-* @param context a context object
-* @return The result code
-*/
 int send(char *message,Context context) {
     #if DEBUG
         printf("\ninside sending message: %s\n",message);
     #endif
 }
 
-/** Subscribing for a topic. The client can subscribe for a topic in which he is interested
-in to receive the messages.
-* @param topic which client is interested in
+/** Subscribing to a topic. The client can subscribe to a topic in which he is interested to receive the messages.
+* @param topic client is interested in
 * @return The result code
 */
 int subscribe(char *topic) {
@@ -79,7 +70,7 @@ int subscribe(char *topic) {
     return rc;
 }
 
-/** Receive the message. The client will be passing an handler which is used as a callback mechanism to pass the
+/** Receive the message. The parameter in this function is used as a callback mechanism to pass the
 received message.
 * @param subscribeClientHandler a callback handler
 * @return The result code
@@ -106,9 +97,8 @@ int receive(void (*subscribeClientHandler)(char *message, Context context)) {
     free (contents);
 }
 
-/** Unsubscribing a topic. The client can unsubscribe a topic in which he is no more
-interested to receive the messages.
-* @param topic which client wants to unsubscribe from
+/** Unsubscribing to a topic. The client can unsubscribe, to stop receiving the messages on that topic.
+* @param topic client wants to unsubscribe from
 * @return The result code
 */
 int unsubscribe(char *topic) {
@@ -119,7 +109,7 @@ int unsubscribe(char *topic) {
     return rc;
 }
 
-/** Cleanup function. This method helps in closing the subscriber socket and destroying the
+/** Cleanup function. This function close the subscriber socket and destroy the
 context object.
 * @return The result code
 */

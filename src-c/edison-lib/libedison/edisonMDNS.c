@@ -1,23 +1,23 @@
 /*
-* MDNS Plugin to handle addition and removal of MDNS Service Records
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * MDNS Plugin to handle addition and removal of MDNS Service Records
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file edisonMDNS.c
-* @brief Implementation of Edison MDNS
-*
-* Provides features to Advertise a Service, to Discover for the available Services with Filtering Mechanism
-*/
+ * @brief Implementation of Edison MDNS.
+ *
+ * Provides features to Advertise a Service, to Discover for the available Services with Filtering Mechanism.
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -584,7 +584,8 @@ void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void 
 
     callback(NULL, 0, createClient(queryDesc));
 }
-/** Browse or Discover a service from MDNS. This is a blocking call
+
+/** Browse or Discover a service from MDNS. This is a blocking call.
 * @param[in] queryDesc service description
 * @param[in] userFilterCB callback method for user filter
 * @param[in] callback callback to be invoked upon successful client creation
@@ -635,7 +636,7 @@ void WaitToDiscoverServicesFiltered(ServiceQuery *queryDesc,
 }
 
 
-/** Match the service name against user supplied service query by resolving regular expression (if any)
+/** Match the service name against user supplied service query by resolving regular expression (if any).
 * @param[in] srvQry service query
 * @param[in] fullservicename complete service name
 */
@@ -691,7 +692,7 @@ bool getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
 }
 
 
-/** Address filtering for service available locally
+/** Address filtering for service available locally.
 * @param[in] srvQry service query
 * @param[in] hosttarget target host name
 * @param[in] fullname full name of the service
@@ -786,7 +787,7 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
     return address;
 }
 
-/** Verifies whether the service is available locally or not
+/** Verifies whether the service is available locally or not.
 * @param[in] address host address information
 * @return returns true if local address and false otherwise
 */
@@ -801,7 +802,7 @@ bool isServiceLocal(const char *address) {
     return false;
 }
 
-/** Service Query Filter
+/** Service Query Filter.
 * @param[in] srvQry service query
 * @param[in] fullservicename complete service name
 * @param[in] PortAsNumber port information
@@ -886,7 +887,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
     return false;
 }
 
-/** Verify whether a property is present in communication parameters or not
+/** Verify whether a property is present in communication parameters or not.
 * @param[in] srvQry service Query
 * @param[in] paramName name of the property to be verified
 * @return returns true if present and false otherwise
@@ -904,7 +905,7 @@ bool isPresentPropertyInCommParams(ServiceQuery *srvQry, char *paramName){
     return false;
 }
 
-/** Return the value of a property if present in communication parameters list
+/** Return the value of a property if present in communication parameters list.
 * @param[in] srvQry service Query
 * @param[in] paramName name of the property to be verified
 * @return returns value if property is present and NULL otherwise
@@ -922,10 +923,10 @@ char* getValueInCommParams(ServiceQuery *srvQry, char *paramName){
     return NULL;
 }
 
-/** Browse or Discover a service from MDNS. This is a blocking call
-* @param[in] queryDesc service description
-* @param[in] callback callback to be invoked upon successful client creation
-*/
+/** Browse or Discover a service from MDNS. This is a blocking call.
+ * @param[in] queryDesc service description
+ * @param[in] callback callback to be invoked upon successful client creation
+ */
 void WaitToDiscoverServices(ServiceQuery *queryDesc,
     void (*callback)(void *, int32_t, void *)) {
     WaitToDiscoverServicesFiltered(queryDesc, NULL, callback);
@@ -1088,11 +1089,11 @@ bool advertiseService(ServiceDescription *description) {
 }
 
 
-/** Advertise a service. Return an opaque object which is passed along to callback.
-* Note: This is a blocking call
-* @param[in] description service description
-* @param[in] callback callback to be invoked upon successful service creation
-*/
+/** Advertise a service. Return an opaque object, which is passed along to callback.
+ * Note: This is a blocking call.
+ * @param[in] description service description
+ * @param[in] callback callback to be invoked upon successful service creation
+ */
 void WaitToAdvertiseService(ServiceDescription *description,
         void (*callback)(void *, int32_t, void *)) {
     DNSServiceRef client;

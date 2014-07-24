@@ -1,22 +1,22 @@
 /*
-* IoTKit Async client plugin to enable subscribe feature through Edison API
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * IoTKit Async client plugin to enable subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file iotkit-client.c
-* @brief Implementation of IoTKit Async Client plugin for Edison API
+* @brief Implementation of IoTKit Async Client plugin for Edison API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic
+* Provides features to connect to an MQTT Broker and subscribe to a topic.
 */
 
 #include "iotkit-client.h"
@@ -168,12 +168,12 @@ void connectionLost(void *context, char *cause) {
 }
 
 /**
-* @name publish a message
-* @brief used to send message to a broker
-* @param[in] message to be published
-* @param[in] context w.r.t topic the message required to be published
-* @return boolean specifies whether the message is successfully published or not
-*/
+ * @name Publish a message
+ * @brief Used to send message to a broker.
+ * @param[in] message to be published
+ * @param[in] context w.r.t topic the message required to be published
+ * @return boolean, specifies whether the message is successfully published or not
+ */
 int send(char *message, Context context) {
 
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
@@ -223,11 +223,11 @@ int send(char *message, Context context) {
 }
 
 /**
-* @name subscribes to a topic
-* @brief subscribes to a topic with an MQTT broker
-* @param[in] topic which needs to be subscribed to
-* @return boolean which specifies whether successfully subscribed or not
-*/
+ * @name Subscribes to a topic
+ * @brief Subscribes to a topic with an MQTT broker.
+ * @param[in] topic needs to be subscribed to
+ * @return boolean, which specifies whether successfully subscribed or not
+ */
 int subscribe() {
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
 
@@ -251,10 +251,10 @@ int subscribe() {
 }
 
 /**
-* @name cleanup the MQTT client
-* @brief used to close the connections and for cleanup activities
-* @return boolean which specifies whether the connection is disconnected or not
-*/
+ * @name Cleanup the MQTT client
+ * @brief Used to close the connections and for cleanup activities.
+ * @return boolean, which specifies whether the connection is disconnected or not
+ */
 int done() {
 
     MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
@@ -277,10 +277,10 @@ int done() {
 }
 
 /**
-* @name unsubscribe a topic
-* @brief discontinues the subscription to a topic
-* @param[in] topic which has been previously subscribed to
-*/
+ * @name Unsubscribe a topic
+ * @brief Discontinues the subscription to a topic.
+ * @param[in] topic has been previously subscribed to
+ */
 int unsubscribe(char *topic) {
 
     #if DEBUG
@@ -304,10 +304,10 @@ int unsubscribe(char *topic) {
 }
 
 /**
-* @name subscribe to a topic
-* @brief registers the client's callback to be invoked on receiving a message from MQTT broker
-* @param handler to be registered as a callback
-*/
+ * @name Subscribe to a topic
+ * @brief Registers the client's callback to be invoked on receiving a message from MQTT broker.
+ * @param handler to be registered as a callback
+ */
 int receive(void (*handler) (char *topic, Context context)) {
 
     #if DEBUG
@@ -326,13 +326,13 @@ int receive(void (*handler) (char *topic, Context context)) {
 #endif
 
 /**
-* @name initialise the MQTT client
-* @brief initialises the plugin.
-* @param[in] serviceDesc is the service description being queried for
-* @return boolean which specifies whether the connection is successfully established or not
-*
-* Establishes the connection with an MQTT broker
-*/
+ * @name Create the MQTT client
+ * @brief Create and initialize the mqtt plugin.
+ * @param[in] serviceDesc is the service description being queried for
+ * @return boolean, which specifies whether the connection is successfully established or not
+ *
+ * Establishes the connection with an MQTT broker.
+ */
 int init(void *serviceDesc) {
     ServiceQuery *serviceQuery = (ServiceQuery *) serviceDesc;
     MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
@@ -392,11 +392,11 @@ int init(void *serviceDesc) {
 }
 
 /**
-* @name registers a sensor
-* @brief registers a sensor with IoT Cloud through IoTKit Agent
-* @param[in] sensorname is the name of the sensor on the device
-* @param[in] type denotes the datatype of the sensor values
-*/
+ * @name Registers a sensor
+ * @brief Registers a sensor with IoT Cloud through IoTKit Agent.
+ * @param[in] sensorname is the name of the sensor on the device
+ * @param[in] type denotes the datatype of the sensor values
+ */
 void registerSensor(char *sensorname, char *type) {
     char mesg[256];
     Context context;

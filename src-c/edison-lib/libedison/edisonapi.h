@@ -1,22 +1,22 @@
 /*
-* Edison 'C' Library to load plugins on-demand
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * Edison 'C' Library to load plugins on-demand
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file edisonapi.h
-* @brief Header file of Edison Library
+* @brief Header file of Edison Library.
 *
-* Data Structure of Service Description, Service Query, Communication Handle, Context
+* Data Structure of Service Description, Service Query, Communication Handle and Context.
 */
 
 #include <stdlib.h>
@@ -47,7 +47,7 @@
     #define LIB_PLUGINS_DIRECTORY "/usr/lib/"
 #endif
 
-/** System level Configuration data read from the config JSON
+/** System level Configuration data read from the config JSON.
 */
 typedef struct _ConfigFileData {
     char *pluginInterfaceDir; // plugin interface directory
@@ -56,7 +56,7 @@ typedef struct _ConfigFileData {
     char *serverFileSuffix; // service plugin suffix
 } ConfigFileData;
 
-/** Context to be passed around the callback methods as a name value pair
+/** Context to be passed around the callback methods as a name-value pair.
 */
 typedef struct _Context {
     char *name;
@@ -68,7 +68,7 @@ typedef struct _Interfaces {
     void *iptr; // interface or function address
 } Interfaces;
 
-/** Handle to the communication plugin
+/** Handle to the communication plugin.
 */
 typedef struct {
     char **interface; // specifies the filename for plugin-interface json file
@@ -80,15 +80,15 @@ typedef struct {
     void *handle; // handle to the library
 } CommHandle;
 
-/** Property stored as key value pair
+/** Property stored as key-value pair.
 */
 typedef struct _Prop {
     char *key;
     char *value;
 } Property;
 
-/** service description
-*/
+/** Service description and query.
+ */
 typedef struct _ServiceDescription {
     enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status; // current status of the service/client
     char *service_name; // name of the service

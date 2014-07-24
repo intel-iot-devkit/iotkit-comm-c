@@ -1,19 +1,19 @@
 /*
-* ZMQ PUB/SUB plugin to enable subscribe feature through Edison API
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * ZMQ PUB/SUB plugin to enable subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /** @file zmqpubsub-client.h
-    Header file. This class lists all those functions in zmq pub/sub client.
+    Header file. List of all functions in zmq subscribe client.
 */
 
 #include <stdio.h>
@@ -34,7 +34,7 @@
 
 char *interface = "edison-client-interface"; /**< specifies the plugin interface json */
 
-/** Structure which holds the context and subscriber handler
+/** Structure holds the context and subscriber handler
 */
 struct ZMQPubSubClient {
     void *context; /**< context handler */

@@ -1,23 +1,24 @@
 /*
-* Edison 'C' Library to load plugins on-demand
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * Edison 'C' Library to load plugins on-demand
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file edisonapi.c
-* @brief Implementation of Edison Library
-*
-* Provides features to create client,service, to load communication interfaces as well as to load the Plugins.
-*/
+* @brief Implementation of Edison Library.
+ *
+ * Provides functions to create a client and service, to load communication interfaces and to load the communication
+   plugins.
+ */
 
 #include "edisonapi.h"
 
@@ -26,9 +27,9 @@
 
 #define MAX_PROPERTIES 128
 
-/** Reports dynamic link library errors. Checks for any recent error happened while loading an shared library
-* @return boolean specifies whether an error was present or not
-*/
+/** Reports dynamic link library errors. Checks for any recent error while loading shared library.
+ * @return boolean specifies whether an error was present or not
+ */
 static inline bool checkDLError() {
     char *error = dlerror();
     if (error != NULL) {
@@ -47,9 +48,9 @@ static inline bool checkDLError() {
     goto endParseConfig;\
 }
 
-/** Considers user defined configuration. Loads and parses user defined configuration
+/** Considers user-defined configuration. Loads and parses user-defined configuration
 * '.edison-config.json' present in user's home directory for 'plugin interface' and
-* 'plugins' configuration properties and concats with edison configuration properties
+* 'plugins' configuration properties and concats with Edison configuration properties.
 */
 void concatUserDefinedConfigurations() {
     char *home, config_file[1024];
@@ -135,9 +136,9 @@ endParseConfig:
     }
 }
 
-/** Parses edison configuration file
-* @param[in] config_file path to the configuration file
-*/
+/** Parses Edison configuration file
+ * @param[in] config_file path to the configuration file
+ */
 bool parseConfigFile(char *config_file) {
     char *out;
     cJSON *json, *jitem, *child, *subjson;
@@ -339,9 +340,9 @@ void freeGlobals() {
     }
 }
 
-/** clean up by freeing globals and client handler
-* @param[in] commHandle communication handle
-*/
+/** Cleanup by freeing globals and client handler.
+ * @param[in] commHandle communication handle
+ */
 void cleanUp(CommHandle *commHandle) {
     freeGlobals();
     if (commHandle) {
@@ -353,7 +354,7 @@ void cleanUp(CommHandle *commHandle) {
 }
 
 /** Initializes Communication handler. Loads the shared library and
-* initializes Service communication handler with the specified functions defined in the plugin interface
+* initializes Service communication handler with the specified functions defined in the plugin interface.
 * @param[out] commHandle Service communication handler
 * @return returns true upon successful initializing and false otherwise
 */
@@ -387,7 +388,7 @@ bool loadCommInterfaces(CommHandle *commHandle) {
 }
 
 /** Service Communication plugin loader. Loads the shared library and
-* read the interface details
+* read the interface details.
 * @param[in] plugin_path path to plugin
 * @return returns service handle upon successful and NULL otherwise
 */
@@ -528,7 +529,7 @@ CommHandle *createClient(ServiceQuery *queryDesc) {
 }
 
 
-/** Checks for file existence
+/** Checks for file existence.
 * @param[in] absPath absolute path of a file
 * @return returns true if the file exists and false otherwise
 */
@@ -542,7 +543,7 @@ bool fileExists(char *absPath) {
     return false;
 }
 
-/** Initializes Service object. Creates the service object and calls its init method for further initialization
+/** Initializes Service object. Creates the service object and calls its init method for further initialization.
 * @param[in] description service description
 * @return returns service handle upon successful and NULL otherwise
 */

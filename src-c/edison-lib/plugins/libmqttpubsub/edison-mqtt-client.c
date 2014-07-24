@@ -1,22 +1,22 @@
 /*
-* MQTT client plugin to enable subscribe feature through Edison API
-* Copyright (c) 2014, Intel Corporation.
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms and conditions of the GNU Lesser General Public License,
-* version 2.1, as published by the Free Software Foundation.
-*
-* This program is distributed in the hope it will be useful, but WITHOUT ANY
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-* more details.
-*/
+ * MQTT client plugin to enable subscribe feature through Edison API
+ * Copyright (c) 2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ */
 
 /**
 * @file edison-mqtt-client.c
-* @brief Implementation of MQTT Client plugin for Edison API
+* @brief Implementation of MQTT Client plugin for Edison API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic
+* Provides features to connect to an MQTT Broker and subscribe to a topic.
 */
 
 #include "edison-mqtt-client.h"
@@ -74,12 +74,12 @@ void connectionLost(void *context, char *cause) {
 }
 
 /**
-* @name publish a message
-* @brief used to send message to a broker
-* @param[in] message to be published
-* @param[in] context w.r.t topic the message required to be published
-* @return boolean specifies whether the message is successfully published or not
-*/
+ * @name Publish a message
+ * @brief Used to send message to a broker.
+ * @param[in] message to be published
+ * @param[in] context w.r.t topic the message required to be published
+ * @return boolean, specifies whether the message is successfully published or not
+ */
 int send(char *message, Context context) {
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
     MQTTClient_deliveryToken token;
@@ -116,11 +116,11 @@ int send(char *message, Context context) {
 }
 
 /**
-* @name subscribes to a topic
-* @brief subscribes to a topic with an MQTT broker
-* @param[in] topic which needs to be subscribed to
-* @return boolean which specifies whether successfully subscribed or not
-*/
+ * @name Subscribes to a topic
+ * @brief Subscribes to a topic with an MQTT broker.
+ * @param[in] topic which needs to be subscribed to
+ * @return boolean, which specifies whether successfully subscribed or not
+ */
 int subscribe(char *topic) {
     int rc = 0;
 
@@ -133,10 +133,10 @@ int subscribe(char *topic) {
 }
 
 /**
-* @name cleanup the MQTT client
-* @brief used to close the connections and for cleanup activities
-* @return boolean which specifies whether the connection is disconnected or not
-*/
+ * @name Disconnect and destroy the MQTT client
+ * @brief Used to close the connections for cleanup activities.
+ * @return boolean, which specifies whether the connection is disconnected or not
+ */
 int done() {
     int rc = 0;
 
@@ -151,10 +151,10 @@ int done() {
 }
 
 /**
-* @name unsubscribe a topic
-* @brief discontinues the subscription to a topic
-* @param[in] topic which has been previously subscribed to
-*/
+ * @name Unsubscribe a topic
+ * @brief Discontinues the subscription to a topic.
+ * @param[in] topic which has been previously subscribed to
+ */
 int unsubscribe(char *topic) {
     #if DEBUG
         printf("Invoked MQTT: unsubscribe()\n");
@@ -171,10 +171,10 @@ int unsubscribe(char *topic) {
 }
 
 /**
-* @name subscribe to a topic
-* @brief registers the client's callback to be invoked on receiving a message from MQTT broker
-* @param handler to be registered as a callback
-*/
+ * @name Subscribe to a topic
+ * @brief Registers the client's callback to be invoked on receiving a message from MQTT broker.
+ * @param handler to be registered as a callback
+ */
 int receive(void (*handler) (char *topic, Context context)) {
     #if DEBUG
         printf("Invoked MQTT: setReceivedMessageHandler()\n");
@@ -186,13 +186,13 @@ int receive(void (*handler) (char *topic, Context context)) {
 }
 
 /**
-* @name initialise the MQTT client
-* @brief initialises the plugin.
-* @param[in] serviceDesc is the service description being queried for
-* @return boolean which specifies whether the connection is successfully established or not
-*
-* Establishes the connection with an MQTT broker
-*/
+ * @name Create and initialize the MQTT client
+ * @brief initializes the plugin.
+ * @param[in] serviceDesc is the service description being queried for
+ * @return boolean, which specifies whether the connection is successfully established or not
+ *
+ * Establishes the connection with an MQTT broker.
+ */
 int init(void *serviceDesc) {
     ServiceQuery *serviceQuery = (ServiceQuery *) serviceDesc;
     int rc = 0;
