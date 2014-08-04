@@ -22,7 +22,7 @@
 #include "../../lib/libiotkit-comm/iotkit-comm.h"
 
 int main(void) {
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./invalidtemperatureServiceZMQPUBSUB.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./invalidtemperatureServiceZMQPUBSUB.json");
     if (query && createClient(query)) {
          puts("Success: Created Client");
          exit(EXIT_FAILURE);

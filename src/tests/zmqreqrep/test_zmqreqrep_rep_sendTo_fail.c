@@ -23,20 +23,20 @@ This file tests whether ZMQ Responder socket fails while sending message.
 #include "../../lib/libiotkit-comm/iotkit-comm.h"
 
 int main(void) {
-    ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-    serviceDesc->address = "127.0.0.1";
-    serviceDesc->port = 1234;
-    init(serviceDesc);
+    ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
+    serviceSpec->address = "127.0.0.1";
+    serviceSpec->port = 1234;
+    init(serviceSpec);
     int result = sendTo(NULL,"Hello World",NULL);
     if (result == 0) {
         puts("Sended Message Successfully");
         done();
-        free(serviceDesc);
+        free(serviceSpec);
         exit(EXIT_FAILURE);
     } else {
         puts("Failed: Sending Message");
         done();
-        free(serviceDesc);
+        free(serviceSpec);
         exit(EXIT_SUCCESS);
     }
 }

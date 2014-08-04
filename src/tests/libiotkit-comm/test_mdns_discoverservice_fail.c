@@ -25,29 +25,29 @@
 
 
 /** Callback function. Once the service is discovered this callback function will be invoked
-* @param queryDesc the query description object
+* @param servQuery the service query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {
+void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle) {
     puts("Fail: Service Not Found");
     exit(EXIT_SUCCESS);
 }
 
 int main(void) {
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceMQTT.json");
+    ServiceQuery *servQuery = (ServiceQuery *) parseServiceQuery("./temperatureServiceQueryMQTT.json");
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceMQTT.json");
     /* Establish a handler for SIGALRM signals. */
     signal(SIGALRM, subDiscoveryCallback);
     /* Set an alarm to go off*/
     alarm(5);
-    if (serviceDescription) {
-        if (query) {
-            fprintf(stderr,"query host address %s\n",query->address);
-            fprintf(stderr,"query host port %d\n",query->port);
-            fprintf(stderr,"query service name %s\n",query->service_name);
+    if (serviceSpec) {
+        if (servQuery) {
+            fprintf(stderr,"query host address %s\n",servQuery->address);
+            fprintf(stderr,"query host port %d\n",servQuery->port);
+            fprintf(stderr,"query service name %s\n",servQuery->service_name);
             printf("Waiting for the Service Upto 5 Seconds\n");
-            WaitToDiscoverServices(query, subDiscoveryCallback);
+            discoverServicesBlocking(servQuery, subDiscoveryCallback);
         }
     }
     return 0;

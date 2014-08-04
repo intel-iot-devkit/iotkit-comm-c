@@ -23,10 +23,10 @@
 
 
 int main(void) {
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./invalidtemperatureServiceZMQPUBSUB.json");
-    if (serviceDescription) {
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./invalidtemperatureServiceZMQPUBSUB.json");
+    if (serviceSpec) {
         printf("Waiting for the Service to Advertise\n");
-        if (advertiseService(serviceDescription)) {
+        if (advertiseService(serviceSpec)) {
              puts("Success: Service Advertised");
              exit(EXIT_FAILURE);
         } else {

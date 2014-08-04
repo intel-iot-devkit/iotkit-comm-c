@@ -31,11 +31,11 @@ void clientMessageCallback(char *message, Context context) {
 }
 
 /** Callback function. Once the service is discovered, this callback function will be invoked.
-* @param queryDesc the query description object
+* @param servQuery the service query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
 */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {
+void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle) {
     int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
     int (**unsubscribe)(char *);
@@ -72,13 +72,13 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ pub/sub plugin !!");
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/temperatureServiceQueryZMQPUBSUB.json");
+    ServiceQuery *servQuery = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQPUBSUB.json");
 
-    if (query) {
-        fprintf(stderr,"query host address %s\n",query->address);
-        fprintf(stderr,"query host port %d\n",query->port);
-        fprintf(stderr,"query service name %s\n",query->service_name);
-        WaitToDiscoverServices(query, subDiscoveryCallback);
+    if (servQuery) {
+        fprintf(stderr,"query host address %s\n",servQuery->address);
+        fprintf(stderr,"query host port %d\n",servQuery->port);
+        fprintf(stderr,"query service name %s\n",servQuery->service_name);
+        discoverServicesBlocking(servQuery, subDiscoveryCallback);
     }
 
     return 0;

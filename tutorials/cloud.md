@@ -96,10 +96,10 @@ Write the code to publish data:
         }
     }
 
-    ServiceDescription *srvDesc = (ServiceDescription *) parseServiceDescription("./temperatureServiceIoTKit.json");
+    ServiceSpec *srvSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceIoTKit.json");
 
-    if (srvDesc){
-        createClientForGivenService(srvDesc, callback);
+    if (srvSpec){
+        createClientForGivenService(srvSpec, callback);
     }
 
 
@@ -156,7 +156,7 @@ Write the code to subscribe to the data:
         }
     }
 
-    ServiceQuery *query = (ServiceQuery *) parseServiceDescription("./temperatureServiceIoTKit.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceSpec("./temperatureServiceIoTKit.json");
 
     if (query){
         createClientForGivenService(query, callback);

@@ -16,7 +16,7 @@
 * @file iotkit-comm.h
 * @brief Header file of iotkit-comm Library.
 *
-* Data Structure of Service Description, Service Query, Communication Handle and Context.
+* Data Structure of Service Specification, Service Query, Communication Handle and Context.
 */
 
 #include <stdlib.h>
@@ -87,9 +87,9 @@ typedef struct _Prop {
     char *value;
 } Property;
 
-/** Service description and query.
+/** Service specification and query.
  */
-typedef struct _ServiceDescription {
+typedef struct _ServiceSpec {
     enum { ADDED, REMOVED, REGISTERED, IN_USE, UNKNOWN } status; // current status of the service/client
     char *service_name; // name of the service
     struct {
@@ -106,7 +106,7 @@ typedef struct _ServiceDescription {
         char *locally;
         char *cloud;
     } advertise;
-} ServiceDescription, ServiceQuery;
+} ServiceSpec,ServiceQuery;
 
 ConfigFileData g_configData;
 
@@ -116,7 +116,7 @@ char **g_funcSignatures;
 int g_funcEntries;
 
 CommHandle *createClient(ServiceQuery *);
-CommHandle *createService(ServiceDescription *);
+CommHandle *createService(ServiceSpec *);
 void *commInterfacesLookup(CommHandle *commHandle, char *funcname);
 void cleanUp(CommHandle *);
 bool fileExists(char *absPath);

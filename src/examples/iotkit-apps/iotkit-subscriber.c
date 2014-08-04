@@ -88,7 +88,7 @@ bool serviceFilter(ServiceQuery *srvQuery) {
 int main(void) {
 
     puts("Sample program to test the IoT Cloud subscribe plugin !!");
-    query = (ServiceQuery *) parseServiceDescription("./serviceSpecs/temperatureServiceIoTKit.json");
+    query = (ServiceQuery *) parseServiceSpec("./serviceSpecs/temperatureServiceIoTKit.json");
 
     if (query){
         createClientForGivenService(query, callback);

@@ -23,7 +23,7 @@
 *   @{
 */
 
-/** Creates the context object and publisher socket. With the help of the ServiceDescription parameter, the publisher
+/** Creates the context object and publisher socket. With the help of the ServiceSpec parameter, the publisher
 socket binds to the address and port to initiate communication.
 * @param publishServiceDesc an void pointer
 * @return The result code
@@ -32,17 +32,17 @@ int init(void *publishServiceDesc) {
     #if DEBUG
         printf("In createService\n");
     #endif
-    ServiceDescription *serviceDescription = (ServiceDescription *) publishServiceDesc;
+    ServiceSpec *serviceSpecification = (ServiceSpec *) publishServiceDesc;
     zmqContainer.context = zmq_ctx_new();
     #if DEBUG
         printf("context initialised\n");
     #endif
     zmqContainer.publisher = zmq_socket(zmqContainer.context,ZMQ_PUB);
     char addr[128];
-    if (serviceDescription->address != NULL) {
-        sprintf(addr, "tcp://%s:%d", serviceDescription->address, serviceDescription->port);
+    if (serviceSpecification->address != NULL) {
+        sprintf(addr, "tcp://%s:%d", serviceSpecification->address, serviceSpecification->port);
     } else {
-        sprintf(addr, "tcp://*:%d", serviceDescription->port);
+        sprintf(addr, "tcp://*:%d", serviceSpecification->port);
     }
     #if DEBUG
         printf("going to bind %s\n",addr);

@@ -12,7 +12,7 @@ owner to see.
 An application using the iotkit-comm library can act like a service, a client, or both. In this case, we are implementing the
 temperature sensor as a service that periodically publishes the ambient temperature. Here's that portion of the code:
 
-    void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommHandle *serviceHandle) {
+    void pubServiceCallback(ServiceSpec *servSpec, int32_t error_code, CommHandle *serviceHandle) {
 
         if (serviceHandle != NULL) {
             int (**publish)(char *,Context context);
@@ -32,7 +32,7 @@ temperature sensor as a service that periodically publishes the ambient temperat
 
 
 Above, the created service service publishes a randomly selected ambient temperature once every 2 seconds. In the below
-block of service spec validation code you will notice WaitToAdvertiseService() takes two arguments: spec, a specification for
+block of service spec validation code you will notice advertiseServiceBlocking() takes two arguments: spec, a specification for
 the service you want to create and a callback, which is invoked with an instance of the created service. At this point,
 it is important to understand the following things about creating a service using iotkit-comm
 
@@ -79,11 +79,11 @@ A service specification can also contain a few other attributes. For more detail
 A JSON service specification file is useful only if it can be passed around as an object; to do that, it must first be
 read and then validated:
 
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperature-sensor-spec.json");
-    if (serviceDescription)
-        WaitToAdvertiseService(serviceDescription, pubServiceCallback);
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperature-sensor-spec.json");
+    if (serviceSpec)
+        advertiseServiceBlocking(serviceSpec, pubServiceCallback);
 
-The resulting object spec can now be passed as an argument to WaitToAdvertiseService(). It's now time for the thermostat
+The resulting object spec can now be passed as an argument to advertiseServiceBlocking(). It's now time for the thermostat
 to find this temperature sensor.
 
 <B> Thermostat </B>
@@ -116,9 +116,9 @@ Using this query, an application will be able to find a service on the LAN that:
 
 Now, that we have the service query, it must be converted into a valid query object:
 
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/temperature-sensor-query.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperature-sensor-query.json");
     if (query) {
-        WaitToDiscoverServices(query, subCallback);
+        discoverServicesBlocking(query, subCallback);
     }
 
 The sensorQuery object can now be used to find and connect to temperature sensors on the network:
@@ -131,7 +131,7 @@ Let's study this a bit more. To createClient iotkit-comm needs a service query (
 for a service on the LAN whose attributes match those given in the query. Once a service is found, iotkit-comm calls the
 serviceFilter with the specification of the service. The application must then confirm that it wants to connect to the
 found service; it does so by having serviceFilter return true. iotkit-comm then creates a client instance connected to this
-new service and passes it back to the application via the callback (see final argument of WaitToDiscoverServices()).
+new service and passes it back to the application via the callback (see final argument of discoverServicesBlocking()).
 
 At this point, it is worth spending a little more time on the question "How does iotkit-comm search for a service using a query?"
 like we mentioned before, the temperature sensors are already advertising themselves on the the network: what this means,
@@ -145,10 +145,10 @@ Now that our thermostat can find and connect to temperature sensors, it needs to
 
         int (**subscribe)(char *);
         int (**receive)(void (*)(char *, Context));
-        ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/thermostat-spec.json");
-        if (serviceDescription) {
-            advertiseService(serviceDescription);
-            CommHandle *serviceHandle = createService(serviceDescription);
+        ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/thermostat-spec.json");
+        if (serviceSpec) {
+            advertiseService(serviceSpec);
+            CommHandle *serviceHandle = createService(serviceSpec);
             mypublisher = commInterfacesLookup(serviceHandle, "publish");
         }
         if (commHandle != NULL) {
@@ -198,10 +198,10 @@ temperature reading arrives, the callback clientMessageCallback is invoked:
 Notice the last line, the thermostat itself is publishing the newly calculated mean temperature so that other applications
 can subscribe to it. To successfully publish though, the thermostat needs to initialize mypublisher:
 
-        ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/thermostat-spec.json");
-        if (serviceDescription) {
-            advertiseService(serviceDescription);
-            CommHandle *serviceHandle = createService(serviceDescription);
+        ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/thermostat-spec.json");
+        if (serviceSpec) {
+            advertiseService(serviceSpec);
+            CommHandle *serviceHandle = createService(serviceSpec);
             mypublisher = commInterfacesLookup(serviceHandle, "publish");
         }
 
@@ -228,9 +228,9 @@ thermostat is available here.
 
 The dashboard is responsible for subscribing to the mean temperature published by the thermostat and display it:
 
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/thermostat-query.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./serviceQueries/thermostat-query.json");
     if (query) {
-        WaitToDiscoverServices(query, subDiscoveryCallback);
+        discoverServicesBlocking(query, subDiscoveryCallback);
     }
 
     void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {

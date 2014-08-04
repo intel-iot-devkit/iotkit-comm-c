@@ -23,7 +23,7 @@
 * @{
 */
 
-/** Creates the context object and responder socket. With the help of the ServiceDescription parameter, the responder
+/** Creates the context object and responder socket. With the help of the ServiceSpec parameter, the responder
 socket binds, connection to the address and port to initiate communication.
 * @param responseServiceDesc an void pointer
 * @return The result code
@@ -32,15 +32,15 @@ int init(void *responseServiceDesc) {
     #if DEBUG
         printf("context initialised\n");
     #endif
-    ServiceDescription *serviceDescription = (ServiceDescription *)responseServiceDesc;
+    ServiceSpec *serviceSpecification = (ServiceSpec *)responseServiceDesc;
     zmqContainer.context = zmq_ctx_new();
 
     // This is server side
     char addr[128];
-    if (serviceDescription->address != NULL) {
-        sprintf(addr, "tcp://%s:%d", serviceDescription->address, serviceDescription->port);
+    if (serviceSpecification->address != NULL) {
+        sprintf(addr, "tcp://%s:%d", serviceSpecification->address, serviceSpecification->port);
     } else {
-        sprintf(addr, "tcp://*:%d", serviceDescription->port);
+        sprintf(addr, "tcp://*:%d", serviceSpecification->port);
     }
 
     #if DEBUG

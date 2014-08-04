@@ -71,7 +71,7 @@ it accepts. For example, in the specification above, the field comm_params conta
 that a non-secure server should be started (note: at the moment the zmqpubsub plugin ignores the ssl parameter. The
 above specification is only an example). <BR>
 
-This specification can then be passed to WaitToAdvertiseService() or advertiseService(), which will eventually return
+This specification can then be passed to advertiseServiceBlocking() or advertiseService(), which will eventually return
 an instance of a service running at the given address and port.
 
 <B> Service Query </B>

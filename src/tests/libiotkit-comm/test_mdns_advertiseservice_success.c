@@ -23,11 +23,11 @@
 
 
 /** Callback function. Once the service is discovered this callback function will be invoked
-* @param queryDesc the query description object
+* @param servQuery the service query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *serviceHandle) {
+void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *serviceHandle) {
      if (serviceHandle != NULL) {
          puts("Success: Service Advertised");
          exit(EXIT_SUCCESS);
@@ -38,10 +38,10 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
 }
 
 int main(void) {
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceZMQPUBSUB.json");
-    if (serviceDescription) {
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceZMQPUBSUB.json");
+    if (serviceSpec) {
         puts("Waiting for the Service to Advertise");
-        WaitToAdvertiseService(serviceDescription, subDiscoveryCallback);
+        advertiseServiceBlocking(serviceSpec, subDiscoveryCallback);
     }
     return 0;
 }

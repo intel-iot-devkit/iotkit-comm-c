@@ -33,11 +33,11 @@ void repMessageCallback(void *client, char *message, Context context) {
 
 /** Callback function. Once the service is advertised, this callback function will be invoked.
 
-* @param servDesc the service description object
+* @param servSpec the service specification object
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
 */
-void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommHandle *serviceHandle) {
+void repAdvertiseCallback(ServiceSpec *servSpec, int32_t error_code,CommHandle *serviceHandle) {
     if (serviceHandle != NULL) {
         void *client;
         Context context;
@@ -64,10 +64,10 @@ void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommH
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceZMQREQREP.json");
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQREQREP.json");
 
-    if (serviceDescription) {
-        WaitToAdvertiseService(serviceDescription, repAdvertiseCallback);
+    if (serviceSpec) {
+        advertiseServiceBlocking(serviceSpec, repAdvertiseCallback);
     }
 
     return 0;

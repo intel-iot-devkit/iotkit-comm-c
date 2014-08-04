@@ -29,7 +29,7 @@
     #define DEBUG 0
 #endif
 
-ServiceDescription *srvDesc = NULL;
+ServiceSpec *srvSpec = NULL;
 int msgnumber = 0;
 
 /**
@@ -77,20 +77,20 @@ int main(void) {
 
     puts("Sample program to publish topic \'/foo\' !!");
 
-    srvDesc = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceMQTT.json");
+    srvSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceMQTT.json");
 
     #if DEBUG
-        printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);
+        printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvSpec->status, srvSpec->service_name, srvSpec->address, srvSpec->port, srvSpec->type.name, srvSpec->type.protocol);
     #endif
 
-    if (srvDesc) {
-        if (!advertiseService(srvDesc)) {
+    if (srvSpec) {
+        if (!advertiseService(srvSpec)) {
             fprintf(stderr, "Failed to advertise the service\n");
 
             return 0;
         }
 
-        createClientForGivenService(srvDesc, callback);
+        createClientForGivenService(srvSpec, callback);
     }
 
     return 0;

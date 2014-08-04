@@ -22,13 +22,13 @@
 #include "../../lib/libiotkit-comm/iotkit-comm.h"
 
 int main(void) {
-    ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-    serviceDesc->address = "127.0.0.1";
-    serviceDesc->port = 123423;
-    init(serviceDesc);
+    ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
+    serviceSpec->address = "127.0.0.1";
+    serviceSpec->port = 123423;
+    init(serviceSpec);
     int result = publish("Hello World",NULL);
     done();
-    free(serviceDesc);
+    free(serviceSpec);
     if (result == 0) {
         puts("Published Message Successfully");
         exit(EXIT_FAILURE);

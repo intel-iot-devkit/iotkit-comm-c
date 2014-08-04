@@ -61,18 +61,18 @@ void clientMessageCallback(char *message, Context context) {
 }
 
 /** Callback function. Once the service is discovered this callback function will be invoked
-* @param queryDesc the query description object
+* @param servQuery the service query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void subCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {
+void subCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle) {
 
     int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/thermostat-spec.json");
-    if (serviceDescription) {
-        advertiseService(serviceDescription);
-        CommHandle *serviceHandle = createService(serviceDescription);
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/thermostat-spec.json");
+    if (serviceSpec) {
+        advertiseService(serviceSpec);
+        CommHandle *serviceHandle = createService(serviceSpec);
         mypublisher = commInterfacesLookup(serviceHandle, "publish");
     }
     if (commHandle != NULL) {
@@ -97,9 +97,9 @@ void subCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHa
 int main(void) {
 
     puts("Thermostat reading sensor data & publishing it to Dashboard");
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/temperature-sensor-query.json");
-    if (query) {
-        WaitToDiscoverServices(query, subCallback);
+    ServiceQuery *servQuery = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperature-sensor-query.json");
+    if (servQuery) {
+        discoverServicesBlocking(servQuery, subCallback);
     }
     return 0;
 }

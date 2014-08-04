@@ -33,10 +33,10 @@ void alarmHandler() {
 }
 
 int main(void) {
-    ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-    serviceDesc->address = "127.0.0.1";
-    serviceDesc->port = 1234;
-    init(serviceDesc);
+    ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
+    serviceSpec->address = "127.0.0.1";
+    serviceSpec->port = 1234;
+    init(serviceSpec);
     void *ctx = zmq_ctx_new();
     void *req = zmq_socket(ctx, ZMQ_REQ);
     int rc = zmq_connect(req, "tcp://127.0.0.1:1234");
@@ -53,6 +53,6 @@ int main(void) {
     puts("waiting for message");
     receive(handler);
     done();
-    free(serviceDesc);
+    free(serviceSpec);
     exit(EXIT_SUCCESS);
 }

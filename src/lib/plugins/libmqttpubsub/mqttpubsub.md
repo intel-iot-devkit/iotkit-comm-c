@@ -5,3 +5,7 @@ of assurance of delivery. These principles make the protocol ideal of the emergi
 or “Internet of Things” world of connected devices, and for mobile applications, where bandwidth and battery power are at a premium.
 
 This documentation is about asynchronous implementation of MQTT pattern publish-subscribe.
+
+<B> API Documentation </B>
+
+[mqtt-client](@ref mqtt-client.c) <BR>

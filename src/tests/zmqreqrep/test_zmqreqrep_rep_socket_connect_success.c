@@ -23,12 +23,12 @@ This file tests whether ZMQ Responder socket is able to successfully connect.
 #include "../../lib/libiotkit-comm/iotkit-comm.h"
 
 int main(void) {
-    ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-    serviceDesc->address = "127.0.0.1";
-    serviceDesc->port = 1080;
-    int result = init(serviceDesc);
+    ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
+    serviceSpec->address = "127.0.0.1";
+    serviceSpec->port = 1080;
+    int result = init(serviceSpec);
     done();
-    free(serviceDesc);
+    free(serviceSpec);
     if (result == 0) {
         puts("Publisher Socket Successfully Binded");
         exit(EXIT_SUCCESS);

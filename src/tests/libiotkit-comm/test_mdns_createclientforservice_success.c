@@ -33,7 +33,7 @@ void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHan
 }
 
 int main(void) {
-    ServiceQuery *query = (ServiceQuery *)parseClientServiceQuery("./temperatureServiceQueryZMQPUBSUB.json");
+    ServiceQuery *query = (ServiceQuery *)parseServiceQuery("./temperatureServiceQueryZMQPUBSUB.json");
     if (query) {
         query->port = 1080;
         createClientForGivenService(query, callback);

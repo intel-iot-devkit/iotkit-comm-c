@@ -23,11 +23,11 @@
 
 int main(void) {
     char *filepath = "./invalidtemperatureServiceQueryMQTT.json";
-    if (parseClientServiceQuery(filepath) != NULL) {
-        puts("Success: Parse Client Service Query Description");
+    if (parseServiceQuery(filepath) != NULL) {
+        puts("Success: Parse Client Service Query");
         exit(EXIT_FAILURE);
     } else {
-        puts("Failure: Parse Client Service Query Description");
+        puts("Failure: Parse Client Service Query");
         exit(EXIT_SUCCESS);
     }
 }

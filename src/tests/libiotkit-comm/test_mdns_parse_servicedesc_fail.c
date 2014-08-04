@@ -23,11 +23,11 @@
 
 int main(void) {
     char *filepath = "./invalidtemperatureServiceMQTT.json";
-    if (parseServiceDescription(filepath) != NULL) {
-        puts("Success: Parse Service Description");
+    if (parseServiceSpec(filepath) != NULL) {
+        puts("Success: Parse Service Specification");
         exit(EXIT_FAILURE);
     } else {
-        puts("Failure: Parse Service Description");
+        puts("Failure: Parse Service Specification");
         exit(EXIT_SUCCESS);
     }
 }

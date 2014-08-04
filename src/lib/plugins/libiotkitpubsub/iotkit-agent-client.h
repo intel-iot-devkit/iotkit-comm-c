@@ -13,7 +13,7 @@
  */
 
 /**
-* @file iotkit-client.h
+* @file iotkit-agent-client.h
 * @brief Headers of iotkit Async Client plugin for iotkit-comm API.
 *
 * Provides features to connect to an MQTT Broker and subscribe to a topic.

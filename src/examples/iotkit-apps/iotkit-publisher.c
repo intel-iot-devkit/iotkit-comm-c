@@ -29,7 +29,7 @@
     #define DEBUG 0
 #endif
 
-ServiceDescription *srvDesc = NULL;
+ServiceSpec *srvSpec = NULL;
 int msgnumber = 40; // iotkit-agent does not accept zero as sensor value; so assigning a non-zero value
 
 /**
@@ -76,14 +76,14 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
 int main(void) {
     puts("Sample program to publish data to IoT Cloud !!");
 
-    srvDesc = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceIoTKit.json");
+    srvSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceIoTKit.json");
 
     #if DEBUG
-        printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvDesc->status, srvDesc->service_name, srvDesc->address, srvDesc->port, srvDesc->type.name, srvDesc->type.protocol);
+        printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvSpec->status, srvSpec->service_name, srvSpec->address, srvSpec->port, srvSpec->type.name, srvSpec->type.protocol);
     #endif
 
-    if (srvDesc){
-        createClientForGivenService(srvDesc, callback);
+    if (srvSpec){
+        createClientForGivenService(srvSpec, callback);
     }
 
     return 0;

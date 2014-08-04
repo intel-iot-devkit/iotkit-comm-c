@@ -13,7 +13,7 @@
  */
 
 /**
-* @file iotkit-client.c
+* @file iotkit-agent-client.c
 * @brief Implementation of IoTKit Async Client plugin for iotkit-comm API.
 *
 * Provides features to connect to an MQTT Broker and subscribe to a topic.
@@ -328,13 +328,13 @@ int receive(void (*handler) (char *topic, Context context)) {
 /**
  * @name Create the MQTT client
  * @brief Create and initialize the mqtt plugin.
- * @param[in] serviceDesc is the service description being queried for
+ * @param[in] servQuery is the service query being queried for
  * @return boolean, which specifies whether the connection is successfully established or not
  *
  * Establishes the connection with an MQTT broker.
  */
-int init(void *serviceDesc) {
-    ServiceQuery *serviceQuery = (ServiceQuery *) serviceDesc;
+int init(void *servQuery) {
+    ServiceQuery *serviceQuery = (ServiceQuery *) servQuery;
     MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
     int rc = 0;
     char uri[256];

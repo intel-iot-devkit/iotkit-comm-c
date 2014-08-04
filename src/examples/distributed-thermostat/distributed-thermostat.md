@@ -308,7 +308,7 @@ $ ./dashboard <BR>
 $ ./sensor <BR>
 $ ./thermostat <BR>
 
-<B> Source Code </B>
+<B>  Documentation  </B>
 
 [Temperature Sensor](@ref temperatureSensor.c) <BR>
 [Thermostat](@ref thermostat.c) <BR>

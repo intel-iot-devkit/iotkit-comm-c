@@ -62,13 +62,13 @@ void reqDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/temperatureServiceQueryZMQREQREP.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQREQREP.json");
 
     if (query) {
         fprintf(stderr,"query host address %s\n",query->address);
         fprintf(stderr,"query host port %d\n",query->port);
         fprintf(stderr,"query service name %s\n",query->service_name);
-        WaitToDiscoverServices(query, reqDiscoveryCallback);
+        discoverServicesBlocking(query, reqDiscoveryCallback);
     }
 
     return 0;

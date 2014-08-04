@@ -3,3 +3,7 @@ and logic for their devices (sensors, actuators, and tags). IoT Kit Agent transp
 format and security during both the device registration and data submission.
 
 This documentation focuses on the Client side implementation of IoTKit Agent.
+
+<B> API Documentation </B>
+
+[iotkit-agent-client](@ref iotkit-agent-client.c) <BR>

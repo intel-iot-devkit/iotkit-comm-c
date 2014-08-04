@@ -14,11 +14,11 @@ Create a client that queries for the service
 
 Now here's the source code for the client itself:
 
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./server-spec.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./server-spec.json");
 
     if (query) {
-	    WaitToDiscoverServices(query, subDiscoveryCallback);
-	}
+        discoverServicesBlocking(query, subDiscoveryCallback);
+    }
 
 Notice that the client does not need to know the IP address of the service or even how to communicate with it. Instead,
 the service query takes care of such details. For example, this client specifies the name of the service and the

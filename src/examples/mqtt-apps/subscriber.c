@@ -88,10 +88,10 @@ bool serviceFilter(ServiceQuery *srvQuery) {
 int main(void) {
 
     puts("Sample program to test the iotkit-comm MQTT pub/sub plugin !!");
-    query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/temperatureServiceQueryMQTT.json");
+    query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryMQTT.json");
 
     if (query) {
-        WaitToDiscoverServicesFiltered(query, serviceFilter, callback);
+        discoverServicesBlockingFiltered(query, serviceFilter, callback);
     }
 
     return 0;

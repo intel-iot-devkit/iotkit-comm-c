@@ -188,13 +188,13 @@ int receive(void (*handler) (char *topic, Context context)) {
 /**
  * @name Create and initialize the MQTT client
  * @brief initializes the plugin.
- * @param[in] serviceDesc is the service description being queried for
+ * @param[in] servQuery is the service query being queried for
  * @return boolean, which specifies whether the connection is successfully established or not
  *
  * Establishes the connection with an MQTT broker.
  */
-int init(void *serviceDesc) {
-    ServiceQuery *serviceQuery = (ServiceQuery *) serviceDesc;
+int init(void *servQuery) {
+    ServiceQuery *serviceQuery = (ServiceQuery *) servQuery;
     int rc = 0;
     char uri[256];
 

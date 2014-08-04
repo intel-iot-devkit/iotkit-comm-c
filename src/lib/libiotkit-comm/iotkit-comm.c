@@ -248,7 +248,7 @@ endParseConfig:
     goto endParseInterfaces;\
 }
 
-/** Parses plugin interfaces. Loads the function names present in the corresponding plugin defined in the service description JSON
+/** Parses plugin interfaces. Loads the function names present in the corresponding plugin defined in the service specification JSON
 * @param[in] inf_file file path for the plugin interface
 * @return returns true upon successful parsing and false otherwise
 */
@@ -378,7 +378,7 @@ bool loadCommInterfaces(CommHandle *commHandle) {
 
     dlerror();  // Clear any existing error
     // this is a special function to initialize the plugin;
-    // this function call takes Service Description as a parameter
+    // this function call takes Service specification as a parameter
     commHandle->init = (int (*)(void *)) dlsym(handle, "init");
     if (!checkDLError()) {
         commHandle->init = NULL;
@@ -422,10 +422,10 @@ CommHandle *loadCommPlugin(char *plugin_path) {
 }
 
 /** Initializes Client object. Creates the client object and calls its init method for further initialization
-* @param[in] queryDesc query description
+* @param[in] servQuery the service query object
 * @return returns client handle upon successful and NULL otherwise
 */
-CommHandle *createClient(ServiceQuery *queryDesc) {
+CommHandle *createClient(ServiceQuery *servQuery) {
     CommHandle *commHandle = NULL;
     char cwd_temp[1024];
 
@@ -463,7 +463,7 @@ CommHandle *createClient(ServiceQuery *queryDesc) {
         }
 
         strcat(cwd_temp, "lib");
-        strcat(cwd_temp, queryDesc->type.name);
+        strcat(cwd_temp, servQuery->type.name);
         strcat(cwd_temp, "-client.so");
         #if DEBUG
             printf("\nplugin name %s\n",cwd_temp);
@@ -475,7 +475,7 @@ CommHandle *createClient(ServiceQuery *queryDesc) {
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
     if (!commHandle) {
-        fprintf(stderr, "Plugin library \"lib%s-client.so\" not found\n", queryDesc->type.name);
+        fprintf(stderr, "Plugin library \"lib%s-client.so\" not found\n", servQuery->type.name);
         cleanUp(commHandle);
         return NULL;
     }
@@ -522,7 +522,7 @@ CommHandle *createClient(ServiceQuery *queryDesc) {
     }
 
     if (commHandle->init) {
-        commHandle->init(queryDesc);
+        commHandle->init(servQuery);
     }
 
     return commHandle;
@@ -544,10 +544,10 @@ bool fileExists(char *absPath) {
 }
 
 /** Initializes Service object. Creates the service object and calls its init method for further initialization.
-* @param[in] description service description
+* @param[in] specification service specification
 * @return returns service handle upon successful and NULL otherwise
 */
-CommHandle *createService(ServiceDescription *description) {
+CommHandle *createService(ServiceSpec *specification) {
     CommHandle *commHandle = NULL;
     char cwd_temp[1024];
 
@@ -582,7 +582,7 @@ CommHandle *createService(ServiceDescription *description) {
         }
 
         strcat(cwd_temp, "lib");
-        strcat(cwd_temp, description->type.name);
+        strcat(cwd_temp, specification->type.name);
         strcat(cwd_temp, "-service.so");
 
         if (fileExists(cwd_temp)) {
@@ -592,7 +592,7 @@ CommHandle *createService(ServiceDescription *description) {
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
     if (!commHandle) {
-        fprintf(stderr, "Plugin library \"lib%s-service.so\" not found\n", description->type.name);
+        fprintf(stderr, "Plugin library \"lib%s-service.so\" not found\n", specification->type.name);
         cleanUp(commHandle);
         return NULL;
     }
@@ -635,7 +635,7 @@ CommHandle *createService(ServiceDescription *description) {
     }
 
     if (commHandle->init) {
-        commHandle->init(description);
+        commHandle->init(specification);
     }
 
     return commHandle;
@@ -656,8 +656,8 @@ void* commInterfacesLookup(CommHandle *commHandle, char *funcname) {
 
 #if DEBUG
 int main(int argc, char *argv[]) {
-    ServiceDescription *description = parseServiceDescription("../../sample-apps/serviceSpecs/temperatureServiceMQTT.json");
-    CommHandle *commHandle = createClient(description);
+    ServiceSpec *specification = (ServiceSpec *)parseServiceSpec("../../examples/serviceSpecs/temperatureServiceMQTT.json");
+    CommHandle *commHandle = createClient(specification);
 
     if (commHandle) {
         Context context;

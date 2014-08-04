@@ -23,12 +23,12 @@ This file tests whether ZMQ Responder socket fails when we pass Invalid IP Addre
 #include "../../lib/libiotkit-comm/iotkit-comm.h"
 
 int main(void) {
-    ServiceDescription *serviceDesc = (ServiceDescription *)malloc(sizeof(ServiceDescription));
-    serviceDesc->address = "invalidaddress";
-    serviceDesc->port = 100;
-    int result = init(serviceDesc);
+    ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
+    serviceSpec->address = "invalidaddress";
+    serviceSpec->port = 100;
+    int result = init(serviceSpec);
     done();
-    free(serviceDesc);
+    free(serviceSpec);
     if (result == 0) {
         puts("Publisher Socket Successfully Binded");
         exit(EXIT_FAILURE);

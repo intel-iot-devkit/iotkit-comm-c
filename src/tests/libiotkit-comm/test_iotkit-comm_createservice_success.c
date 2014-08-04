@@ -22,8 +22,8 @@
 #include "../../lib/libiotkit-comm/iotkit-comm.h"
 
 int main(void) {
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./temperatureServiceZMQPUBSUB.json");
-    if (serviceDescription && createService(serviceDescription)) {
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceZMQPUBSUB.json");
+    if (serviceSpec && createService(serviceSpec)) {
          puts("Success: Created Service");
          exit(EXIT_SUCCESS);
     } else {

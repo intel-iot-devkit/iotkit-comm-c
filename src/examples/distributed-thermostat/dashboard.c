@@ -69,9 +69,9 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
 int main(void) {
 
     puts("Dashboard reading the mean temperature from thermostat");
-    ServiceQuery *query = (ServiceQuery *) parseClientServiceQuery("./serviceQueries/thermostat-query.json");
+    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./serviceQueries/thermostat-query.json");
     if (query) {
-        WaitToDiscoverServices(query, subDiscoveryCallback);
+        discoverServicesBlocking(query, subDiscoveryCallback);
     }
     return 0;
 }

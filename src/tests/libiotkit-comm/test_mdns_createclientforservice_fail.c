@@ -23,11 +23,11 @@
 
 
 /** Callback function. Once the service is discovered this callback function will be invoked
-* @param queryDesc the query description object
+* @param servQuery the service query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */
-void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHandle) {
+void callback(ServiceQuery *servQuery, int32_t error_code, CommHandle *clientHandle) {
      if (clientHandle != NULL) {
          puts("Success: Service Advertised");
          exit(EXIT_FAILURE);
@@ -38,9 +38,9 @@ void callback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *clientHan
 }
 
 int main(void) {
-    ServiceQuery *query = (ServiceQuery *)parseClientServiceQuery("./temperatureServiceQueryMQTT.json");
-    if (query) {
-        createClientForGivenService(query, callback);
+    ServiceQuery *servQuery = (ServiceQuery *)parseServiceQuery("./temperatureServiceQueryMQTT.json");
+    if (servQuery) {
+        createClientForGivenService(servQuery, callback);
     }
     return 0;
 }

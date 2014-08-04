@@ -23,11 +23,11 @@
 #include "util.h"
 
 /** Callback function. Once the service is advertised, this callback function will be invoked.
-* @param servDesc the service description object
+* @param servSpec the service specification object
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
 */
-void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommHandle *serviceHandle) {
+void pubServiceCallback(ServiceSpec *servSpec, int32_t error_code, CommHandle *serviceHandle) {
     if (serviceHandle != NULL) {
         int (**publish)(char *,Context context);
 
@@ -50,10 +50,10 @@ void pubServiceCallback(ServiceDescription *servDesc, int32_t error_code, CommHa
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ pub/sub plugin !!");
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
-    if (serviceDescription) {
-        WaitToAdvertiseService(serviceDescription, pubServiceCallback);
+    if (serviceSpec) {
+        advertiseServiceBlocking(serviceSpec, pubServiceCallback);
     }
 
     return 0;

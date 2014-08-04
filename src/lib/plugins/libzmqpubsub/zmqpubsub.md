@@ -3,3 +3,8 @@ It provides a message queue, but unlike message-oriented middleware, a ZeroMQ sy
 The library is designed to have a familiar socket-style API.
 
 ZeroMQ publish/subscribe pattern connects a set of publishers to a set of subscribers. This is a data distribution pattern.
+
+<B> API Documentation </B>
+
+[zeromq-subscriber-client](@ref zmqpubsub-client.c) <BR>
+[zeromq-publisher-service](@ref zmqpubsub-service.c) <BR>

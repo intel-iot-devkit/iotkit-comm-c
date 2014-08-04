@@ -26,7 +26,7 @@ for the service we will be writing (place in server-spec.json):
 
 Now here's the source code for the service itself:
 
-    void repAdvertiseCallback(ServiceDescription *servDesc, int32_t error_code,CommHandle *serviceHandle)
+    void repAdvertiseCallback(ServiceSpec *spec, int32_t error_code,CommHandle *serviceHandle)
     {
         if (serviceHandle != NULL) {
             void *client;
@@ -47,10 +47,10 @@ Now here's the source code for the service itself:
         }
     }
 
-    ServiceDescription *serviceDescription = (ServiceDescription *) parseServiceDescription("./server-spec.json");
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./server-spec.json");
 
-    if (serviceDescription)
-        WaitToAdvertiseService(serviceDescription, repAdvertiseCallback);
+    if (serviceSpec)
+        advertiseServiceBlocking(serviceSpec, repAdvertiseCallback);
 
 Notice that the service does not need to worry about how messages will be delivered, it only needs to worry about the
 contents of those messages. Specifying zmqreqrep in the type.name field of the specification is enough to let iotkit-comm
