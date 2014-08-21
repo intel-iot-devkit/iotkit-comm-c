@@ -23,16 +23,19 @@
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 1234;
-    int result = init(serviceQuery);
-    done();
-    free(serviceQuery);
-    if (result == 0) {
-        puts("Subscriber Socket Successfully Connected");
-        exit(EXIT_SUCCESS);
-    } else {
-        puts("Failed: Subscriber Socket Initialization");
-        exit(EXIT_FAILURE);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 1234;
+        int result = init(serviceQuery);
+        done();
+        free(serviceQuery);
+        if (result == 0) {
+            puts("Subscriber Socket Successfully Connected");
+            exit(EXIT_SUCCESS);
+        } else {
+            puts("Failed: Subscriber Socket Initialization");
+        }
     }
+    exit(EXIT_FAILURE);
+
 }

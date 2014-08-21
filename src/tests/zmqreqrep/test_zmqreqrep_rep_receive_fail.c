@@ -34,25 +34,29 @@ void alarmHandler() {
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
-    serviceSpec->address = "127.0.0.1";
-    serviceSpec->port = 1234;
-    init(serviceSpec);
-    void *ctx = zmq_ctx_new();
-    void *req = zmq_socket(ctx, ZMQ_REQ);
-    int rc = zmq_connect(req, "tcp://127.0.0.1:1234");
-    if (rc == -1)
-        puts("client connect failed");
-    //  Send message from client to server
-    rc = zmq_send(req, "rose", 4, -1);
-    if (rc == -1)
-        puts("client send failed");
-    /* Establish a handler for SIGALRM signals. */
-    signal(SIGALRM, alarmHandler);
-    /* Set an alarm to go off*/
-    alarm(3);
-    puts("waiting for message");
-    receive(handler);
-    done();
-    free(serviceSpec);
-    exit(EXIT_SUCCESS);
+    if (serviceSpec != NULL) {
+        serviceSpec->address = "127.0.0.1";
+        serviceSpec->port = 1234;
+        init(serviceSpec);
+        void *ctx = zmq_ctx_new();
+        void *req = zmq_socket(ctx, ZMQ_REQ);
+        int rc = zmq_connect(req, "tcp://127.0.0.1:1234");
+        if (rc == -1)
+            puts("client connect failed");
+        //  Send message from client to server
+        rc = zmq_send(req, "rose", 4, -1);
+        if (rc == -1)
+            puts("client send failed");
+        /* Establish a handler for SIGALRM signals. */
+        signal(SIGALRM, alarmHandler);
+        /* Set an alarm to go off*/
+        alarm(3);
+        puts("waiting for message");
+        receive(handler);
+        done();
+        free(serviceSpec);
+        exit(EXIT_SUCCESS);
+    } else {
+        exit(EXIT_FAILURE);
+    }
 }

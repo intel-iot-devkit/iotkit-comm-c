@@ -40,9 +40,10 @@ int messageArrived(void *ctx, char *topicName, int topicLen, MQTTClient_message 
     #endif
 
     payloadmsg = (char *)malloc(message->payloadlen+1);
-    strncpy(payloadmsg, message->payload, message->payloadlen);
-    payloadmsg[message->payloadlen] = '\0';
-
+    if (payloadmsg != NULL) {
+        strncpy(payloadmsg, message->payload, message->payloadlen);
+        payloadmsg[message->payloadlen] = '\0';
+    }
     context.name = "topic";
     context.value = strdup(topicName);
     if (msgArrhandler != NULL) {
@@ -52,7 +53,7 @@ int messageArrived(void *ctx, char *topicName, int topicLen, MQTTClient_message 
     }
 
     free(payloadmsg);
-
+    free(context.value);
     return true;
 }
 

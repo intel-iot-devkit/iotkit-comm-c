@@ -24,16 +24,18 @@ This file tests whether ZMQ Requester socket fails when we pass the Invalid IP A
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "127.0.0.123232132321323123232233";
-    serviceQuery->port = 100;
-    int result = init(serviceQuery);
-    done();
-    free(serviceQuery);
-    if (result == 0) {
-        puts("Requester Socket Successfully Connected");
-        exit(EXIT_FAILURE);
-    } else {
-        puts("Failed: Requester Socket Binding");
-        exit(EXIT_SUCCESS);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "127.0.0.123232132321323123232233";
+        serviceQuery->port = 100;
+        int result = init(serviceQuery);
+        done();
+        free(serviceQuery);
+        if (result == 0) {
+            puts("Requester Socket Successfully Connected");
+        } else {
+            puts("Failed: Requester Socket Binding");
+            exit(EXIT_SUCCESS);
+        }
     }
+    exit(EXIT_FAILURE);
 }

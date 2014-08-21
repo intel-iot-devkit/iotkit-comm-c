@@ -25,16 +25,18 @@ This file tests whether ZMQ Requester socket is able to successfully connect.
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 1234;
-    int result = init(serviceQuery);
-    done();
-    free(serviceQuery);
-    if (result == 0) {
-        puts("Requester Socket Successfully Connected");
-        exit(EXIT_SUCCESS);
-    } else {
-        puts("Failed: Requester Socket Initialization");
-        exit(EXIT_FAILURE);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 1234;
+        int result = init(serviceQuery);
+        done();
+        free(serviceQuery);
+        if (result == 0) {
+            puts("Requester Socket Successfully Connected");
+            exit(EXIT_SUCCESS);
+        } else {
+            puts("Failed: Requester Socket Initialization");
+        }
     }
+    exit(EXIT_FAILURE);
 }

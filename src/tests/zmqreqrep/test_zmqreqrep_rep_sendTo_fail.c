@@ -24,19 +24,21 @@ This file tests whether ZMQ Responder socket fails while sending message.
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
-    serviceSpec->address = "127.0.0.1";
-    serviceSpec->port = 1234;
-    init(serviceSpec);
-    int result = sendTo(NULL,"Hello World",NULL);
-    if (result == 0) {
-        puts("Sended Message Successfully");
-        done();
-        free(serviceSpec);
-        exit(EXIT_FAILURE);
-    } else {
-        puts("Failed: Sending Message");
-        done();
-        free(serviceSpec);
-        exit(EXIT_SUCCESS);
+    if (serviceSpec != NULL) {
+        serviceSpec->address = "127.0.0.1";
+        serviceSpec->port = 1234;
+        init(serviceSpec);
+        int result = sendTo(NULL,"Hello World",NULL);
+        if (result == 0) {
+            puts("Sended Message Successfully");
+            done();
+            free(serviceSpec);
+        } else {
+            puts("Failed: Sending Message");
+            done();
+            free(serviceSpec);
+            exit(EXIT_SUCCESS);
+        }
     }
+    exit(EXIT_FAILURE);
 }

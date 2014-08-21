@@ -67,7 +67,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
     ServiceSpec *specification = NULL;
     char *out;
     int i = 0;
-    cJSON *json, *jitem, *child;
+    cJSON *json = NULL, *jitem, *child;
     bool status = true;
 
     FILE *fp = fopen(service_desc_file, "rb");
@@ -81,11 +81,12 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
         // read the file
         char *buffer = (char *)malloc(size+1);
-        fread(buffer, 1, size, fp);
-
-        // parse the file
-        json = cJSON_Parse(buffer);
-        if (!json) {
+        if (buffer != NULL) {
+            fread(buffer, 1, size, fp);
+            // parse the file
+            json = cJSON_Parse(buffer);
+        }
+        if (json == NULL || !json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
         }
         else {
@@ -129,12 +130,16 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             #endif
 
             child = cJSON_GetObjectItem(json, "type");
-            if (!isJsonObject(child))
+            if (!isJsonObject(child)) {
+                free(specification->service_name);
                 handleParseError();
+            }
 
             jitem = cJSON_GetObjectItem(child, "name");
-            if (!isJsonString(jitem))
+            if (!isJsonString(jitem)) {
+                free(specification->service_name);
                 handleParseError();
+            }
 
             specification->type.name = strdup(jitem->valuestring);
             #if DEBUG
@@ -142,8 +147,11 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             #endif
 
             jitem = cJSON_GetObjectItem(child, "protocol");
-            if (!isJsonString(jitem))
+            if (!isJsonString(jitem)) {
+                free(specification->service_name);
+                free(specification->type.name);
                 handleParseError();
+            }
 
             specification->type.protocol = strdup(jitem->valuestring);
             #if DEBUG
@@ -161,16 +169,26 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             }
             // must have a port
             jitem = cJSON_GetObjectItem(json, "port");
-            if (!jitem || !isJsonNumber(jitem))
+            if (!jitem || !isJsonNumber(jitem)) {
+                free(specification->service_name);
+                free(specification->type.name);
+                free(specification->type.protocol);
+                free(specification->address);
                 handleParseError();
+            }
             specification->port = jitem->valueint;
             #if DEBUG
                 printf("port %d\n", specification->port);
             #endif
 
             jitem = cJSON_GetObjectItem(json, "properties");
-            if (!isJsonObject(jitem))
+            if (!isJsonObject(jitem)) {
+                free(specification->service_name);
+                free(specification->type.name);
+                free(specification->type.protocol);
+                free(specification->address);
                 handleParseError();
+            }
 
             specification->numProperties = 0;
             child = jitem->child;
@@ -179,19 +197,22 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             }
             if (specification->numProperties) {
                 specification->properties = (Property **)malloc(sizeof(Property *) * specification->numProperties);
-                i = 0;
-                child = jitem->child;
-                while (child && i < MAX_PROPERTIES) {
-                    specification->properties[i] = (Property *)malloc(sizeof(Property));
-
-                    specification->properties[i]->key = strdup(child->string);
-                    specification->properties[i]->value = strdup(child->valuestring);
-                    #if DEBUG
-                        printf("properties key=%s value=%s\n", specification->properties[i]->key,
-                        specification->properties[i]->value);
-                    #endif
-                    i++;
-                    child = child->next;
+                if (specification->properties != NULL) {
+                    i = 0;
+                    child = jitem->child;
+                    while (child && i < MAX_PROPERTIES) {
+                        specification->properties[i] = (Property *)malloc(sizeof(Property));
+                        if (specification->properties[i] != NULL) {
+                            specification->properties[i]->key = strdup(child->string);
+                            specification->properties[i]->value = strdup(child->valuestring);
+                            #if DEBUG
+                                printf("properties key=%s value=%s\n", specification->properties[i]->key,
+                                specification->properties[i]->value);
+                            #endif
+                        }
+                        i++;
+                        child = child->next;
+                    }
                 }
             }
 
@@ -205,31 +226,34 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
                 }
                 if (specification->commParamsCount) {
                     specification->comm_params = (Property **)malloc(sizeof(Property *) * specification->commParamsCount);
-                    i=0;
-                    child = jitem->child;
-                    while (child && i < MAX_PROPERTIES) {
-                        specification->comm_params[i] = (Property *)malloc(sizeof(Property));
-
-                        specification->comm_params[i]->key = strdup(child->string);
-                        #if DEBUG
-                            printf("Value type is : %d\n", child->type);
-                            printf("String value is: %s\n", child->valuestring);
-                            printf("Int value is: %d\n", child->valueint);
-                            printf("Double value is: %f\n", child->valuedouble);
-                        #endif
-                        if(child->type == cJSON_False) {
-                            specification->comm_params[i]->value = "false";
-                        } else if(child->type == cJSON_True) {
-                            specification->comm_params[i]->value = "true";
-                        } else {
-                            specification->comm_params[i]->value = strdup(child->valuestring);
+                    if (specification->comm_params != NULL) {
+                        i=0;
+                        child = jitem->child;
+                        while (child && i < MAX_PROPERTIES) {
+                            specification->comm_params[i] = (Property *)malloc(sizeof(Property));
+                            if (specification->comm_params[i] != NULL) {
+                                specification->comm_params[i]->key = strdup(child->string);
+                                #if DEBUG
+                                    printf("Value type is : %d\n", child->type);
+                                    printf("String value is: %s\n", child->valuestring);
+                                    printf("Int value is: %d\n", child->valueint);
+                                    printf("Double value is: %f\n", child->valuedouble);
+                                #endif
+                                if(child->type == cJSON_False) {
+                                    specification->comm_params[i]->value = "false";
+                                } else if(child->type == cJSON_True) {
+                                    specification->comm_params[i]->value = "true";
+                                } else {
+                                    specification->comm_params[i]->value = strdup(child->valuestring);
+                                }
+                                #if DEBUG
+                                    printf("Comm Param key=%s value=%s\n", specification->comm_params[i]->key,
+                                    specification->comm_params[i]->value);
+                                #endif
+                            }
+                            i++;
+                            child=child->next;
                         }
-                        #if DEBUG
-                            printf("Comm Param key=%s value=%s\n", specification->comm_params[i]->key,
-                            specification->comm_params[i]->value);
-                        #endif
-                        i++;
-                        child=child->next;
                     }
                 }
             }
@@ -273,7 +297,7 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
     ServiceQuery *specification = NULL;
     char *out;
     int i = 0;
-    cJSON *json, *jitem, *child;
+    cJSON *json = NULL, *jitem, *child;
     bool status = true;
 
     FILE *fp = fopen(service_desc_file, "rb");
@@ -287,11 +311,12 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
 
         // read the file
         char *buffer = (char *)malloc(size+1);
-        fread(buffer, 1, size, fp);
-
-        // parse the file
-        json = cJSON_Parse(buffer);
-        if (!json) {
+        if (buffer != NULL) {
+            fread(buffer, 1, size, fp);
+            // parse the file
+            json = cJSON_Parse(buffer);
+        }
+        if (json == NULL || !json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
         }
         else {
@@ -335,12 +360,16 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
             #endif
 
             child = cJSON_GetObjectItem(json, "type");
-            if (!isJsonObject(child))
+            if (!isJsonObject(child)) {
+                free(specification->service_name);
                 handleParseError();
+            }
 
             jitem = cJSON_GetObjectItem(child, "name");
-            if (!isJsonString(jitem))
+            if (!isJsonString(jitem)) {
+                free(specification->service_name);
                 handleParseError();
+            }
 
             specification->type.name = strdup(jitem->valuestring);
             #if DEBUG
@@ -348,8 +377,11 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
             #endif
 
             jitem = cJSON_GetObjectItem(child, "protocol");
-            if (!isJsonString(jitem))
+            if (!isJsonString(jitem)) {
+                free(specification->service_name);
+                free(specification->type.name);
                 handleParseError();
+            }
 
             specification->type.protocol = strdup(jitem->valuestring);
             #if DEBUG
@@ -399,7 +431,7 @@ char *getIPAddressFromHostName(char *hostname,char *PortAsNumber) {
     #if DEBUG
         printf("IP Address = %s\n",ipaddress);
     #endif
-
+    freeaddrinfo(result); // frees the memory that was dynamically allocated
     return ipaddress;
 }
 
@@ -534,7 +566,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
                 void *context) {
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceSpec *desc = (ServiceSpec *) discContext->serviceSpec;
-    DNSServiceRef newclient;
+    DNSServiceRef newclient = NULL;
     DNSServiceErrorType err;
 
 #if DEBUG
@@ -726,59 +758,61 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
     ServiceCache *traverse = serviceCache;
     bool isPresentInCache = false;
     bool isServiceSeenBefore = false;
-    while(traverse != NULL) {
-        if(strcmp(traverse->servicename, serviceName) == 0) {
+    if (serviceName != NULL && address != NULL) {
+        while(traverse != NULL) {
+            if(strcmp(traverse->servicename, serviceName) == 0) {
 
-            if(strcmp(traverse->address, address) == 0) {
-                isPresentInCache = true;
-            }else {
-                // service is already known; but got callback on new address/interface
-                isServiceSeenBefore = true;
+                if(strcmp(traverse->address, address) == 0) {
+                    isPresentInCache = true;
+                }else {
+                    // service is already known; but got callback on new address/interface
+                    isServiceSeenBefore = true;
+                }
             }
-        }
-        traverse = traverse->next;
-    }
-
-    if(isPresentInCache == true) {
-        #if DEBUG
-            puts("Info: service info already present in cache");
-        #endif
-
-        return NULL;
-    }
-
-    ServiceCache *newService = (ServiceCache *)malloc(sizeof(ServiceCache));
-    newService->next = NULL;
-    newService->servicename = serviceName;
-    newService->address = address;
-
-    if(serviceCache == NULL) {
-        serviceCache = newService;
-    } else {
-        traverse = serviceCache;
-        while(traverse->next != NULL) {
             traverse = traverse->next;
         }
 
-        traverse->next = newService;
+        if(isPresentInCache == true) {
+            #if DEBUG
+                puts("Info: service info already present in cache");
+            #endif
+            free(serviceName);
+            free(address);
+            return NULL;
+        }
+
+        ServiceCache *newService = (ServiceCache *)malloc(sizeof(ServiceCache));
+        if (newService != NULL) {
+            newService->next = NULL;
+            newService->servicename = serviceName;
+            newService->address = address;
+
+            if(serviceCache == NULL) {
+                serviceCache = newService;
+            } else {
+                traverse = serviceCache;
+                while(traverse->next != NULL) {
+                    traverse = traverse->next;
+                }
+
+                traverse->next = newService;
+            }
+        }
+        if(isServiceSeenBefore) {
+            #if DEBUG
+                puts("Info: service already seen before");
+            #endif
+            return NULL;
+        }
+
+        if(isServiceLocal(address)) {
+            #if DEBUG
+                puts("Info: This is a local service; so returning local address");
+            #endif
+
+            return LOCAL_ADDRESS;
+        }
     }
-
-    if(isServiceSeenBefore) {
-        #if DEBUG
-            puts("Info: service already seen before");
-        #endif
-
-        return NULL;
-    }
-
-    if(isServiceLocal(address)) {
-        #if DEBUG
-            puts("Info: This is a local service; so returning local address");
-        #endif
-
-        return LOCAL_ADDRESS;
-    }
-
     #if DEBUG
         printf("This is a non-local service; so returning IP address of non-local host:%s\n", address);
     #endif
@@ -845,19 +879,21 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
     int i, j;
 
     properties = (Property **)malloc(sizeof(Property *) * propertiesCountInTxtRecord);
-    for(i = 0; i < propertiesCountInTxtRecord; i++) {
-        properties[i] = (Property *)malloc(sizeof(Property));
+    if (properties != NULL) {
+        for(i = 0; i < propertiesCountInTxtRecord; i++) {
+            properties[i] = (Property *)malloc(sizeof(Property));
+            if (properties[i] != NULL) {
+                TXTRecordGetItemAtIndex(txtLen, txtRecord, i, bufferKeySize -1, bufferKey, &bufferValueSize, &bufferValue);
 
-        TXTRecordGetItemAtIndex(txtLen, txtRecord, i, bufferKeySize -1, bufferKey, &bufferValueSize, &bufferValue);
+                properties[i]->key = strdup(bufferKey);
+                properties[i]->value = strndup(bufferValue, bufferValueSize);
 
-        properties[i]->key = strdup(bufferKey);
-        properties[i]->value = strndup(bufferValue, bufferValueSize);
-
-        #if DEBUG
-            printf("READ Property:%s:%s; from TXT Record\n", properties[i]->key, properties[i]->value);
-        #endif
+                #if DEBUG
+                    printf("READ Property:%s:%s; from TXT Record\n", properties[i]->key, properties[i]->value);
+                #endif
+            }
+        }
     }
-
     if(srvQry->numProperties > 0 && srvQry->properties != NULL) {
         // look for atleast one property match
         for(i = 0; i < srvQry->numProperties; i++) {
@@ -874,6 +910,11 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
         isPropertiesMatched = true;
     }
 
+    // free the memory
+    for(i = 0; i < propertiesCountInTxtRecord; i++) {
+        free(properties[i]);
+    }
+    free(properties);
     if(isNameMatched && isPortMatched && isPropertiesMatched) {
     #if DEBUG
         printf("Returning TRUE --- Match found for service:%s\n", fullservicename);
@@ -1171,43 +1212,47 @@ bool setMyAddresses(void) {
     }
 
     if_ni = if_nameindex();
-
-    // verify how many addresses do we have for the network interfaces
-    for (i = if_ni, myaddressesCount; ! (i->if_index == 0 && i->if_name == NULL); i++) {
-        struct ifreq req;
-        strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
-        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0) {
-            if (errno == EADDRNOTAVAIL) {
-                continue;
+    if (if_ni != NULL) {
+        // verify how many addresses do we have for the network interfaces
+        for (i = if_ni, myaddressesCount; ! (i->if_index == 0 && i->if_name == NULL); i++) {
+            struct ifreq req;
+            strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
+            if (ioctl(iSocket, SIOCGIFADDR, &req) < 0) {
+                if (errno == EADDRNOTAVAIL) {
+                    continue;
+                }
+                perror("ioctl");
+                close(iSocket);
+                if_freenameindex(if_ni);
+                return false;
             }
-            perror("ioctl");
-            close(iSocket);
-            return false;
-        }
-        myaddressesCount++;
-    }
-
-    myaddresses = (char **)malloc(sizeof(char *) * myaddressesCount);
-
-    for (i = if_ni, j = 0; ! (i->if_index == 0 && i->if_name == NULL); i++) {
-        struct ifreq req;
-        strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
-        if (ioctl(iSocket, SIOCGIFADDR, &req) < 0) {
-            if (errno == EADDRNOTAVAIL) {
-                myaddresses[j] = NULL;
-                continue;
-            }
-            perror("ioctl");
-            close(iSocket);
-            return false;
+            myaddressesCount++;
         }
 
-        myaddresses[j++] = strdup(inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr));
-        #if DEBUG
-            printf("Got IP Address:%s\n", myaddresses[j-1]);
-        #endif
+        myaddresses = (char **)malloc(sizeof(char *) * myaddressesCount);
+        if (myaddresses != NULL) {
+            for (i = if_ni, j = 0; ! (i->if_index == 0 && i->if_name == NULL); i++) {
+                struct ifreq req;
+                strncpy(req.ifr_name, i->if_name, IFNAMSIZ);
+                if (ioctl(iSocket, SIOCGIFADDR, &req) < 0) {
+                    if (errno == EADDRNOTAVAIL) {
+                        myaddresses[j] = NULL;
+                        continue;
+                    }
+                    perror("ioctl");
+                    close(iSocket);
+                    if_freenameindex(if_ni);
+                    return false;
+                }
+
+                myaddresses[j++] = strdup(inet_ntoa(((struct sockaddr_in*)&req.ifr_addr)->sin_addr));
+                #if DEBUG
+                    printf("Got IP Address:%s\n", myaddresses[j-1]);
+                #endif
+            }
+        }
+        if_freenameindex(if_ni);
     }
-    if_freenameindex(if_ni);
     close(iSocket);
 
     return true;

@@ -47,7 +47,7 @@ void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
         unsubscribe = commInterfacesLookup(commHandle, "unsubscribe");
 
         if (subscribe != NULL && receive != NULL && unsubscribe != NULL) {
-            while (1) {
+            while (1) {  // Infinite Event Loop
                 i++;
                 if (i < 10) {
                     (*subscribe)("vehicle");

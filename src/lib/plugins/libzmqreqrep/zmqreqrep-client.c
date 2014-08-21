@@ -68,12 +68,14 @@ int subscribe(char *topic) {
     #if DEBUG
         printf("In subscribe\n");
     #endif
+    return -1;
 }
 
 int unsubscribe(char *topic) {
     #if DEBUG
         printf("In unsubscribe\n");
     #endif
+    return -1;
 }
 
 /** Receive the message. The parameter in this function is used as a callback mechanism to pass the
@@ -99,6 +101,7 @@ int receive(void (*requestClientHandler)(char *message, Context context)) {
     context.value = "message";
     requestClientHandler(contents,context);
     free(contents);
+    return rc;
 }
 
 /** Cleanup function. This function close the requester socket and destroy the context object.

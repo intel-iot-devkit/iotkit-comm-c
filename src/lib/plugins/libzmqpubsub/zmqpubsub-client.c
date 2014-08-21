@@ -55,6 +55,7 @@ int send(char *message,Context context) {
     #if DEBUG
         printf("\ninside sending message: %s\n",message);
     #endif
+    return -1;
 }
 
 /** Subscribing to a topic. The client can subscribe to a topic in which he is interested to receive the messages.
@@ -95,6 +96,7 @@ int receive(void (*subscribeClientHandler)(char *message, Context context)) {
         printf ("\nfree the contents\n");
     #endif
     free (contents);
+    return 0;
 }
 
 /** Unsubscribing to a topic. The client can unsubscribe, to stop receiving the messages on that topic.
@@ -131,6 +133,7 @@ int done() {
     #if DEBUG
         printf("\nclosed\n");
     #endif
+    return 0;
 }
 
 /** @} */ // end of zmqpubsubclient

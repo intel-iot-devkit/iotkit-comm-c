@@ -45,7 +45,7 @@ void reqDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
         send = commInterfacesLookup(commHandle, "send");
         receive = commInterfacesLookup(commHandle, "receive");
         if (send != NULL && receive != NULL) {
-            while (1) {
+            while (1) { // Infinite Event Loop
                 (*send)("toys",context);
                 (*receive)(reqMessageCallback);
                 sleep(2);

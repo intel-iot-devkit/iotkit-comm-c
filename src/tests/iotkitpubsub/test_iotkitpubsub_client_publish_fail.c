@@ -22,24 +22,26 @@
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 1884;
-    int result = init(serviceQuery);
-    if (result == MQTTASYNC_SUCCESS) {
-        printf("Successfully Connected to an MQTT Broker\n");
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 1884;
+        int result = init(serviceQuery);
+        if (result == MQTTASYNC_SUCCESS) {
+            printf("Successfully Connected to an MQTT Broker\n");
 
-        Context context;
-        context.name = "topic";
-        context.value = NULL;
-        result = send("This is a test message", context);
-        if(result != MQTTASYNC_SUCCESS){
-            printf("Test Passed: Could not publish message as expected\n");
-            exit(EXIT_SUCCESS);
+            Context context;
+            context.name = "topic";
+            context.value = NULL;
+            result = send("This is a test message", context);
+            if(result != MQTTASYNC_SUCCESS){
+                printf("Test Passed: Could not publish message as expected\n");
+                exit(EXIT_SUCCESS);
+            }
+        } else {
+            printf("Test Failed: Could not connect to MQTT Broker\n");
         }
-    } else {
-        printf("Test Failed: Could not connect to MQTT Broker\n");
+        done();
+        free(serviceQuery);
     }
-    done();
-    free(serviceQuery);
     exit(EXIT_FAILURE);
 }

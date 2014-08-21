@@ -24,16 +24,18 @@ This file tests whether ZMQ Responder socket is able to successfully connect.
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
-    serviceSpec->address = "127.0.0.1";
-    serviceSpec->port = 1080;
-    int result = init(serviceSpec);
-    done();
-    free(serviceSpec);
-    if (result == 0) {
-        puts("Publisher Socket Successfully Binded");
-        exit(EXIT_SUCCESS);
-    } else {
-        puts("Failed: Publisher Socket Binding");
-        exit(EXIT_FAILURE);
+    if (serviceSpec != NULL) {
+        serviceSpec->address = "127.0.0.1";
+        serviceSpec->port = 1080;
+        int result = init(serviceSpec);
+        done();
+        free(serviceSpec);
+        if (result == 0) {
+            puts("Publisher Socket Successfully Binded");
+            exit(EXIT_SUCCESS);
+        } else {
+            puts("Failed: Publisher Socket Binding");
+        }
     }
+    exit(EXIT_FAILURE);
 }

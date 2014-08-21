@@ -22,16 +22,18 @@
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 1883;
-    int result = init(serviceQuery);
-    if (result == MQTTASYNC_SUCCESS) {
-        puts("Test Passed: Successfully Connected to an MQTT Broker");
-        exit(EXIT_SUCCESS);
-    } else {
-        puts("Test Failed: Could not connect to MQTT Broker");
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 1883;
+        int result = init(serviceQuery);
+        if (result == MQTTASYNC_SUCCESS) {
+            puts("Test Passed: Successfully Connected to an MQTT Broker");
+            exit(EXIT_SUCCESS);
+        } else {
+            puts("Test Failed: Could not connect to MQTT Broker");
+        }
+        done();
+        free(serviceQuery);
     }
-    done();
-    free(serviceQuery);
     exit(EXIT_FAILURE);
 }

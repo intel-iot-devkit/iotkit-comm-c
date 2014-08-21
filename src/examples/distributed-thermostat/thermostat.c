@@ -79,7 +79,7 @@ void subCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHa
         subscribe = commInterfacesLookup(commHandle, "subscribe");
         receive = commInterfacesLookup(commHandle, "receive");
         if (subscribe != NULL && receive != NULL) {
-            while (1) {
+            while (1) {  // Infinite Event Loop
                 (*subscribe)("mytemp");
                 (*receive)(clientMessageCallback);
                 sleep(2);

@@ -23,17 +23,19 @@
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
-    serviceSpec->address = "127.0.0.1";
-    serviceSpec->port = 123423;
-    init(serviceSpec);
-    int result = publish("Hello World",NULL);
-    done();
-    free(serviceSpec);
-    if (result == 0) {
-        puts("Published Message Successfully");
-        exit(EXIT_FAILURE);
-    } else {
-        puts("Failed: Publishing Message");
-        exit(EXIT_SUCCESS);
+    if (serviceSpec != NULL) {
+        serviceSpec->address = "127.0.0.1";
+        serviceSpec->port = 123423;
+        init(serviceSpec);
+        int result = publish("Hello World",NULL);
+        done();
+        free(serviceSpec);
+        if (result == 0) {
+            puts("Published Message Successfully");
+        } else {
+            puts("Failed: Publishing Message");
+            exit(EXIT_SUCCESS);
+        }
     }
+    exit(EXIT_FAILURE);
 }

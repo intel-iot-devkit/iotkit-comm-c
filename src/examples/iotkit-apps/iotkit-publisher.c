@@ -52,12 +52,13 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         send = commInterfacesLookup(commHandle, "send");
         if(send == NULL) {
             printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
+            return;
         }
 
         context.name = "topic";
         context.value = "data";
 
-        while(1) {
+        while(1) {  // Infinite Event Loop
             sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 

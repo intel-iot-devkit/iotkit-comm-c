@@ -32,13 +32,16 @@ void handler(char *message,Context context) {
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "127.0.0.1";
-    serviceQuery->port = 5560;
-    int result = init(serviceQuery);
-    if (result == -1)
-        puts("Requester init failed");
-    puts("waiting for message");
-    receive(handler);
-    done();
-    free(serviceQuery);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "127.0.0.1";
+        serviceQuery->port = 5560;
+        int result = init(serviceQuery);
+        if (result == -1)
+            puts("Requester init failed");
+        puts("waiting for message");
+        receive(handler);
+        done();
+        free(serviceQuery);
+    }
+    exit(EXIT_FAILURE);
 }

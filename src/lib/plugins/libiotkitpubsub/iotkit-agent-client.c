@@ -48,9 +48,10 @@ int messageArrived(void *ctx, char *topicName, int topicLen, MQTTAsync_message *
     #endif
 
     payloadmsg = (char *)malloc(message->payloadlen+1);
-    strncpy(payloadmsg, message->payload, message->payloadlen);
-    payloadmsg[message->payloadlen] = '\0';
-
+    if (payloadmsg != NULL) {
+        strncpy(payloadmsg, message->payload, message->payloadlen);
+        payloadmsg[message->payloadlen] = '\0';
+    }
 
     context.name = "topic";
     context.value = strdup(topicName);
@@ -62,6 +63,14 @@ int messageArrived(void *ctx, char *topicName, int topicLen, MQTTAsync_message *
 
     MQTTAsync_freeMessage(&message);
     MQTTAsync_free(topicName);
+    if (payloadmsg != NULL) {
+        free(payloadmsg);
+        payloadmsg = NULL;
+    }
+    if (context.value != NULL) {
+        free(context.value);
+        context.value = NULL;
+    }
     return 1;
 }
 

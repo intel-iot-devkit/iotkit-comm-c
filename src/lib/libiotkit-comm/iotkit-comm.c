@@ -69,7 +69,7 @@ void concatUserDefinedConfigurations() {
     strcat(config_file, USER_CONFIG_FILENAME);
 
     char *out;
-    cJSON *json, *jitem;
+    cJSON *json = NULL, *jitem;
     FILE *fp = fopen(config_file, "rb");
 
     if (fp == NULL) {
@@ -81,11 +81,12 @@ void concatUserDefinedConfigurations() {
 
         // read the file
         char *buffer = (char *)malloc(size+1);
-        fread(buffer, 1, size, fp);
-
-        // parse the file
-        json = cJSON_Parse(buffer);
-        if (!json) {
+        if (buffer != NULL) {
+            fread(buffer, 1, size, fp);
+            // parse the file
+            json = cJSON_Parse(buffer);
+        }
+        if (json == NULL || !json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
         } else {
             #if DEBUG
@@ -105,10 +106,12 @@ void concatUserDefinedConfigurations() {
 
             int pathSize = strlen(g_configData.pluginInterfaceDir) + strlen(jitem->valuestring) + 2;
             char *pluginInterfaceDirPaths = (char *)malloc(sizeof(char) * pathSize);
-            strcpy(pluginInterfaceDirPaths, g_configData.pluginInterfaceDir);
-            strcat(pluginInterfaceDirPaths, ":");
-            strcat(pluginInterfaceDirPaths, jitem->valuestring);
-            g_configData.pluginInterfaceDir = pluginInterfaceDirPaths;
+            if (pluginInterfaceDirPaths != NULL) {
+                strcpy(pluginInterfaceDirPaths, g_configData.pluginInterfaceDir);
+                strcat(pluginInterfaceDirPaths, ":");
+                strcat(pluginInterfaceDirPaths, jitem->valuestring);
+                g_configData.pluginInterfaceDir = pluginInterfaceDirPaths;
+            }
             #if DEBUG
                 printf("pluginInterfaceDir = %s\n", g_configData.pluginInterfaceDir);
             #endif
@@ -120,10 +123,12 @@ void concatUserDefinedConfigurations() {
 
             pathSize = strlen(g_configData.pluginDir) + strlen(jitem->valuestring) + 2;
             char *pluginDirPaths = (char *)malloc(sizeof(char) * pathSize);
-            strcpy(pluginDirPaths, g_configData.pluginDir);
-            strcat(pluginDirPaths, ":");
-            strcat(pluginDirPaths, jitem->valuestring);
-            g_configData.pluginDir = pluginDirPaths;
+            if (pluginDirPaths != NULL) {
+                strcpy(pluginDirPaths, g_configData.pluginDir);
+                strcat(pluginDirPaths, ":");
+                strcat(pluginDirPaths, jitem->valuestring);
+                g_configData.pluginDir = pluginDirPaths;
+            }
             #if DEBUG
                 printf("pluginDir = %s\n", g_configData.pluginDir);
             #endif
@@ -133,6 +138,7 @@ endParseConfig:
         }
 
         free(buffer);
+        fclose(fp); // close the file pointer
     }
 }
 
@@ -141,7 +147,7 @@ endParseConfig:
  */
 bool parseConfigFile(char *config_file) {
     char *out;
-    cJSON *json, *jitem, *child, *subjson;
+    cJSON *json = NULL, *jitem, *child, *subjson;
     bool status = true;
     FILE *fp = fopen(config_file, "rb");
 
@@ -155,11 +161,12 @@ bool parseConfigFile(char *config_file) {
 
         // read the file
         char *buffer = (char *)malloc(size+1);
-        fread(buffer, 1, size, fp);
-
-        // parse the file
-        json = cJSON_Parse(buffer);
-        if (!json) {
+        if (buffer != NULL) {
+            fread(buffer, 1, size, fp);
+            // parse the file
+            json = cJSON_Parse(buffer);
+        }
+        if (json == NULL || !json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
             status = false;
         } else {
@@ -230,6 +237,7 @@ endParseConfig:
         }
 
         free(buffer);
+        fclose(fp); // close the file pointer
     }
 
     concatUserDefinedConfigurations();
@@ -255,7 +263,7 @@ endParseConfig:
 bool parsePluginInterfaces(char *inf_file) {
     char *out;
     int numentries = 0, i = 0;
-    cJSON *json, *jitem, *child;
+    cJSON *json = NULL, *jitem, *child;
     bool status = true;
     FILE *fp = fopen(inf_file, "rb");
 
@@ -269,11 +277,12 @@ bool parsePluginInterfaces(char *inf_file) {
 
         // read the file
         char *buffer = (char *)malloc(size+1);
-        fread(buffer, 1, size, fp);
-
-        // parse the file
-        json = cJSON_Parse(buffer);
-        if (!json) {
+        if (buffer != NULL) {
+            fread(buffer, 1, size, fp);
+            // parse the file
+            json = cJSON_Parse(buffer);
+        }
+        if (json == NULL || !json) {
             fprintf(stderr,"Error before: [%s]\n",cJSON_GetErrorPtr());
             status = false;
         } else {
@@ -327,6 +336,7 @@ endParseInterfaces:
         }
 
         free(buffer);
+        fclose(fp); // close the file pointer
     }
 
     return status;
@@ -364,18 +374,24 @@ bool loadCommInterfaces(CommHandle *commHandle) {
 
     commHandle->interfacesCount = g_funcEntries;
     commHandle->interfaces = (Interfaces **)malloc(sizeof(Interfaces *) * g_funcEntries);
-
-    dlerror();  /* Clear any existing error */
-    for(i = 0; i < g_funcEntries; i ++) {
-        commHandle->interfaces[i] = (Interfaces *)malloc(sizeof(Interfaces));
-
-        commHandle->interfaces[i]->iname = g_funcSignatures[i]; // copy the function name
-        commHandle->interfaces[i]->iptr = dlsym(handle, g_funcSignatures[i]); // copy the function address - void pointer
-        if (!checkDLError()) {
-            return false;
+    if (commHandle->interfaces != NULL) {
+        dlerror();  /* Clear any existing error */
+        for(i = 0; i < g_funcEntries; i ++) {
+            commHandle->interfaces[i] = (Interfaces *)malloc(sizeof(Interfaces));
+            if (commHandle->interfaces[i] != NULL) {
+                commHandle->interfaces[i]->iname = g_funcSignatures[i]; // copy the function name
+                commHandle->interfaces[i]->iptr = dlsym(handle, g_funcSignatures[i]); // copy the function address - void pointer
+                if (!checkDLError()) {
+                    while(i >= 0) { // freeing the dynamic memory
+                        free(commHandle->interfaces[i]);
+                        i--;
+                    }
+                    free(commHandle->interfaces);
+                    return false;
+                }
+            }
         }
     }
-
     dlerror();  // Clear any existing error
     // this is a special function to initialize the plugin;
     // this function call takes Service specification as a parameter
@@ -404,13 +420,18 @@ CommHandle *loadCommPlugin(char *plugin_path) {
 
         handle = dlopen(plugin_path, RTLD_LAZY);
         if (!handle) {
-            fprintf(stderr, "DL open error %s\n", dlerror());
+            char *errmsg = dlerror();
+            if (errmsg != NULL) {
+                fprintf(stderr, "DL open error %s\n", errmsg);
+            }
             commHandle->handle = NULL;
+            free(commHandle); // free the dynamic memory
             return NULL;
         } else {
             dlerror();  /* Clear any existing error */
             commHandle->interface = (char **) dlsym(handle, "interface");
             if (!checkDLError()) {
+                free(commHandle); // free the dynamic memory
                 return NULL;
             }
 
@@ -439,10 +460,14 @@ CommHandle *createClient(ServiceQuery *servQuery) {
     // load the plugin
     // Considers the last path and loads the plugin interface
     char *substrStart = g_configData.pluginDir;
-    char *substrEnd, *folderPath;
+    char *substrEnd, *folderPath = NULL;
     do {
         if (*substrStart == ':') {
             substrStart++;
+        }
+        if (folderPath != NULL) { // Incase of iteration, freeing the previously allocated dynamic memory
+            free(folderPath);
+            folderPath = NULL;
         }
         #if DEBUG
             printf("\nsubstrStart path %s\n",substrStart);
@@ -458,7 +483,7 @@ CommHandle *createClient(ServiceQuery *servQuery) {
         #endif
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin file
-        if (*folderPath != '/') { // if path is not absolute path; then consider plugins directory
+        if (folderPath != NULL && *folderPath != '/') { // if path is not absolute path; then consider plugins directory
             strcpy(cwd_temp, LIB_PLUGINS_DIRECTORY);
         }
 
@@ -477,6 +502,7 @@ CommHandle *createClient(ServiceQuery *servQuery) {
     if (!commHandle) {
         fprintf(stderr, "Plugin library \"lib%s-client.so\" not found\n", servQuery->type.name);
         cleanUp(commHandle);
+        free(folderPath);
         return NULL;
     }
 
@@ -487,7 +513,10 @@ CommHandle *createClient(ServiceQuery *servQuery) {
         if (*substrStart == ':') {
             substrStart++;
         }
-
+        if (folderPath != NULL) { // Incase of iteration, freeing the previously allocated dynamic memory
+            free(folderPath);
+            folderPath = NULL;
+        }
         substrEnd = strstr(substrStart, ":");
         if (substrEnd == NULL) {
             folderPath = strdup(substrStart);
@@ -497,7 +526,7 @@ CommHandle *createClient(ServiceQuery *servQuery) {
 
         strcpy(cwd_temp, ""); // set empty string
         // Parse plugin interface file
-        if (*folderPath != '/') { // if path is not absolute path; then consider plugins directory
+        if (folderPath != NULL && *folderPath != '/') { // if path is not absolute path; then consider plugins directory
             strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
         }
 
@@ -516,15 +545,16 @@ CommHandle *createClient(ServiceQuery *servQuery) {
         }
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
-
+    free(folderPath); // free the dynamic memory
     if (loadCommInterfaces(commHandle) == false) {
         cleanUp(commHandle);
+        return NULL;
     }
 
     if (commHandle->init) {
         commHandle->init(servQuery);
     }
-
+    
     return commHandle;
 }
 
@@ -561,12 +591,15 @@ CommHandle *createService(ServiceSpec *specification) {
     // load the plugin
     // Considers the last path and loads the plugin interface
     char *substrStart = g_configData.pluginDir;
-    char *substrEnd, *folderPath;
+    char *substrEnd, *folderPath = NULL;
     do {
         if (*substrStart == ':') {
             substrStart++;
         }
-
+        if (folderPath != NULL) { // Incase of iteration, freeing the previously allocated dynamic memory
+            free(folderPath);
+            folderPath = NULL;
+        }
         substrEnd = strstr(substrStart, ":");
         if (substrEnd == NULL) {
             folderPath = strdup(substrStart);
@@ -577,7 +610,7 @@ CommHandle *createService(ServiceSpec *specification) {
         strcpy(cwd_temp, ""); // set empty string
 
         // Parse plugin file
-        if (*folderPath != '/') { // if path is not absolute path; then consider plugins directory
+        if (folderPath != NULL && *folderPath != '/') { // if path is not absolute path; then consider plugins directory
             strcpy(cwd_temp, LIB_PLUGINS_DIRECTORY);
         }
 
@@ -594,6 +627,7 @@ CommHandle *createService(ServiceSpec *specification) {
     if (!commHandle) {
         fprintf(stderr, "Plugin library \"lib%s-service.so\" not found\n", specification->type.name);
         cleanUp(commHandle);
+        free(folderPath);
         return NULL;
     }
 
@@ -603,7 +637,10 @@ CommHandle *createService(ServiceSpec *specification) {
         if (*substrStart == ':') {
             substrStart++;
         }
-
+        if (folderPath != NULL) { // Incase of iteration, freeing the previously allocated dynamic memory
+            free(folderPath);
+            folderPath = NULL;
+        }
         substrEnd = strstr(substrStart, ":");
         if (substrEnd == NULL) {
             folderPath = strdup(substrStart);
@@ -614,7 +651,7 @@ CommHandle *createService(ServiceSpec *specification) {
         strcpy(cwd_temp, ""); // set empty string
 
         // Parse plugin interface file
-        if (*folderPath != '/') { // if path is not absolute path; then consider plugins directory
+        if (folderPath != NULL && *folderPath != '/') { // if path is not absolute path; then consider plugins directory
             strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
         }
         strcat(cwd_temp, folderPath);
@@ -630,8 +667,10 @@ CommHandle *createService(ServiceSpec *specification) {
         }
     }while((substrStart = strstr(substrStart, ":")) != NULL);
 
+    free(folderPath); // free the dynamic memory
     if (loadCommInterfaces(commHandle) == false) {
         cleanUp(commHandle);
+        return NULL;
     }
 
     if (commHandle->init) {

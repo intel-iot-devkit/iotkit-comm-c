@@ -23,16 +23,18 @@
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));
-    serviceSpec->address = "invalidaddress";
-    serviceSpec->port = 100;
-    int result = init(serviceSpec);
-    done();
-    free(serviceSpec);
-    if (result == 0) {
-        puts("Publisher Socket Successfully Binded");
-        exit(EXIT_FAILURE);
-    } else {
-        puts("Failed: Publisher Socket Binding");
-        exit(EXIT_SUCCESS);
+    if (serviceSpec != NULL) {
+        serviceSpec->address = "invalidaddress";
+        serviceSpec->port = 100;
+        int result = init(serviceSpec);
+        done();
+        free(serviceSpec);
+        if (result == 0) {
+            puts("Publisher Socket Successfully Binded");
+        } else {
+            puts("Failed: Publisher Socket Binding");
+            exit(EXIT_SUCCESS);
+        }
     }
+    exit(EXIT_FAILURE);
 }

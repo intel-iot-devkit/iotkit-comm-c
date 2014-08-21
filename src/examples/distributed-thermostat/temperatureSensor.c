@@ -37,7 +37,7 @@ void pubServiceCallback(ServiceSpec *servSpec, int32_t error_code, CommHandle *s
         publish = commInterfacesLookup(serviceHandle, "publish");
         if (publish != NULL) {
             Context context;
-            while(1) {
+            while(1) {  // Infinite Event Loop
                 char addr[128];
                 double random = floor(rand() % 90 + 60);
                 sprintf(addr, "mytemp: %f",random);

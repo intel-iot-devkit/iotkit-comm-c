@@ -59,6 +59,7 @@ int sendTo(void *client, char *message, Context context) {
     #if DEBUG
         printf("In sendTo\n");
     #endif
+    return -1;
 }
 
 /**  Publishing a message. This function will publish message to the clients.
@@ -84,12 +85,14 @@ int manageClient(void *client,Context context) {
     #if DEBUG
         printf("In manageClient\n");
     #endif
+    return -1;
 }
 
 int receive(void (*publishServiceHandler) (void *client,char *message,Context context)) {
     #if DEBUG
         printf("In receive\n");
     #endif
+    return -1;
 }
 
 /** Cleanup function. This function close the publisher socket and destroy the context object.
@@ -113,6 +116,7 @@ int done() {
     #if DEBUG
         printf("\nclosed\n");
     #endif
+    return 0;
 }
 
 /** @} */ // end of zmqpubsubservice

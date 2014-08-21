@@ -72,12 +72,14 @@ int publish(char *message,Context context) {
     #if DEBUG
         printf("In publish\n");
     #endif
+    return -1;
 }
 
 int manageClient(void *client,Context context) {
     #if DEBUG
         printf ("In manageClient\n");
     #endif
+    return -1;
 }
 
 /** Receive the message. The parameter in this function is used as a callback mechanism to pass the
@@ -85,11 +87,11 @@ received message.
 * @param responseServiceHandler a callback handler which takes a client,message,context object as params
 * @return The result code
 */
-int receive(void (*responseServiceHandler)(void *client,char *message,Context context)) {
+int receive(void (*responseServiceHandler)(void *clnt,char *mesg,Context ctx)) {
     #if DEBUG
         printf("In receive\n");
     #endif
-    void *client;
+    void *client = NULL;
     int rc = 0;
     //  Read message contents
     char *message = s_recv (zmqContainer.responder);
@@ -104,6 +106,7 @@ int receive(void (*responseServiceHandler)(void *client,char *message,Context co
     context.value = "message";
     responseServiceHandler(client,message,context);
     free(message);
+    return rc;
 }
 
 /** Cleanup function. This function close the responder socket and destroy the context object.

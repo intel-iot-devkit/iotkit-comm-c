@@ -39,7 +39,7 @@ void repMessageCallback(void *client, char *message, Context context) {
 */
 void repAdvertiseCallback(ServiceSpec *servSpec, int32_t error_code,CommHandle *serviceHandle) {
     if (serviceHandle != NULL) {
-        void *client;
+        void *client = NULL;
         Context context;
         void (**sendTo)(void *, char *, Context context);
         int (**receive)(void (*)(void *, char *, Context context));
@@ -47,7 +47,7 @@ void repAdvertiseCallback(ServiceSpec *servSpec, int32_t error_code,CommHandle *
         sendTo = commInterfacesLookup(serviceHandle, "sendTo");
         receive = commInterfacesLookup(serviceHandle, "receive");
         if (sendTo != NULL && receive != NULL) {
-            while(1) {
+            while(1) {  // Infinite Event Loop
                 (*sendTo)(client,"train bike car",context);
                 (*receive)(repMessageCallback);
                 sleep(2);

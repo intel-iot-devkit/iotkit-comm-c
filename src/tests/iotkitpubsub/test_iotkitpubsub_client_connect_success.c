@@ -1,4 +1,4 @@
-/*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /*
  * Tests mqtt connection
  * Copyright (c) 2014, Intel Corporation.
  *
@@ -22,16 +22,18 @@
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 1884;
-    int result = init(serviceQuery);
-    if (result == MQTTASYNC_SUCCESS) {
-        printf("Test Passed: Successfully Connected to an MQTT Broker\n");
-        exit(EXIT_SUCCESS);
-    } else {
-        printf("Test Failed: Could not connect to MQTT Broker\n");
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 1884;
+        int result = init(serviceQuery);
+        if (result == MQTTASYNC_SUCCESS) {
+            printf("Test Passed: Successfully Connected to an MQTT Broker\n");
+            exit(EXIT_SUCCESS);
+        } else {
+            printf("Test Failed: Could not connect to MQTT Broker\n");
+        }
+        done();
+        free(serviceQuery);
     }
-    done();
-    free(serviceQuery);
     exit(EXIT_FAILURE);
 }

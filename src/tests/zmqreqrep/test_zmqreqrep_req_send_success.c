@@ -29,33 +29,35 @@ void handler(char *message,Context context) {
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "127.0.0.1";
-    serviceQuery->port = 5560;
-    int result = init(serviceQuery);
-    if (result == -1)
-        puts("Requester init failed");
-    void *ctx = zmq_ctx_new();
-    assert (ctx);
-    void *pub = zmq_socket(ctx, ZMQ_REP);
-    assert (pub);
-    int rc = zmq_bind(pub, "tcp://127.0.0.1:5560");
-    assert (rc == 0);
-    result = send("apple",NULL);
-    if (result == -1) {
-        puts("send failed");
-        rc = zmq_close(pub);
-        assert(rc == 0);
-        rc = zmq_ctx_term(ctx);
-        assert(rc == 0);
-        free(serviceQuery);
-        exit(EXIT_FAILURE);
-    } else {
-        puts("Requester Sent Message Successfully");
-        rc = zmq_close(pub);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "127.0.0.1";
+        serviceQuery->port = 5560;
+        int result = init(serviceQuery);
+        if (result == -1)
+            puts("Requester init failed");
+        void *ctx = zmq_ctx_new();
+        assert (ctx);
+        void *pub = zmq_socket(ctx, ZMQ_REP);
+        assert (pub);
+        int rc = zmq_bind(pub, "tcp://127.0.0.1:5560");
         assert (rc == 0);
-        rc = zmq_ctx_term(ctx);
-        assert(rc == 0);
-        free(serviceQuery);
-        exit(EXIT_SUCCESS);
+        result = send("apple",NULL);
+        if (result == -1) {
+            puts("send failed");
+            rc = zmq_close(pub);
+            assert(rc == 0);
+            rc = zmq_ctx_term(ctx);
+            assert(rc == 0);
+            free(serviceQuery);
+        } else {
+            puts("Requester Sent Message Successfully");
+            rc = zmq_close(pub);
+            assert (rc == 0);
+            rc = zmq_ctx_term(ctx);
+            assert(rc == 0);
+            free(serviceQuery);
+            exit(EXIT_SUCCESS);
+        }
     }
+    exit(EXIT_FAILURE);
 }

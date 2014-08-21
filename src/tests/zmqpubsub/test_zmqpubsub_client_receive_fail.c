@@ -29,22 +29,24 @@ void handler() {
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 5563;
-    int result = init(serviceQuery);
-    if (result == -1)
-        puts("client init failed");
-    result = subscribe("flower");
-    if (result == -1)
-        puts("client subscribe failed");
-    /* Establish a handler for SIGALRM signals. */
-    signal(SIGALRM, handler);
-    /* Set an alarm to go off*/
-    alarm(3);
-    result = receive(handler);
-    if (result == -1)
-        puts("receive failed");
-    done();
-    free(serviceQuery);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 5563;
+        int result = init(serviceQuery);
+        if (result == -1)
+            puts("client init failed");
+        result = subscribe("flower");
+        if (result == -1)
+            puts("client subscribe failed");
+        /* Establish a handler for SIGALRM signals. */
+        signal(SIGALRM, handler);
+        /* Set an alarm to go off*/
+        alarm(3);
+        result = receive(handler);
+        if (result == -1)
+            puts("receive failed");
+        done();
+        free(serviceQuery);
+    }
     exit(EXIT_FAILURE);
 }

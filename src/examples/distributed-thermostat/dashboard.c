@@ -50,7 +50,7 @@ void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandl
         subscribe = commInterfacesLookup(commHandle, "subscribe");
         receive = commInterfacesLookup(commHandle, "receive");
         if (subscribe != NULL && receive != NULL) {
-            while (1) {
+            while (1) { // Infinite Event Loop
                 (*subscribe)("mean_temp");
                 (*receive)(clientMessageCallback);
                  sleep(2);

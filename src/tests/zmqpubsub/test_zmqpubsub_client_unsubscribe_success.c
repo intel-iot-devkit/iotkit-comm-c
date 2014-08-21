@@ -23,17 +23,19 @@
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "localhost";
-    serviceQuery->port = 1234;
-    init(serviceQuery);
-    int result = unsubscribe("flower");
-    done();
-    free(serviceQuery);
-    if (result == 0) {
-        puts("UnSubscribed Successfully");
-        exit(EXIT_SUCCESS);
-    } else {
-        puts("Failed: UnSubscription");
-        exit(EXIT_FAILURE);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "localhost";
+        serviceQuery->port = 1234;
+        init(serviceQuery);
+        int result = unsubscribe("flower");
+        done();
+        free(serviceQuery);
+        if (result == 0) {
+            puts("UnSubscribed Successfully");
+            exit(EXIT_SUCCESS);
+        } else {
+            puts("Failed: UnSubscription");
+        }
     }
+    exit(EXIT_FAILURE);
 }

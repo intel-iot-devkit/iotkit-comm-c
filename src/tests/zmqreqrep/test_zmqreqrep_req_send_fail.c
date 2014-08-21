@@ -24,16 +24,18 @@ This file tests whether ZMQ Requester socket fails while sending message.
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
-    serviceQuery->address = "127.0.0.1";
-    serviceQuery->port = 123423;
-    init(serviceQuery);
-    int result = send("Hello World",NULL);
-    free(serviceQuery);
-    if (result == 0) {
-        puts("Requester Sent Message Successfully");
-        exit(EXIT_FAILURE);
-    } else {
-        puts("Failed: Requester Sending Message");
-        exit(EXIT_SUCCESS);
+    if (serviceQuery != NULL) {
+        serviceQuery->address = "127.0.0.1";
+        serviceQuery->port = 123423;
+        init(serviceQuery);
+        int result = send("Hello World",NULL);
+        free(serviceQuery);
+        if (result == 0) {
+            puts("Requester Sent Message Successfully");
+        } else {
+            puts("Failed: Requester Sending Message");
+            exit(EXIT_SUCCESS);
+        }
     }
+    exit(EXIT_FAILURE);
 }
