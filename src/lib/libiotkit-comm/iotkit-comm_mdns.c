@@ -531,8 +531,10 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
         return;
 
     // there is a user filterCB, so call it. If it returns false then donothing
-    if (discContext->userFilterCB && discContext->userFilterCB(query) == false)
+    if (discContext->userFilterCB && discContext->userFilterCB(query) == false) {
+        free(filteredServiceAddress);
         return;
+    }
 
     /*// check whether user has configured any host address
     if (query->address == NULL)
@@ -798,10 +800,14 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
                 traverse->next = newService;
             }
         }
+        free(serviceName);
+        serviceName = NULL;
+        free(newService);
         if(isServiceSeenBefore) {
             #if DEBUG
                 puts("Info: service already seen before");
             #endif
+            free(address);
             return NULL;
         }
 
@@ -809,14 +815,16 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
             #if DEBUG
                 puts("Info: This is a local service; so returning local address");
             #endif
-
+            free(address);
             return LOCAL_ADDRESS;
         }
+        #if DEBUG
+            printf("This is a non-local service; so returning IP address of non-local host:%s\n", address);
+        #endif
     }
-    #if DEBUG
-        printf("This is a non-local service; so returning IP address of non-local host:%s\n", address);
-    #endif
-
+    if (serviceName != NULL) {
+        free(serviceName);
+    }
     // return the IP address of non-local host
     return address;
 }
@@ -893,28 +901,29 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
                 #endif
             }
         }
-    }
-    if(srvQry->numProperties > 0 && srvQry->properties != NULL) {
-        // look for atleast one property match
-        for(i = 0; i < srvQry->numProperties; i++) {
-            for(j = 0; j < propertiesCountInTxtRecord; j++) {
-                if(strcmp(srvQry->properties[i]->key, properties[j]->key) == 0 && \
-                    strcmp(srvQry->properties[i]->value, properties[j]->value) == 0) {
-                        isPropertiesMatched = true; // yes found atleast one matching property
-                        break;
-                    }
-            }
-        }
-    } else {
-        // there are no properties defined by the service query; so consider as matched successfully
-        isPropertiesMatched = true;
-    }
 
-    // free the memory
-    for(i = 0; i < propertiesCountInTxtRecord; i++) {
-        free(properties[i]);
+        if(srvQry->numProperties > 0 && srvQry->properties != NULL) {
+            // look for atleast one property match
+            for(i = 0; i < srvQry->numProperties; i++) {
+                for(j = 0; j < propertiesCountInTxtRecord; j++) {
+                    if(strcmp(srvQry->properties[i]->key, properties[j]->key) == 0 && \
+                        strcmp(srvQry->properties[i]->value, properties[j]->value) == 0) {
+                            isPropertiesMatched = true; // yes found atleast one matching property
+                            break;
+                        }
+                }
+            }
+        } else {
+            // there are no properties defined by the service query; so consider as matched successfully
+            isPropertiesMatched = true;
+        }
+
+        // free the memory
+        for(i = 0; i < propertiesCountInTxtRecord; i++) {
+            free(properties[i]);
+        }
+        free(properties);
     }
-    free(properties);
     if(isNameMatched && isPortMatched && isPropertiesMatched) {
     #if DEBUG
         printf("Returning TRUE --- Match found for service:%s\n", fullservicename);

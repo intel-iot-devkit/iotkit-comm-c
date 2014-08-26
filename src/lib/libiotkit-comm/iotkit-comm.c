@@ -530,7 +530,9 @@ CommHandle *createClient(ServiceQuery *servQuery) {
             strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
         }
 
-        strcat(cwd_temp, folderPath);
+        if (folderPath != NULL) {
+            strcat(cwd_temp, folderPath);
+        }
         strcat(cwd_temp, "/");
         strcat(cwd_temp, *(commHandle->interface));
         strcat(cwd_temp, ".json");
@@ -654,7 +656,9 @@ CommHandle *createService(ServiceSpec *specification) {
         if (folderPath != NULL && *folderPath != '/') { // if path is not absolute path; then consider plugins directory
             strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
         }
-        strcat(cwd_temp, folderPath);
+        if (folderPath != NULL) {
+            strcat(cwd_temp, folderPath);
+        }
         strcat(cwd_temp, "/");
         strcat(cwd_temp, *(commHandle->interface));
         strcat(cwd_temp, ".json");
