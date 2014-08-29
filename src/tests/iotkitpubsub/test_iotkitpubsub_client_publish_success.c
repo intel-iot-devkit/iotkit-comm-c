@@ -28,11 +28,18 @@ int main(void) {
         int result = init(serviceQuery);
         if (result == MQTTASYNC_SUCCESS) {
             printf("Successfully Connected to an MQTT Broker\n");
-            registerSensor("garage56", "temperature.v1.0");
             Context context;
             context.name = "topic";
             context.value = "data";
-            result = send("This is a test message", context);
+            result = send("{\"n\":\"garage5\",\"t\":\"temperature.v1.0\"}", context);
+            if(result != MQTTASYNC_SUCCESS){
+                printf("Test Failed: Could not register a sensor\n");
+                exit(EXIT_FAILURE);
+            }
+
+            sleep(5); // wait for 5 seconds so that sensor registration completes hopefully
+
+            result = send("{\"n\":\"garage5\",\"v\":185}", context);
             if(result == MQTTASYNC_SUCCESS){
                 printf("Test Passed: Successfully published message\n");
                 exit(EXIT_SUCCESS);
