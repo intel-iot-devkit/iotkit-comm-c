@@ -43,6 +43,7 @@ int msgnumber = 0;
 void callback(void *handle, int32_t error_code, void *serviceHandle) {
     Context context;
     char msg[256];
+    int i = 0;
 
     if (serviceHandle != NULL) {
         CommHandle *commHandle = (CommHandle *)serviceHandle;
@@ -58,14 +59,19 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         context.name = "topic";
         context.value = "/foo";
 
-        while(1) {  // Infinite Event Loop
+        while(i < 10) {  // Event Loop
             sprintf(msg, "This is a test message %d", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
             (*send)(msg, context);
             sleep(2);
+
+            i ++;
         }
     }
+
+    // clean the service specification object
+    cleanUpService(srvSpec);
 }
 
 /**

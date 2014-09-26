@@ -93,6 +93,7 @@ void concatUserDefinedConfigurations() {
                 out = cJSON_Print(json, 2);
                 fprintf(stderr,"%s\n", out);
                 free(out);
+                out = NULL;
             #endif
 
             if (!isJsonObject(json)) {
@@ -174,6 +175,7 @@ bool parseConfigFile(char *config_file) {
                 out = cJSON_Print(json, 2);
                 fprintf(stderr,"%s\n", out);
                 free(out);
+                out = NULL;
             #endif
 
             if (!isJsonObject(json)) {
@@ -290,6 +292,7 @@ bool parsePluginInterfaces(char *inf_file) {
                 out = cJSON_Print(json, 2);
                 printf("%s\n", out);
                 free(out);
+                out = NULL;
             #endif
 
             if (!isJsonObject(json)) {
@@ -344,9 +347,16 @@ endParseInterfaces:
 
 /** Frees all the memory allocated for global data
 */
-void freeGlobals() {
+void freeFuncSignatures() {
+    int i;
+
+    for(i = 0; i < g_funcEntries; i++) {
+        free(g_funcSignatures[i]);
+    }
+
     if (g_funcSignatures) {
         free(g_funcSignatures);
+        g_funcSignatures = NULL;
     }
 }
 
@@ -354,12 +364,85 @@ void freeGlobals() {
  * @param[in] commHandle communication handle
  */
 void cleanUp(CommHandle *commHandle) {
-    freeGlobals();
+    freeFuncSignatures();
     if (commHandle) {
         if (commHandle->handle) {
             dlclose(commHandle->handle);
         }
         free(commHandle);
+    }
+}
+
+/** Cleanup by freeing service
+ * @param[in] srvSpec service query or specification
+ */
+void cleanUpService(ServiceSpec *srvSpec) {
+    int i;
+    freeMDNSGlobals();
+
+    if (srvSpec) {
+        if(srvSpec->service_name) {
+            free(srvSpec->service_name);
+            srvSpec->service_name = NULL;
+        }
+        if(srvSpec->type.name) {
+            free(srvSpec->type.name);
+            srvSpec->type.name = NULL;
+        }
+        if(srvSpec->type.protocol) {
+            free(srvSpec->type.protocol);
+            srvSpec->type.protocol = NULL;
+        }
+        if(srvSpec->address) {
+            free(srvSpec->address);
+            srvSpec->address = NULL;
+        }
+        if(srvSpec->comm_params) {
+            for(i = 0; i < srvSpec->commParamsCount; i++) {
+                if(srvSpec->comm_params[i]) {
+                    if(srvSpec->comm_params[i]->key) {
+                        free(srvSpec->comm_params[i]->key);
+                    }
+                    if(srvSpec->comm_params[i]->value) {
+                        free(srvSpec->comm_params[i]->value);
+                    }
+
+                    free(srvSpec->comm_params[i]);
+                    srvSpec->comm_params[i] = NULL;
+                }
+            }
+            free(srvSpec->comm_params);
+            srvSpec->comm_params = NULL;
+        }
+        if(srvSpec->properties) {
+            for(i = 0; i < srvSpec->numProperties; i++) {
+                if(srvSpec->properties[i]) {
+                    if(srvSpec->properties[i]->key) {
+                        free(srvSpec->properties[i]->key);
+                        srvSpec->properties[i]->key = NULL;
+                    }
+                    if(srvSpec->properties[i]->value) {
+                        free(srvSpec->properties[i]->value);
+                        srvSpec->properties[i]->value = NULL;
+                    }
+
+                    free(srvSpec->properties[i]);
+                    srvSpec->properties[i] = NULL;
+                }
+            }
+
+            free(srvSpec->properties);
+            srvSpec->properties = NULL;
+        }
+        if(srvSpec->advertise.locally) {
+            free(srvSpec->advertise.locally);
+            srvSpec->advertise.locally = NULL;
+        }
+        if(srvSpec->advertise.cloud) {
+            free(srvSpec->advertise.cloud);
+            srvSpec->advertise.cloud = NULL;
+        }
+        free(srvSpec);
     }
 }
 
@@ -384,9 +467,11 @@ bool loadCommInterfaces(CommHandle *commHandle) {
                 if (!checkDLError()) {
                     while(i >= 0) { // freeing the dynamic memory
                         free(commHandle->interfaces[i]);
+                        commHandle->interfaces[i] = NULL;
                         i--;
                     }
                     free(commHandle->interfaces);
+                    commHandle->interfaces = NULL;
                     return false;
                 }
             }
@@ -454,7 +539,7 @@ CommHandle *createClient(ServiceQuery *servQuery) {
     strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
     strcat(cwd_temp, LIB_CONFIG_FILENAME);
     if (!parseConfigFile(cwd_temp)) {
-        freeGlobals();
+        freeFuncSignatures();
     }
 
     // load the plugin
@@ -541,7 +626,7 @@ CommHandle *createClient(ServiceQuery *servQuery) {
         #endif
         if (fileExists(cwd_temp)) {
             if (!parsePluginInterfaces(cwd_temp)) {
-                freeGlobals();
+                freeFuncSignatures();
             }
             break;
         }
@@ -587,7 +672,7 @@ CommHandle *createService(ServiceSpec *specification) {
     strcpy(cwd_temp, LIB_CONFIG_DIRECTORY);
     strcat(cwd_temp, LIB_CONFIG_FILENAME);
     if (!parseConfigFile(cwd_temp)) {
-        freeGlobals();
+        freeFuncSignatures();
     }
 
     // load the plugin
@@ -665,7 +750,7 @@ CommHandle *createService(ServiceSpec *specification) {
 
         if (fileExists(cwd_temp)) {
             if (!parsePluginInterfaces(cwd_temp)) {
-                freeGlobals();
+                freeFuncSignatures();
             }
             break;
         }

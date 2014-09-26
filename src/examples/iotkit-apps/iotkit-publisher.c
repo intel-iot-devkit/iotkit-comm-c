@@ -43,6 +43,7 @@ int msgnumber = 40; // iotkit-agent does not accept zero as sensor value; so ass
 void callback(void *handle, int32_t error_code, void *serviceHandle) {
     Context context;
     char msg[256];
+    int i = 0;
 
     if(serviceHandle != NULL) {
         CommHandle *commHandle = (CommHandle *) serviceHandle;
@@ -58,13 +59,18 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         context.name = "topic";
         context.value = "data";
 
-        while(1) {  // Infinite Event Loop
+        while(i < 10) {  // Event Loop
             sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
             (*send)(msg, context);
             sleep(2);
+
+            i++;
         }
+
+        // clean the service specification object
+        cleanUpService(srvSpec);
     }
 }
 

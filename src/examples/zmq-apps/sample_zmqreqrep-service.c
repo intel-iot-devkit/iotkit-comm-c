@@ -22,6 +22,8 @@
 #include "iotkit-comm.h"
 #include "util.h"
 
+ServiceSpec *serviceSpec = NULL;
+
 /** Callback function. To to be invoked when it receives any messages from the Client.
 * @param client the client object
 * @param message the message received from client
@@ -33,25 +35,31 @@ void repMessageCallback(void *client, char *message, Context context) {
 
 /** Callback function. Once the service is advertised, this callback function will be invoked.
 
-* @param servSpec the service specification object
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
 */
-void repAdvertiseCallback(ServiceSpec *servSpec, int32_t error_code,CommHandle *serviceHandle) {
+void repAdvertiseCallback(void *handle, int32_t error_code,CommHandle *serviceHandle) {
     if (serviceHandle != NULL) {
         void *client = NULL;
         Context context;
         void (**sendTo)(void *, char *, Context context);
         int (**receive)(void (*)(void *, char *, Context context));
+        int i = 0;
 
         sendTo = commInterfacesLookup(serviceHandle, "sendTo");
         receive = commInterfacesLookup(serviceHandle, "receive");
         if (sendTo != NULL && receive != NULL) {
-            while(1) {  // Infinite Event Loop
+            while(i < 10) {  // Event Loop
                 (*sendTo)(client,"train bike car",context);
                 (*receive)(repMessageCallback);
                 sleep(2);
+
+                i ++;
             }
+
+            // clean the service specification object
+            cleanUpService(serviceSpec);
+            exit(0);
         } else {
             puts("Interface lookup failed");
         }
@@ -64,7 +72,7 @@ void repAdvertiseCallback(ServiceSpec *servSpec, int32_t error_code,CommHandle *
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
-    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQREQREP.json");
+    serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQREQREP.json");
 
     if (serviceSpec) {
         advertiseServiceBlocking(serviceSpec, repAdvertiseCallback);

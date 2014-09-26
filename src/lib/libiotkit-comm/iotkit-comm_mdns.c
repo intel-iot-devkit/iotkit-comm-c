@@ -59,6 +59,27 @@ char *getLastError() {
     goto endParseSrvFile;\
 }
 
+/** Initializes service specification with default values
+* @param[in] specification service specification or query JSON
+*/
+void initSpecification(ServiceSpec *specification) {
+    // initialize the structure with default (null) values
+    specification->service_name = NULL;
+    specification->type.name = NULL;
+    specification->type.protocol = NULL;
+    specification->address = NULL;
+    specification->port = 0;
+    specification->commParamsCount = 0;
+    specification->comm_params = NULL;
+    specification->numProperties = 0;
+    specification->properties = NULL;
+    specification->advertise.locally = NULL;
+    specification->advertise.cloud = NULL;
+
+    // initially set status to UNKNOWN
+    specification->status = UNKNOWN;
+}
+
 /** Parses service specification.
 * @param[in] service_desc_file file path to the service specification JSON
 * @return returns service specification object upon successful parsing and NULL otherwise
@@ -94,6 +115,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
                 out = cJSON_Print(json, 2);
                 printf("%s\n", out);
                 free(out);
+                out = NULL;
             #endif
 
             if (!isJsonObject(json))
@@ -105,20 +127,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
                 goto endParseSrvFile;
             }
 
-            specification->service_name = NULL;
-            specification->type.name = NULL;
-            specification->type.protocol = NULL;
-            specification->address = NULL;
-            specification->port = 0;
-            specification->commParamsCount = 0;
-            specification->comm_params = NULL;
-            specification->numProperties = 0;
-            specification->properties = NULL;
-            specification->advertise.locally = NULL;
-            specification->advertise.cloud = NULL;
-
-            // initially set status to UNKNOWN
-            specification->status = UNKNOWN;
+            initSpecification(specification);
 
             jitem = cJSON_GetObjectItem(json, "name");
             if (!isJsonString(jitem))
@@ -131,13 +140,13 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             child = cJSON_GetObjectItem(json, "type");
             if (!isJsonObject(child)) {
-                free(specification->service_name);
+                cleanUpService(specification);
                 handleParseError();
             }
 
             jitem = cJSON_GetObjectItem(child, "name");
             if (!isJsonString(jitem)) {
-                free(specification->service_name);
+                cleanUpService(specification);
                 handleParseError();
             }
 
@@ -148,8 +157,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(child, "protocol");
             if (!isJsonString(jitem)) {
-                free(specification->service_name);
-                free(specification->type.name);
+                cleanUpService(specification);
                 handleParseError();
             }
 
@@ -170,10 +178,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             // must have a port
             jitem = cJSON_GetObjectItem(json, "port");
             if (!jitem || !isJsonNumber(jitem)) {
-                free(specification->service_name);
-                free(specification->type.name);
-                free(specification->type.protocol);
-                free(specification->address);
+                cleanUpService(specification);
                 handleParseError();
             }
             specification->port = jitem->valueint;
@@ -183,10 +188,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(json, "properties");
             if (!isJsonObject(jitem)) {
-                free(specification->service_name);
-                free(specification->type.name);
-                free(specification->type.protocol);
-                free(specification->address);
+                cleanUpService(specification);
                 handleParseError();
             }
 
@@ -240,9 +242,9 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
                                     printf("Double value is: %f\n", child->valuedouble);
                                 #endif
                                 if(child->type == cJSON_False) {
-                                    specification->comm_params[i]->value = "false";
+                                    specification->comm_params[i]->value = strdup("false");
                                 } else if(child->type == cJSON_True) {
-                                    specification->comm_params[i]->value = "true";
+                                    specification->comm_params[i]->value = strdup("true");
                                 } else {
                                     specification->comm_params[i]->value = strdup(child->valuestring);
                                 }
@@ -324,6 +326,7 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
                 out = cJSON_Print(json, 2);
                 printf("%s\n", out);
                 free(out);
+                out = NULL;
             #endif
 
             if (!isJsonObject(json))
@@ -335,20 +338,7 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
                 goto endParseSrvFile;
             }
 
-            specification->service_name = NULL;
-            specification->type.name = NULL;
-            specification->type.protocol = NULL;
-            specification->address = NULL;
-            specification->port = 0;
-            specification->commParamsCount = 0;
-            specification->comm_params = NULL;
-            specification->numProperties = 0;
-            specification->properties = NULL;
-            specification->advertise.locally = NULL;
-            specification->advertise.cloud = NULL;
-
-            // initially set status to UNKNOWN
-            specification->status = UNKNOWN;
+            initSpecification(specification);
 
             jitem = cJSON_GetObjectItem(json, "name");
             if (!isJsonString(jitem))
@@ -361,13 +351,13 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
 
             child = cJSON_GetObjectItem(json, "type");
             if (!isJsonObject(child)) {
-                free(specification->service_name);
+                cleanUpService(specification);
                 handleParseError();
             }
 
             jitem = cJSON_GetObjectItem(child, "name");
             if (!isJsonString(jitem)) {
-                free(specification->service_name);
+                cleanUpService(specification);
                 handleParseError();
             }
 
@@ -378,8 +368,7 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(child, "protocol");
             if (!isJsonString(jitem)) {
-                free(specification->service_name);
-                free(specification->type.name);
+                cleanUpService(specification);
                 handleParseError();
             }
 
@@ -608,7 +597,7 @@ static void DNSSD_API queryReply(DNSServiceRef client,
 */
 void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void *, int32_t, void *)) {
     if(queryDesc->address == NULL) {
-        queryDesc->address = "127.0.0.1"; // defaults to localhost
+        queryDesc->address = strdup(LOCAL_ADDRESS); // defaults to localhost
     }
 
     if(queryDesc->port == 0) {
@@ -800,14 +789,11 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
                 traverse->next = newService;
             }
         }
-        free(serviceName);
         serviceName = NULL;
-        free(newService);
         if(isServiceSeenBefore) {
             #if DEBUG
                 puts("Info: service already seen before");
             #endif
-            free(address);
             return NULL;
         }
 
@@ -815,15 +801,11 @@ char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const c
             #if DEBUG
                 puts("Info: This is a local service; so returning local address");
             #endif
-            free(address);
-            return LOCAL_ADDRESS;
+            return strdup(LOCAL_ADDRESS);
         }
         #if DEBUG
             printf("This is a non-local service; so returning IP address of non-local host:%s\n", address);
         #endif
-    }
-    if (serviceName != NULL) {
-        free(serviceName);
     }
     // return the IP address of non-local host
     return address;
@@ -906,7 +888,8 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
             // look for atleast one property match
             for(i = 0; i < srvQry->numProperties; i++) {
                 for(j = 0; j < propertiesCountInTxtRecord; j++) {
-                    if(strcmp(srvQry->properties[i]->key, properties[j]->key) == 0 && \
+                    if(properties[j]->key && properties[j]->value && \
+                        strcmp(srvQry->properties[i]->key, properties[j]->key) == 0 && \
                         strcmp(srvQry->properties[i]->value, properties[j]->value) == 0) {
                             isPropertiesMatched = true; // yes found atleast one matching property
                             break;
@@ -920,7 +903,14 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
 
         // free the memory
         for(i = 0; i < propertiesCountInTxtRecord; i++) {
-            free(properties[i]);
+            if(properties[i]->key)
+                free(properties[i]->key);
+
+            if(properties[i]->value)
+                free(properties[i]->value);
+
+            if(properties[i])
+                free(properties[i]);
         }
         free(properties);
     }
@@ -1265,6 +1255,36 @@ bool setMyAddresses(void) {
     close(iSocket);
 
     return true;
+}
+
+/** Frees all the memory allocated for global data
+*/
+void freeMDNSGlobals() {
+    int i;
+    if (serviceCache) {
+        ServiceCache *traverse = NULL;
+
+        do {
+            traverse = serviceCache;
+            serviceCache = serviceCache->next;
+
+            if(traverse->servicename)
+                free(traverse->servicename);
+            if(traverse->address)
+                free(traverse->address);
+            free(traverse);
+        }while(serviceCache != NULL);
+    }
+
+    for(i = 0; i < myaddressesCount; i++) {
+        if(myaddresses[i]) {
+            free(myaddresses[i]);
+        }
+    }
+    if(myaddresses) {
+        free(myaddresses);
+        myaddresses = NULL;
+    }
 }
 
 #if DEBUG

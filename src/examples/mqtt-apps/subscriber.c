@@ -26,6 +26,7 @@
 #include "util.h"
 
 ServiceQuery *query = NULL;
+int i = 0;
 
 /**
  * @name Message handler
@@ -37,6 +38,14 @@ ServiceQuery *query = NULL;
  */
 void message_callback(char *message, Context context) {
     printf("Message received:%s\n", message);
+
+    i ++;
+
+    if(i >= 5) {
+        // clean the service query object
+        cleanUpService(query);
+        exit(0);
+    }
 }
 
 int serviceStarted = 0;

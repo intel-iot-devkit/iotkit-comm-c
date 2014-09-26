@@ -22,22 +22,30 @@
 #include "iotkit-comm.h"
 #include "util.h"
 
+ServiceSpec *serviceSpec = NULL;
+
 /** Callback function. Once the service is advertised, this callback function will be invoked.
-* @param servSpec the service specification object
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
 */
-void pubServiceCallback(ServiceSpec *servSpec, int32_t error_code, CommHandle *serviceHandle) {
+void pubServiceCallback(void *handle, int32_t error_code, CommHandle *serviceHandle) {
     if (serviceHandle != NULL) {
         int (**publish)(char *,Context context);
+        int i = 0;
 
         publish = commInterfacesLookup(serviceHandle, "publish");
         if (publish != NULL) {
             Context context;
-            while(1) { // Infinite Event Loop
+            while(i < 10) { // Event Loop
                 (*publish)("vehicle: car",context);
                 sleep(2);
+
+                i ++;
             }
+
+            // clean the service specification object
+            cleanUpService(serviceSpec);
+            exit(0);
         } {
             puts("Interface lookup failed");
         }
@@ -50,7 +58,7 @@ void pubServiceCallback(ServiceSpec *servSpec, int32_t error_code, CommHandle *s
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ pub/sub plugin !!");
-    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
+    serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
     if (serviceSpec) {
         advertiseServiceBlocking(serviceSpec, pubServiceCallback);

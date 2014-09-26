@@ -22,6 +22,8 @@
 #include "iotkit-comm.h"
 #include "util.h"
 
+ServiceQuery *servQuery = NULL;
+
 /** Callback function. To to be invoked when it receives any messages for the subscribed topic.
 * @param message the message received from service/publisher
 * @param context a context object
@@ -31,15 +33,14 @@ void clientMessageCallback(char *message, Context context) {
 }
 
 /** Callback function. Once the service is discovered, this callback function will be invoked.
-* @param servQuery the service query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
 */
-void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle) {
+void subDiscoveryCallback(void *handle, int32_t error_code, CommHandle *commHandle) {
     int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
     int (**unsubscribe)(char *);
-    int i = 0;
+    int i = 0, j = 0;
 
     if (commHandle != NULL) {
         subscribe = commInterfacesLookup(commHandle, "subscribe");
@@ -47,19 +48,25 @@ void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
         unsubscribe = commInterfacesLookup(commHandle, "unsubscribe");
 
         if (subscribe != NULL && receive != NULL && unsubscribe != NULL) {
-            while (1) {  // Infinite Event Loop
+            while (j < 5) {  // Event Loop
                 i++;
-                if (i < 10) {
+                if (i < 5) {
                     (*subscribe)("vehicle");
                     (*receive)(clientMessageCallback);
                 } else {
-                    if (i == 10) {
+                    if (i == 5) {
                         (*unsubscribe)("vehicle");
                         puts("\nSuccessfully unsubscribed won't receive anymore messages on 'vehicle'\n");
                     }
                 }
                 sleep(2);
+
+                j ++;
             }
+
+            // clean the service query object
+            cleanUpService(servQuery);
+            exit(0);
         } else {
             puts("Interface lookup failed");
         }
@@ -72,7 +79,7 @@ void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ pub/sub plugin !!");
-    ServiceQuery *servQuery = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQPUBSUB.json");
+    servQuery = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQPUBSUB.json");
 
     if (servQuery) {
         fprintf(stderr,"query host address %s\n",servQuery->address);

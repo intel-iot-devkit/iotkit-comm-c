@@ -22,6 +22,8 @@
 #include "iotkit-comm.h"
 #include "util.h"
 
+ServiceQuery *query = NULL;
+
 /** Callback function. To be invoked when it receives any messages from the Service.
 * @param message the message received from service
 * @param context a context object
@@ -32,24 +34,30 @@ void reqMessageCallback(char *message, Context context) {
 
 /** Callback function. Once the service is discovered, this callback function will be invoked.
 
-* @param servQuery the client query object
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
 */
-void reqDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle) {
+void reqDiscoveryCallback(void *handle, int32_t error_code, CommHandle *commHandle) {
     if (commHandle != NULL) {
         int (**send)(char *, Context context);
         int (**receive)(void (*)(char *, Context));
         Context context;
+        int i = 0;
 
         send = commInterfacesLookup(commHandle, "send");
         receive = commInterfacesLookup(commHandle, "receive");
         if (send != NULL && receive != NULL) {
-            while (1) { // Infinite Event Loop
+            while (i < 9) { // Event Loop
                 (*send)("toys",context);
                 (*receive)(reqMessageCallback);
                 sleep(2);
+
+                i ++;
             }
+
+            // clean the service query object
+            cleanUpService(query);
+            exit(0);
         } else {
             puts("Interface lookup failed");
         }
@@ -62,7 +70,7 @@ void reqDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
 */
 int main(void) {
     puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
-    ServiceQuery *query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQREQREP.json");
+    query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQREQREP.json");
 
     if (query) {
         fprintf(stderr,"query host address %s\n",query->address);

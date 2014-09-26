@@ -119,4 +119,5 @@ CommHandle *createClient(ServiceQuery *);
 CommHandle *createService(ServiceSpec *);
 void *commInterfacesLookup(CommHandle *commHandle, char *funcname);
 void cleanUp(CommHandle *);
+void cleanUpService(ServiceSpec *);
 bool fileExists(char *absPath);
