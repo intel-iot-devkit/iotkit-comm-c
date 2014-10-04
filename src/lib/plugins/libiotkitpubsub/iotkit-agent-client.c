@@ -237,11 +237,14 @@ int send(char *message, Context context) {
  * @param[in] topic needs to be subscribed to
  * @return boolean, which specifies whether successfully subscribed or not
  */
-int subscribe() {
+int subscribe(char *topic) {
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
 
     int rc = 0;
-    char *topic = "data";
+
+    if(!topic) {
+        topic = "data";
+    }
 
     opts.onSuccess = onSubscribe;
     opts.onFailure = onSubscribeFailure;
@@ -288,7 +291,7 @@ int done() {
 /**
  * @name Unsubscribe a topic
  * @brief Discontinues the subscription to a topic.
- * @param[in] topic has been previously subscribed to
+ * @param[in] topic that has been previously subscribed to
  */
 int unsubscribe(char *topic) {
 
@@ -297,6 +300,10 @@ int unsubscribe(char *topic) {
     #endif
 
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
+
+    if(!topic) {
+        topic = "data";
+    }
 
     opts.onSuccess = onUnSubscribe;
     opts.onFailure = onUnSubscribeFailure;
@@ -307,6 +314,10 @@ int unsubscribe(char *topic) {
     if ((rc = MQTTAsync_unsubscribe(client, topic, &opts)) != MQTTASYNC_SUCCESS) {
         printf("Failed to unsubscribe, return code %d\n", rc);
         exit(-1);
+    }
+
+    while (subscribed) {
+        sleep(1); // waiting for subscribe
     }
 
     return rc;

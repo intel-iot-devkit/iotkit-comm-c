@@ -77,9 +77,12 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         }
 
         (*receive)(message_callback);
-        (*subscribe)();
+        (*subscribe)(NULL);
 
         serviceStarted = 1;
+        while(1) { // Infinite Event Loop
+            sleep(1);
+        }
     }
 }
 
