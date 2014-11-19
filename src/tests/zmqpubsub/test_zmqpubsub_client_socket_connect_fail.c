@@ -26,7 +26,7 @@ int main(void) {
     if (serviceQuery != NULL) {
         serviceQuery->address = "invalidaddress";
         serviceQuery->port = 100;
-        int result = init(serviceQuery);
+        int result = init(serviceQuery, NULL);
         done();
         free(serviceQuery);
         if (result == 0) {

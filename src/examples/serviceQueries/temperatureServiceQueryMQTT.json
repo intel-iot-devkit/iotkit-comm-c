@@ -3,5 +3,6 @@
     "type" : {
         "name": "mqttpubsub",
         "protocol" : "tcp"
-    }
+    },
+    "type_params": {"mustsecure": true}
 }

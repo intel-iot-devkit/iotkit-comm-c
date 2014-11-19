@@ -28,7 +28,7 @@ socket binds to the address and port to initiate communication.
 * @param publishServiceDesc an void pointer
 * @return The result code
 */
-int init(void *publishServiceDesc) {
+int init(void *publishServiceDesc, Crypto *crypto) {
     #if DEBUG
         printf("In createService\n");
     #endif

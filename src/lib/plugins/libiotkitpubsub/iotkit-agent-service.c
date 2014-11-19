@@ -1,5 +1,5 @@
 /*
- * IoTKit Async client plugin to enable subscribe feature through iotkit-comm API
+ * IoTKit Async service plugin to enable publish feature through iotkit-comm API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -13,13 +13,13 @@
  */
 
 /**
-* @file iotkit-agent-client.c
-* @brief Implementation of IoTKit Async Client plugin for iotkit-comm API.
+* @file iotkit-agent-service.c
+* @brief Implementation of IoTKit Async Service plugin for iotkit-comm API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic.
+* Provides features to connect to an MQTT Broker and publish to a topic.
 */
 
-#include "iotkit-agent-client.h"
+#include "iotkit-agent-service.h"
 
 void handleSignal(int sig) {
     #if DEBUG
@@ -27,79 +27,6 @@ void handleSignal(int sig) {
     #endif
 
     toStop = 1;
-}
-
-int messageArrived(void *ctx, char *topicName, int topicLen, MQTTAsync_message *message) {
-    int i;
-    char* payloadptr;
-    char *payloadmsg;
-    Context context;
-
-    #if DEBUG
-        printf("Message arrived\n");
-        printf("topic: %s\n", topicName);
-        printf("message:");
-
-        payloadptr = message->payload;
-        for(i = 0; i<message->payloadlen; i++) {
-            putchar(*payloadptr++);
-        }
-        putchar('\n');
-    #endif
-
-    payloadmsg = (char *)malloc(message->payloadlen+1);
-    if (payloadmsg != NULL) {
-        strncpy(payloadmsg, message->payload, message->payloadlen);
-        payloadmsg[message->payloadlen] = '\0';
-    }
-
-    context.name = "topic";
-    context.value = strdup(topicName);
-    if (msgArrhandler != NULL) {
-        msgArrhandler(payloadmsg, context);
-    } else {
-        printf("error: Receive Handler not set\n");
-    }
-
-    MQTTAsync_freeMessage(&message);
-    MQTTAsync_free(topicName);
-    if (payloadmsg != NULL) {
-        free(payloadmsg);
-        payloadmsg = NULL;
-    }
-    if (context.value != NULL) {
-        free(context.value);
-        context.value = NULL;
-    }
-    return 1;
-}
-
-void onSubscribe(void* context, MQTTAsync_successData* response) {
-    #if DEBUG
-        printf("Subscribe succeeded\n");
-    #endif
-    subscribed = 1;
-}
-
-void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
-    #if DEBUG
-        printf("Subscribe failed\n");
-    #endif
-
-    finished = 1;
-}
-
-void onUnSubscribe(void* context, MQTTAsync_successData* response) {
-    #if DEBUG
-        printf("UnSubscribe succeeded\n");
-    #endif
-    subscribed = 0;
-}
-
-void onUnSubscribeFailure(void* context, MQTTAsync_failureData* response) {
-    #if DEBUG
-        printf("UnSubscribe failed\n");
-    #endif
 }
 
 void onDisconnect(void* context, MQTTAsync_successData* response) {
@@ -176,6 +103,12 @@ void connectionLost(void *context, char *cause) {
     }
 }
 
+int sendTo(void *client, char *message, Context context) {
+    #if DEBUG
+        printf("In sendTo\n");
+    #endif
+    return -1;
+}
 /**
  * @name Publish a message
  * @brief Used to send message to a broker.
@@ -183,7 +116,7 @@ void connectionLost(void *context, char *cause) {
  * @param[in] context w.r.t topic the message required to be published
  * @return boolean, specifies whether the message is successfully published or not
  */
-int send(char *message, Context context) {
+int publish(char *message, Context context) {
 
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
@@ -232,37 +165,6 @@ int send(char *message, Context context) {
 }
 
 /**
- * @name Subscribes to a topic
- * @brief Subscribes to a topic with an MQTT broker.
- * @param[in] topic needs to be subscribed to
- * @return boolean, which specifies whether successfully subscribed or not
- */
-int subscribe(char *topic) {
-    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-
-    int rc = 0;
-
-    if(!topic) {
-        topic = "data";
-    }
-
-    opts.onSuccess = onSubscribe;
-    opts.onFailure = onSubscribeFailure;
-    opts.context = client;
-
-    if ((rc = MQTTAsync_subscribe(client, topic, QOS, &opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to subscribe, return code %d\n", rc);
-        exit(-1);
-    }
-
-    while (!subscribed) {
-        sleep(1); // waiting for subscribe
-    }
-
-    return rc;
-}
-
-/**
  * @name Cleanup the MQTT client
  * @brief Used to close the connections and for cleanup activities.
  * @return boolean, which specifies whether the connection is disconnected or not
@@ -289,41 +191,6 @@ int done() {
 }
 
 /**
- * @name Unsubscribe a topic
- * @brief Discontinues the subscription to a topic.
- * @param[in] topic that has been previously subscribed to
- */
-int unsubscribe(char *topic) {
-
-    #if DEBUG
-        printf("Invoked MQTT: unsubscribe()\n");
-    #endif
-
-    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-
-    if(!topic) {
-        topic = "data";
-    }
-
-    opts.onSuccess = onUnSubscribe;
-    opts.onFailure = onUnSubscribeFailure;
-    opts.context = client;
-
-    int rc = 0;
-
-    if ((rc = MQTTAsync_unsubscribe(client, topic, &opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to unsubscribe, return code %d\n", rc);
-        exit(-1);
-    }
-
-    while (subscribed) {
-        sleep(1); // waiting for subscribe
-    }
-
-    return rc;
-}
-
-/**
  * @name Subscribe to a topic
  * @brief Registers the client's callback to be invoked on receiving a message from MQTT broker.
  * @param handler to be registered as a callback
@@ -331,10 +198,8 @@ int unsubscribe(char *topic) {
 int receive(void (*handler) (char *topic, Context context)) {
 
     #if DEBUG
-        printf("Invoked MQTT: setReceivedMessageHandler()\n");
+        printf("Invoked iotkit-service: setReceivedMessageHandler()\n");
     #endif
-
-    msgArrhandler = handler;
 
     return 1;
 }
@@ -382,7 +247,7 @@ int init(void *servQuery, Crypto *crypto) {
         MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_ERROR);
     #endif
 
-    MQTTAsync_setCallbacks(client, client, connectionLost, messageArrived, deliveryComplete);
+    MQTTAsync_setCallbacks(client, client, connectionLost, NULL, deliveryComplete);
 
     conn_opts.cleansession = 0;
     conn_opts.onSuccess = onConnect;

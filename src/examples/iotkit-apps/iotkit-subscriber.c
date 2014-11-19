@@ -26,6 +26,7 @@
 #include "util.h"
 
 ServiceQuery *query = NULL;
+CommHandle *commHandle = NULL;
 int i = 0;
 
 /**
@@ -42,8 +43,8 @@ void message_callback(char *message, Context context) {
     i ++;
 
     if(i >= 3) {
-        // clean the service query object
-        cleanUpService(query);
+        // clean the objects
+        cleanUpService(&query, &commHandle);
         exit(0);
     }
 }
@@ -60,7 +61,7 @@ int serviceStarted = 0;
  */
 void callback(void *handle, int32_t error_code, void *serviceHandle) {
     if(serviceHandle != NULL && !serviceStarted) {
-        CommHandle *commHandle = (CommHandle *) serviceHandle;
+        commHandle = (CommHandle *) serviceHandle;
         int (**subscribe)() = NULL;
         int (**receive)(void (*)(char *, Context)) = NULL;
 

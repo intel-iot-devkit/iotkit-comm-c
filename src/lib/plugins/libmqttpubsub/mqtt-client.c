@@ -194,7 +194,7 @@ int receive(void (*handler) (char *topic, Context context)) {
  *
  * Establishes the connection with an MQTT broker.
  */
-int init(void *servQuery) {
+int init(void *servQuery, Crypto *crypto) {
     ServiceQuery *serviceQuery = (ServiceQuery *) servQuery;
     int rc = 0;
     char uri[256];
@@ -216,6 +216,19 @@ int init(void *servQuery) {
         }
 
         conn_opts.ssl->enableServerCertAuth = 0;
+    } else if(serviceQuery->type_params.mustsecure) {
+        if(crypto->host) {
+            sprintf(uri, "ssl://%s:%d", crypto->host, crypto->mosquittoSecurePort);
+            conn_opts.ssl = &sslopts;
+            conn_opts.ssl->trustStore = strdup(crypto->cacert);
+            conn_opts.ssl->privateKey = strdup(crypto->userkey);
+            conn_opts.ssl->keyStore = strdup(crypto->usersslcert);
+            conn_opts.ssl->enableServerCertAuth = 0;
+        } else {
+            printf("Cannot secure communication channel."
+                         " Please setup and configure credentials using iotkit-comm setupAuthentication.");
+            return -1;
+        }
     } else {
         if (serviceQuery->address != NULL) {
             sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
@@ -223,9 +236,11 @@ int init(void *servQuery) {
             sprintf(uri, "tcp://localhost:%d", serviceQuery->port);
         }
     }
+    #if DEBUG
+        printf("URI is :%s\n", uri);
+    #endif
 
     // Default settings:
-    char clientID[256];
     sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
     MQTTClient_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);

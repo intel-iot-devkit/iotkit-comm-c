@@ -72,7 +72,7 @@ void subCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHa
     ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/thermostat-spec.json");
     if (serviceSpec) {
         advertiseService(serviceSpec);
-        CommHandle *serviceHandle = createService(serviceSpec);
+        CommHandle *serviceHandle = createService(NULL, serviceSpec);
         mypublisher = commInterfacesLookup(serviceHandle, "publish");
     }
     if (commHandle != NULL) {

@@ -33,6 +33,7 @@
 */
 
 char *interface = "client-interface"; /**< specifies the plugin interface json */
+bool provides_secure_comm = false;
 
 /** Structure holds the context and subscriber handler
 */
@@ -45,7 +46,7 @@ struct ZMQPubSubClient {
 */
 struct ZMQPubSubClient zmqContainer;
 
-int init(void *ClientServiceQuery);
+int init(void *ClientServiceQuery, Crypto *crypto);
 int send(char *message,Context context);
 int subscribe(char *topic);
 int unsubscribe(char *topic);

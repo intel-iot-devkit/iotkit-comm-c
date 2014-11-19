@@ -35,6 +35,7 @@
 */
 
 char *interface = "service-interface"; /**< specifies the plugin interface json */
+bool provides_secure_comm = false;
 
 /** Structure holds the context and publisher handler
 */
@@ -47,7 +48,7 @@ struct ZMQPubSubService {
 */
 struct ZMQPubSubService zmqContainer;
 
-int init(void *publishServiceDesc);
+int init(void *publishServiceDesc, Crypto *crypto);
 int sendTo(void *client, char *message, Context context);
 int publish(char *message,Context context);
 int manageClient(void *client,Context context);

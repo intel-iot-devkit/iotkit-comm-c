@@ -28,7 +28,7 @@ socket binds, connection to the address and port to initiate communication.
 * @param responseServiceDesc an void pointer
 * @return The result code
 */
-int init(void *responseServiceDesc) {
+int init(void *responseServiceDesc, Crypto *crypto) {
     #if DEBUG
         printf("context initialised\n");
     #endif

@@ -19,6 +19,9 @@
 * DataStructure of DiscoverContext and ServiceCache.
 */
 
+#ifndef __IOTKIT_COMM_MDNS_H
+#define __IOTKIT_COMM_MDNS_H
+
 #include "iotkit-comm.h"
 
 #ifndef DEBUG
@@ -44,6 +47,7 @@ typedef struct _DiscoverContext {
     bool (*userFilterCB) (ServiceQuery *);
     void (*callback) (void *, int32_t, void *);
     void *serviceSpec;
+    CommHandle *commHandle;
 } DiscoverContext;
 
 
@@ -65,3 +69,5 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNum
 char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber);
 bool isServiceLocal(const char *address);
 bool setMyAddresses(void);
+
+#endif

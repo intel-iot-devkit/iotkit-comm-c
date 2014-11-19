@@ -4,8 +4,9 @@
     "name": "mqttpubsub",
     "protocol" : "tcp"
   },
-  "port" : 1883,
+  "port" : 8883,
   "properties" : {"dataType": "float"},
   "comm_params": {"ssl": false},
-  "advertise": {"locally": true, "cloud": false}
+  "advertise": {"locally": true, "cloud": false},
+  "type_params": {"mustsecure": true}
 }

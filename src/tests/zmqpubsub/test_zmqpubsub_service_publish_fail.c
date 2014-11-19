@@ -26,7 +26,7 @@ int main(void) {
     if (serviceSpec != NULL) {
         serviceSpec->address = "127.0.0.1";
         serviceSpec->port = 123423;
-        init(serviceSpec);
+        init(serviceSpec, NULL);
         int result = publish("Hello World",NULL);
         done();
         free(serviceSpec);

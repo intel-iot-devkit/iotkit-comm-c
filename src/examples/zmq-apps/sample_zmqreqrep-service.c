@@ -58,7 +58,7 @@ void repAdvertiseCallback(void *handle, int32_t error_code,CommHandle *serviceHa
             }
 
             // clean the service specification object
-            cleanUpService(serviceSpec);
+            cleanUpService(&serviceSpec, &serviceHandle);
             exit(0);
         } else {
             puts("Interface lookup failed");

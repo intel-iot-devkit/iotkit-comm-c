@@ -26,7 +26,7 @@ int main(void) {
     if (serviceQuery != NULL) {
         serviceQuery->address = "localhost";
         serviceQuery->port = 1234;
-        init(serviceQuery);
+        init(serviceQuery, NULL);
         int result = subscribe("flower");
         done();
         free(serviceQuery);

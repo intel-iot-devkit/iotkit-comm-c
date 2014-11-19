@@ -1,5 +1,5 @@
 /*
- * IoTKit Async client plugin to enable subscribe feature through iotkit-comm API
+ * IoTKit Async service plugin to enable publish feature through iotkit-comm API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -13,10 +13,10 @@
  */
 
 /**
-* @file iotkit-agent-client.h
-* @brief Headers of iotkit Async Client plugin for iotkit-comm API.
+* @file iotkit-agent-service.h
+* @brief Headers of iotkit Async Service plugin for iotkit-comm API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic.
+* Provides features to connect to an MQTT Broker and publish a topic.
 */
 
 #include <stdio.h>
@@ -45,7 +45,7 @@ volatile int delivery = 0;
 
 int clientInstanceNumber = 0;
 
-char *interface = "iotkit-agent-client-interface"; // specifies the plugin interface json
+char *interface = "iotkit-agent-service-interface"; // specifies the plugin interface json
 bool provides_secure_comm = true;
 
 void *handle = NULL;
@@ -54,12 +54,10 @@ char *err = NULL;
 MQTTAsync client;
 MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
-void (*msgArrhandler) (char *topic, Context context) = NULL;
-
 void registerSensor(char *sensorname, char *type);
 int init(void *serviceDesc, Crypto *crypto);
-int send(char *message, Context context);
-int subscribe();
-int unsubscribe(char *topic);
+int sendTo(void *client, char *message, Context context);
+int publish(char *message,Context context);
+int manageClient(void *client,Context context);
 int receive(void (*) (char *topic, Context context));
 int done();

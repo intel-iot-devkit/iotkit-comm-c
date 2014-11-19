@@ -32,6 +32,7 @@
 *  @{
 */
 char *interface = "service-interface"; /**< specifies the plugin interface json */
+bool provides_secure_comm = false;
 
 /** Structure holds the context and responder handler
 */
@@ -44,7 +45,7 @@ struct ZMQReqRepService {
 */
 struct ZMQReqRepService zmqContainer;
 
-int init(void *responseServiceDesc);
+int init(void *responseServiceDesc, Crypto *crypto);
 int sendTo(void *client,char *message,Context context);
 int publish(char *message,Context context);
 int manageClient(void *client,Context context);

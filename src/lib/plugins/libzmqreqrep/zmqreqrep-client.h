@@ -32,6 +32,7 @@
 */
 
 char *interface = "client-interface"; /**< specifies the plugin interface json */
+bool provides_secure_comm = false;
 
 /** Structure holds the context and requester handler
 */
@@ -44,7 +45,7 @@ struct ZMQReqRepClient {
 */
 struct ZMQReqRepClient zmqContainer;
 
-int init(void *requestClientQuery);
+int init(void *requestClientQuery, Crypto *crypto);
 int send(char *message, Context);
 int subscribe(char *topic);
 int unsubscribe(char *topic);

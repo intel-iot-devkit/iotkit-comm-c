@@ -27,7 +27,7 @@ int main(void) {
     if (serviceSpec != NULL) {
         serviceSpec->address = "invalidaddress";
         serviceSpec->port = 100;
-        int result = init(serviceSpec);
+        int result = init(serviceSpec, NULL);
         done();
         free(serviceSpec);
         if (result == 0) {

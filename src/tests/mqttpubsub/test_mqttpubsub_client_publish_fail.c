@@ -25,7 +25,7 @@ int main(void) {
     if (serviceQuery != NULL) {
         serviceQuery->address = "localhost";
         serviceQuery->port = 1883;
-        int result = init(serviceQuery);
+        int result = init(serviceQuery, NULL);
         if (result == MQTTASYNC_SUCCESS) {
             puts("Successfully Connected to an MQTT Broker");
             Context context;

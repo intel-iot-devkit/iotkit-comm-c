@@ -140,13 +140,13 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             child = cJSON_GetObjectItem(json, "type");
             if (!isJsonObject(child)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
             jitem = cJSON_GetObjectItem(child, "name");
             if (!isJsonString(jitem)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
@@ -157,7 +157,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(child, "protocol");
             if (!isJsonString(jitem)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
@@ -178,7 +178,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             // must have a port
             jitem = cJSON_GetObjectItem(json, "port");
             if (!jitem || !isJsonNumber(jitem)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
             specification->port = jitem->valueint;
@@ -188,7 +188,7 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(json, "properties");
             if (!isJsonObject(jitem)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
@@ -351,13 +351,13 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
 
             child = cJSON_GetObjectItem(json, "type");
             if (!isJsonObject(child)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
             jitem = cJSON_GetObjectItem(child, "name");
             if (!isJsonString(jitem)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
@@ -368,13 +368,39 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(child, "protocol");
             if (!isJsonString(jitem)) {
-                cleanUpService(specification);
+                cleanUpService(&specification, NULL);
                 handleParseError();
             }
 
             specification->type.protocol = strdup(jitem->valuestring);
             #if DEBUG
                 printf("protocol %s\n", specification->type.protocol);
+            #endif
+
+            child = cJSON_GetObjectItem(json, "type_params");
+            if (!isJsonObject(child)) {
+                cleanUpService(&specification, NULL);
+                handleParseError();
+            }
+
+            jitem = cJSON_GetObjectItem(child, "mustsecure");
+            if (!jitem || (!isJsonBooleanFalse(jitem) && !isJsonBooleanTrue(jitem))) {
+                cleanUpService(&specification, NULL);
+                handleParseError();
+            }
+
+            if(isJsonBooleanTrue(jitem)) {
+                specification->type_params.mustsecure = true;
+            } else {
+                specification->type_params.mustsecure = false;
+            }
+
+            #if DEBUG
+                if(specification->type_params.mustsecure) {
+                    printf("must secure parameter is TRUE\n");
+                } else {
+                    printf("must secure parameter is FALSE\n");
+                }
             #endif
 
 endParseSrvFile:
@@ -529,6 +555,32 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     if (query->address == NULL)
         query->address = hosttarget;*/
 
+    uint16_t propertiesCountInTxtRecord = TXTRecordGetCount(txtLen, txtRecord);
+    int bufferKeySize = 256;
+    char bufferKey[bufferKeySize];
+    void *bufferValue;
+    uint8_t bufferValueSize;
+    int i, j, lastPropIndex;
+
+    lastPropIndex = query->numProperties; // index point at end of existing properties
+    query->numProperties += propertiesCountInTxtRecord;
+    query->properties = (Property **)realloc(query->properties, sizeof(Property *) * query->numProperties);
+    if (query->properties != NULL) {
+        for(i = 0; i < propertiesCountInTxtRecord; i++, lastPropIndex++) {
+            query->properties[i] = (Property *)malloc(sizeof(Property));
+            if (query->properties[i] != NULL) {
+                TXTRecordGetItemAtIndex(txtLen, txtRecord, i, bufferKeySize -1, bufferKey, &bufferValueSize, &bufferValue);
+
+                query->properties[lastPropIndex]->key = strdup(bufferKey);
+                query->properties[lastPropIndex]->value = strndup(bufferValue, bufferValueSize);
+
+                #if DEBUG
+                    printf("READ Property:%s:%s; from MDNS TXT Record\n", query->properties[lastPropIndex]->key, query->properties[lastPropIndex]->value);
+                #endif
+            }
+        }
+    }
+
     query->address = filteredServiceAddress;
     query->port = PortAsNumber;
     #if DEBUG
@@ -628,6 +680,7 @@ void discoverServicesBlockingFiltered(ServiceQuery *queryDesc,
     context->userFilterCB = userFilterCB;
     context->callback = callback;
     context->serviceSpec = queryDesc;
+    context->commHandle = NULL;
 
     // register type
     strcpy(regtype, "_");
@@ -1002,6 +1055,7 @@ static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSSer
 
     DiscoverContext *discContext = (DiscoverContext *)context;
     ServiceSpec *specification = discContext->serviceSpec;
+    CommHandle *commHandle = discContext->commHandle;
     // check whether user has explicitly specified the host address
     if (specification->address != NULL) {
         char portarr[128];
@@ -1009,12 +1063,12 @@ static void DNSSD_API advertise_resolve_reply(DNSServiceRef client, const DNSSer
         char *ipaddress = getIPAddressFromHostName(specification->address,portarr);
         if (ipaddress != NULL) {
             specification->address = ipaddress;
-            discContext->callback(client, errorCode,createService(specification));
+            discContext->callback(client, errorCode,createService(commHandle, specification));
         } else {
             printf("\nIn advertise_resolve_reply Host Name to IP Address Conversion Failed\n");
         }
     } else {
-        discContext->callback(client, errorCode,createService(specification));
+        discContext->callback(client, errorCode,createService(commHandle, specification));
     }
 
 }
@@ -1080,9 +1134,12 @@ bool advertiseService(ServiceSpec *specification) {
     pthread_t tid; // thread to handle events from DNS server
     char regtype[128];
     TXTRecordRef txtRecord;
+    CommHandle *commHandle = NULL;
 
     setMyAddresses(); // initialize my IP Addresses
 
+    commHandle = loadService(specification);
+    cleanUp(&commHandle);
     // register type
     strcpy(regtype, "_");
     strcat(regtype, specification->type.name);
@@ -1138,16 +1195,19 @@ void advertiseServiceBlocking(ServiceSpec *specification,
         void (*callback)(void *, int32_t, void *)) {
     DNSServiceRef client;
     DNSServiceErrorType err;
+    CommHandle *commHandle = NULL;
     pthread_t tid;      // thread to handle events from DNS server
     char regtype[128];
     TXTRecordRef txtRecord;
 
     setMyAddresses(); // initialize my IP Addresses
 
+    commHandle = loadService(specification);
     DiscoverContext *context = (DiscoverContext *)malloc(sizeof(DiscoverContext));
     if (!context) return;
     context->callback = callback;
     context->serviceSpec = specification;
+    context->commHandle = commHandle;
 
     // register type
     strcpy(regtype, "_");

@@ -19,8 +19,27 @@
 * Utility class for parsing JSON Objects.
 */
 
+#ifndef __CJSON_UTIL_H
+#define __CJSON_UTIL_H
+
 #include <stdbool.h>
 #include "cJSON.h"
+
+/** Check whether JSON item is a boolean false */
+static inline bool isJsonBooleanFalse(cJSON *item) {
+    if (item == NULL || item->type != cJSON_False) {
+        return false;
+    }
+    return true;
+}
+
+/** Check whether JSON item is a boolean true */
+static inline bool isJsonBooleanTrue(cJSON *item) {
+    if (item == NULL || item->type != cJSON_True) {
+        return false;
+    }
+    return true;
+}
 
 /** Check whether JSON item is a string. */
 static inline bool isJsonString(cJSON *item) {
@@ -53,3 +72,5 @@ static inline bool isJsonArray(cJSON *item) {
     }
     return true;
 }
+
+#endif

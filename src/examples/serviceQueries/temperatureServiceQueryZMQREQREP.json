@@ -3,5 +3,6 @@
     "type" : {
         "name": "zmqreqrep",
         "protocol" : "tcp"
-    }
+    },
+    "type_params": {"mustsecure": true}
 }

@@ -50,9 +50,9 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
 
         int (**send) (char *message,Context context);
 
-        send = commInterfacesLookup(commHandle, "send");
+        send = commInterfacesLookup(commHandle, "publish");
         if(send == NULL) {
-            printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
+            printf("Function \'publish\' is not available; please verify the Plugin documentation !!\n");
             return;
         }
 
@@ -69,8 +69,8 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
             i++;
         }
 
-        // clean the service specification object
-        cleanUpService(srvSpec);
+        // clean the objects
+        cleanUpService(&srvSpec, &commHandle);
     }
 }
 
@@ -90,7 +90,7 @@ int main(void) {
     #endif
 
     if (srvSpec){
-        createClientForGivenService(srvSpec, callback);
+        advertiseServiceBlocking(srvSpec, callback);
     }
 
     return 0;

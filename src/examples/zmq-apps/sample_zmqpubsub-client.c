@@ -65,7 +65,7 @@ void subDiscoveryCallback(void *handle, int32_t error_code, CommHandle *commHand
             }
 
             // clean the service query object
-            cleanUpService(servQuery);
+            cleanUpService(&servQuery, &commHandle);
             exit(0);
         } else {
             puts("Interface lookup failed");

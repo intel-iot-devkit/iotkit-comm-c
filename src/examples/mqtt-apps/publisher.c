@@ -44,13 +44,14 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
     Context context;
     char msg[256];
     int i = 0;
+    CommHandle *commHandle = NULL;
 
     if (serviceHandle != NULL) {
-        CommHandle *commHandle = (CommHandle *)serviceHandle;
+        commHandle = (CommHandle *)serviceHandle;
 
         int (**send)(char *, Context context);
 
-        send = commInterfacesLookup(commHandle, "send");
+        send = commInterfacesLookup(commHandle, "publish");
         if (send == NULL) {
             printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
             return;
@@ -70,8 +71,8 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         }
     }
 
-    // clean the service specification object
-    cleanUpService(srvSpec);
+    // clean the objects
+    cleanUpService(&srvSpec, &commHandle);
 }
 
 /**
@@ -91,13 +92,7 @@ int main(void) {
     #endif
 
     if (srvSpec) {
-        if (!advertiseService(srvSpec)) {
-            fprintf(stderr, "Failed to advertise the service\n");
-
-            return 0;
-        }
-
-        createClientForGivenService(srvSpec, callback);
+        advertiseServiceBlocking(srvSpec, callback);
     }
 
     return 0;

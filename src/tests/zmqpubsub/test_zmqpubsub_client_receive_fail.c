@@ -32,7 +32,7 @@ int main(void) {
     if (serviceQuery != NULL) {
         serviceQuery->address = "localhost";
         serviceQuery->port = 5563;
-        int result = init(serviceQuery);
+        int result = init(serviceQuery, NULL);
         if (result == -1)
             puts("client init failed");
         result = subscribe("flower");

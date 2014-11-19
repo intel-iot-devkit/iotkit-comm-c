@@ -30,7 +30,7 @@ establishes, connection to the address and port to initiate communication.
 * @param requestClientQuery an void pointer
 * @return The result code
 */
-int init(void *requestClientQuery) {
+int init(void *requestClientQuery, Crypto *crypto) {
     #if DEBUG
         printf("context initialised\n");
     #endif

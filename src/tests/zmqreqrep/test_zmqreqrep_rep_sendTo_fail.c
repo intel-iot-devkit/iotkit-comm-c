@@ -27,7 +27,7 @@ int main(void) {
     if (serviceSpec != NULL) {
         serviceSpec->address = "127.0.0.1";
         serviceSpec->port = 1234;
-        init(serviceSpec);
+        init(serviceSpec, NULL);
         int result = sendTo(NULL,"Hello World",NULL);
         if (result == 0) {
             puts("Sended Message Successfully");

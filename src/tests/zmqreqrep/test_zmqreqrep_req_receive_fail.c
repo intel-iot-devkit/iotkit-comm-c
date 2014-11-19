@@ -35,7 +35,7 @@ int main(void) {
     if (serviceQuery != NULL) {
         serviceQuery->address = "127.0.0.1";
         serviceQuery->port = 5560;
-        int result = init(serviceQuery);
+        int result = init(serviceQuery, NULL);
         if (result == -1)
             puts("Requester init failed");
         puts("waiting for message");

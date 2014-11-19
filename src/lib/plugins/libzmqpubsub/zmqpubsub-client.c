@@ -29,7 +29,7 @@ establishes connection to the address and port to initiate communication.
 * @param ClientServiceQuery an void pointer
 * @return The result code
 */
-int init(void *ClientServiceQuery) {
+int init(void *ClientServiceQuery, Crypto *crypto) {
     #if DEBUG
         printf("In createClient\n");
     #endif

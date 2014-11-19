@@ -37,7 +37,7 @@ int main(void) {
     if (serviceSpec != NULL) {
         serviceSpec->address = "127.0.0.1";
         serviceSpec->port = 1234;
-        init(serviceSpec);
+        init(serviceSpec, NULL);
         void *ctx = zmq_ctx_new();
         void *req = zmq_socket(ctx, ZMQ_REQ);
         int rc = zmq_connect(req, "tcp://127.0.0.1:1234");

@@ -27,7 +27,7 @@ int main(void) {
     if (serviceQuery != NULL) {
         serviceQuery->address = "127.0.0.123232132321323123232233";
         serviceQuery->port = 100;
-        int result = init(serviceQuery);
+        int result = init(serviceQuery, NULL);
         done();
         free(serviceQuery);
         if (result == 0) {

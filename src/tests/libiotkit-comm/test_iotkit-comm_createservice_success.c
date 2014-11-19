@@ -23,7 +23,7 @@
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceZMQPUBSUB.json");
-    if (serviceSpec && createService(serviceSpec)) {
+    if (serviceSpec && createService(NULL, serviceSpec)) {
          puts("Success: Created Service");
          exit(EXIT_SUCCESS);
     } else {

@@ -1,5 +1,5 @@
 /*
- * MQTT client plugin to enable subscribe feature through iotkit-comm API
+ * MQTT service plugin to enable publish feature through iotkit-comm API
  * Copyright (c) 2014, Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -13,10 +13,10 @@
  */
 
 /**
-* @file mqtt-client.h
-* @brief Headers of MQTT Async Client plugin for iotkit-comm API.
+* @file mqtt-service.h
+* @brief Headers of MQTT Async Service plugin for iotkit-comm API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic.
+* Provides features to connect to an MQTT Broker and publish a topic.
 */
 
 #include <stdio.h>
@@ -44,14 +44,12 @@ MQTTClient client;
 MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
 MQTTClient_SSLOptions sslopts = MQTTClient_SSLOptions_initializer;
 
-char *interface = "client-interface"; // specifies the plugin interface json
+char *interface = "service-interface"; // specifies the plugin interface json
 bool provides_secure_comm = true;
 
-int init(void *serviceDesc, Crypto *crypto);
-int send(char *message, Context context);
-int subscribe(char *topic);
-int unsubscribe(char *topic);
-int receive(void (*) (char *topic, Context context));
+int init(void *publishServiceDesc, Crypto *crypto);
+int sendTo(void *client, char *message, Context context);
+int publish(char *message,Context context);
+int manageClient(void *client,Context context);
+int receive(void (*publishServiceHandler)(void *client,char *message,Context context));
 int done();
-
-void (*msgArrhandler) (char *topic, Context context) = NULL;
