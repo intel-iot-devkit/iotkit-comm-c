@@ -226,7 +226,7 @@ int init(void *servQuery, Crypto *crypto) {
 
         conn_opts.ssl->enableServerCertAuth = 0;
     } else if(serviceQuery->type_params.mustsecure) {
-        if(crypto->host) {
+        if(crypto && crypto->host) {
             sprintf(uri, "ssl://%s:%d", crypto->host, crypto->mosquittoSecurePort);
             conn_opts.ssl = &sslopts;
             conn_opts.ssl->trustStore = strdup(crypto->cacert);
@@ -235,8 +235,8 @@ int init(void *servQuery, Crypto *crypto) {
             conn_opts.ssl->enableServerCertAuth = 0;
         } else {
             printf("Cannot secure communication channel."
-                         " Please setup and configure credentials using iotkit-comm setupAuthentication.");
-            return -1;
+                         " Please setup and configure credentials using iotkit-comm setupAuthentication.\n");
+            exit(1);
         }
     } else {
         if (serviceQuery->address != NULL) {

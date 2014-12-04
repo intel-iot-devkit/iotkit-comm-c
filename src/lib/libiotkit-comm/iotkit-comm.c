@@ -972,14 +972,16 @@ CommHandle *createClient(ServiceQuery *servQuery) {
             // no credentials setup and plugin does not provide own security mechanism
             fprintf(stderr, "Cannot connect securely because credentials are not setup (a secure\n"
                                     "communication channel was requested either by the service or the client).\n"
-                                    "Run iotkit-comm setupAuthentication to create and configure credentials.");
+                                    "Run iotkit-comm setupAuthentication to create and configure credentials.\n");
         }
 
         if(getSpecPropertyValue(servQuery, "__mustsecure") == NULL && \
             getSpecPropertyValue(servQuery, "__cansecure") == NULL && \
             getSpecPropertyValue(servQuery, "__user") == NULL ) {
                 // cannot create secure channel because server is not configured for it
-                fprintf(stderr, "Cannot connect securely because the server does not support secure communications.");
+                fprintf(stderr, "Cannot connect securely because the server does not support secure communications.\n");
+                cleanUp(&commHandle);
+                return NULL;
         }
 
         if(gCrypto && *commHandle->provides_secure_comm == false) {
@@ -1124,6 +1126,8 @@ CommHandle *loadService(ServiceSpec *specification) {
         if(gCrypto == NULL && *(commHandle->provides_secure_comm) == false) {
             fprintf(stderr, "Service expects clients to connect securely but credentials are not setup.\n"
                                   "Run iotkit-comm setupAuthentication to create and configure credentials.\n");
+            cleanUp(&commHandle);
+            return NULL;
         }
 
         addSpecProperty(specification, "__mustsecure", "true");
@@ -1156,9 +1160,9 @@ CommHandle *createService(CommHandle *commHandle, ServiceSpec *specification) {
         commHandle = loadService(specification);
     }
 
-    if(specification->type_params.mustsecure) {
-        gCrypto = crypto_init();
-    }
+    //if(specification->type_params.mustsecure) {
+    //    gCrypto = crypto_init();
+    //}
 
     if (commHandle && commHandle->init) {
         commHandle->init(specification, gCrypto);
@@ -1213,13 +1217,13 @@ Crypto *crypto_init() {
         return NULL;
     }
     if(!g_configData.localState || !g_configData.globalState) {
-        fprintf(stderr, "No credentials found. Please create credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No credentials found. Please create credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
     if(strcmp(g_configData.localState->host, g_configData.globalState->host) != 0 ) {
         fprintf(stderr, "Credentials do not seem to have been setup correctly for this host. Please rerun "
-               "iotkit-comm setupAuthentication");
+               "iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1240,7 +1244,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->cacert, g_configData.SSLCertSuffix);
 
     if(!fileExists(lCrypto->cacert)) {
-        fprintf(stderr, "No CA certificate found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No CA certificate found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1268,7 +1272,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->hostpubkey, g_configData.SSHPubKeySuffix);
 
     if(!fileExists(lCrypto->hostpubkey)) {
-        fprintf(stderr, "No host public key found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No host public key found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1289,7 +1293,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->hostkey, g_configData.privateKeyNameSuffix);
 
     if(!fileExists(lCrypto->hostkey)) {
-        fprintf(stderr, "No host private key found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No host private key found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1312,7 +1316,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->hostsshcert, g_configData.SSHPubKeySuffix);
 
     if(!fileExists(lCrypto->hostsshcert)) {
-        fprintf(stderr, "No host SSH certificate found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No host SSH certificate found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1333,7 +1337,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->hostsslcert, g_configData.SSLCertSuffix);
 
     if(!fileExists(lCrypto->hostsslcert)) {
-        fprintf(stderr, "No host SSL certificate found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No host SSL certificate found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1355,7 +1359,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->userkey, g_configData.privateKeyNameSuffix);
 
     if(!fileExists(lCrypto->userkey)) {
-        fprintf(stderr, "No user private key found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No user private key found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1378,7 +1382,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->userpubkey, g_configData.SSHPubKeySuffix);
 
     if(!fileExists(lCrypto->userpubkey)) {
-        fprintf(stderr, "No user public key found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No user public key found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1402,7 +1406,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->usersshcert, g_configData.SSHPubKeySuffix);
 
     if(!fileExists(lCrypto->usersshcert)) {
-        fprintf(stderr, "No user SSH certificate found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No user SSH certificate found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1425,7 +1429,7 @@ Crypto *crypto_init() {
     strcat(lCrypto->usersslcert, g_configData.SSLCertSuffix);
 
     if(!fileExists(lCrypto->usersslcert)) {
-        fprintf(stderr, "No user SSL certificate found. Please recreate credentials using iotkit-comm setupAuthentication");
+        fprintf(stderr, "No user SSL certificate found. Please recreate credentials using iotkit-comm setupAuthentication\n");
         return NULL;
     }
 
@@ -1611,7 +1615,7 @@ bool startTunnel(ServiceSpec *specification, int *localport, char **localaddr) {
         }
 
         if(gCrypto->portInUse != 0) {
-            fprintf(stderr, "Could not create tunnel at chosen port \'%d\', trying again with a new port...", gCrypto->portInUse);
+            fprintf(stderr, "Could not create tunnel at chosen port \'%d\', trying again with a new port...\n", gCrypto->portInUse);
             gCrypto->tunnelproc = -1;
             gCrypto->portInUse = 0;
         }
@@ -1629,7 +1633,7 @@ bool startTunnel(ServiceSpec *specification, int *localport, char **localaddr) {
 bool createSecureTunnel(ServiceSpec *specification, int *localport, char **localaddr) {
     char *user = getSpecPropertyValue(specification, "__user");
     if(gCrypto->tunnelproc > 0) {
-        fprintf(stderr, "Warning: A secure tunnel already exists. To create a new one, use a new instance");
+        fprintf(stderr, "Warning: A secure tunnel already exists. To create a new one, use a new instance\n");
 
         *localport = 0;
         *localaddr = NULL;

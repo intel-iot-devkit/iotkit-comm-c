@@ -287,6 +287,30 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             }
 
 
+            child = cJSON_GetObjectItem(json, "type_params");
+            if (isJsonObject(child)) {
+                jitem = cJSON_GetObjectItem(child, "mustsecure");
+                if (!jitem || (!isJsonBooleanFalse(jitem) && !isJsonBooleanTrue(jitem))) {
+                    cleanUpService(&specification, NULL);
+                    handleParseError();
+                }
+
+                if(isJsonBooleanTrue(jitem)) {
+                    specification->type_params.mustsecure = true;
+                } else {
+                    specification->type_params.mustsecure = false;
+                }
+
+                #if DEBUG
+                    if(specification->type_params.mustsecure) {
+                        printf("must secure parameter is TRUE\n");
+                    } else {
+                        printf("must secure parameter is FALSE\n");
+                    }
+                #endif
+            } else {
+                specification->type_params.mustsecure = false;
+            }
 
 endParseSrvFile:
             cJSON_Delete(json);
@@ -537,7 +561,7 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
     uint16_t PortAsNumber = ((uint16_t)port.b[0]) << 8 | port.b[1];
 
     #if DEBUG
-        printf("%s can be reached at %s:%u (interface %d)", fullservicename, hosttarget, PortAsNumber, ifIndex);
+        printf("%s can be reached at %s:%u (interface %d)\n", fullservicename, hosttarget, PortAsNumber, ifIndex);
     #endif
     if (errorCode)
         fprintf(stderr,"Error code %d\n", errorCode);
@@ -996,7 +1020,7 @@ bool serviceQueryFilter(ServiceQuery *srvQry, char *fullservicename, uint16_t Po
 */
 bool isPresentPropertyInCommParams(ServiceQuery *srvQry, char *paramName){
     int i;
-    if(srvQry->commParamsCount > 0 && srvQry->comm_params != NULL){
+    if(srvQry && srvQry->commParamsCount > 0 && srvQry->comm_params != NULL){
         for(i = 0; i < srvQry->commParamsCount; i ++){
             if(strcmp(srvQry->comm_params[i]->key, paramName) == 0) {
                 return true;
@@ -1123,12 +1147,12 @@ static void DNSSD_API regReply(DNSServiceRef client,
         }
     }
     else if (errorCode == kDNSServiceErr_NameConflict) {
-        sprintf(lastError, "Name in use, please choose another %s.%s.%s", name, regtype, domain);
+        sprintf(lastError, "Name in use, please choose another %s.%s.%s\n", name, regtype, domain);
         desc.status = IN_USE;
         discContext->callback(client, errorCode, NULL);
     }
     else {
-        sprintf(lastError, "MDNS unexpected error");
+        sprintf(lastError, "MDNS unexpected error\n");
         discContext->callback(client, errorCode, NULL);
     }
 }
