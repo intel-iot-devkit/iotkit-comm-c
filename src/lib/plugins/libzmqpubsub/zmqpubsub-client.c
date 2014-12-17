@@ -36,6 +36,7 @@
 establishes connection to the address and port to initiate communication.
 
 * @param ClientServiceQuery an void pointer
+* @param crypto authentication object
 * @return The result code
 */
 int init(void *ClientServiceQuery, Crypto *crypto) {

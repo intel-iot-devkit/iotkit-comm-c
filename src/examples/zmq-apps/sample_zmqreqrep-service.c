@@ -43,7 +43,7 @@ void repMessageCallback(void *client, char *message, Context context) {
 }
 
 /** Callback function. Once the service is advertised, this callback function will be invoked.
-
+* @param[in] handle left for future purpose, currently unused
 * @param error_code the error code
 * @param serviceHandle the communication handle used to invoke the interfaces
 */

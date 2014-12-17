@@ -35,6 +35,7 @@
 /** Creates the context object and publisher socket. With the help of the ServiceSpec parameter, the publisher
 socket binds to the address and port to initiate communication.
 * @param publishServiceDesc an void pointer
+* @param crypto authentication object
 * @return The result code
 */
 int init(void *publishServiceDesc, Crypto *crypto) {
@@ -64,6 +65,13 @@ int init(void *publishServiceDesc, Crypto *crypto) {
     return rc;
 }
 
+/**
+ * @name send a message
+ * @brief Used to send message to a client
+ * @param[in] client to be communicated
+ * @param[in] message to be published
+ * @param[in] context w.r.t topic the message required to be published
+ */
 int sendTo(void *client, char *message, Context context) {
     #if DEBUG
         printf("In sendTo\n");

@@ -58,6 +58,9 @@ static inline bool checkDLError() {
     goto endParseConfig;\
 }
 
+/*
+* Helper snippet to print JSON parse errors.
+*/
 #define handleUserDefinedConfigError() \
 {\
     fprintf(stderr,"invalid JSON format for %s file\n", config_file);\
@@ -159,11 +162,17 @@ endUserDefinedConfig:
     }
 }
 
+/** Returns path for global state configuration
+*/
 char *getGlobalStateLoc() {
     // TODO: support for different platforms
     return strdup("/usr/local");
 }
 
+/** parses the state configurations
+* @param[in] config_file path for the configuration file
+* @return returns AuthenticationState object
+*/
 AuthenticationState *readAuthenticationState(char *config_file) {
     cJSON *json = NULL, *jitem = NULL;
     AuthenticationState *authenticationState = NULL;
@@ -249,6 +258,8 @@ endParseStateConfig:
     return NULL;
 }
 
+/** Returns path for global state configuration
+*/
 void loadLocalState() {
     char *home, config_file[1024];
 
@@ -271,6 +282,9 @@ void loadLocalState() {
     g_configData.localState = readAuthenticationState(config_file);
 }
 
+/** frames the global state configuration file path and parses authentication state
+* @param[in] location path for the configurations
+*/
 void loadGlobalState(char *location) {
     char *home, config_file[1024];
 
@@ -690,6 +704,7 @@ void cleanUp(CommHandle **commHandle) {
 
 /** Cleanup by freeing service
  * @param[in] srvSpec service query or specification
+ * @param[in] commHandle communication handle
  */
 void cleanUpService(ServiceSpec **servSpec, CommHandle **commHandle) {
     int i;
@@ -1022,6 +1037,10 @@ bool fileExists(char *absPath) {
     return false;
 }
 
+/** Initializes the service object
+* @param[in] specification the service specification object
+* @return returns service handle upon successful and NULL otherwise
+*/
 CommHandle *loadService(ServiceSpec *specification) {
     CommHandle *commHandle = NULL;
     char cwd_temp[1024];
@@ -1150,6 +1169,7 @@ CommHandle *loadService(ServiceSpec *specification) {
 }
 
 /** Initializes Service object. Creates the service object and calls its init method for further initialization.
+* @param[in] commHandle communication handle
 * @param[in] specification service specification
 * @return returns service handle upon successful and NULL otherwise
 */
@@ -1171,6 +1191,10 @@ CommHandle *createService(CommHandle *commHandle, ServiceSpec *specification) {
     return commHandle;
 }
 
+/** Looks for requested function and returns the function pointer
+* @param[in] commHandle communication handle
+* @return returns function pointer if found, otherwise NULL
+*/
 void* commInterfacesLookup(CommHandle *commHandle, char *funcname) {
     int i;
 
@@ -1183,6 +1207,11 @@ void* commInterfacesLookup(CommHandle *commHandle, char *funcname) {
     return NULL;
 }
 
+/** Retrieves a property from specification
+* @param[in] specification service specification
+* @param[in] key property name
+* @return returns property value if found, otherwise NULL
+*/
 char *getSpecPropertyValue(ServiceSpec *specification, char *key) {
     if(specification->numProperties > 0 && specification->properties) {
         int i = 0;
@@ -1198,6 +1227,11 @@ char *getSpecPropertyValue(ServiceSpec *specification, char *key) {
     return NULL;
 }
 
+/** Add an property to specification
+* @param[in] specification service specification
+* @param[in] key property name
+* @param[in] value property value
+*/
 void addSpecProperty(ServiceSpec *specification, char *key, char *value) {
     Property *property = (Property *)malloc(sizeof(Property));
     property->key = strdup(key);
@@ -1207,6 +1241,8 @@ void addSpecProperty(ServiceSpec *specification, char *key, char *value) {
     specification->properties[specification->numProperties - 1] = property;
 }
 
+/** Initializes authentication object
+*/
 Crypto *crypto_init() {
     char *home;
     Crypto *lCrypto = NULL;
@@ -1444,6 +1480,8 @@ Crypto *crypto_init() {
     return lCrypto;
 }
 
+/** Closes SSH Tunnel
+*/
 int destroySecureTunnel() {
     if(gCrypto->tunnelproc > 0) {
         int internal_stat;
@@ -1454,10 +1492,22 @@ int destroySecureTunnel() {
     }
 }
 
+/** Generates a random port between a range
+* @param[in] min_port minimum value in range
+* @param[in] max_port maximum value in range
+* @return returns generated random port
+*/
 int getRandomPort(int min_port, int max_port) {
     return (rand() % (max_port - min_port)) + min_port;
 }
 
+/** frames SSH Tunnel command along with arguments
+* @param[in] remoteHost denotes remote hostname
+* @param[in] localPort denotes local port
+* @param[in] remotePort denotes remote port
+* @param[in] remoteUser denotes remote username
+* @return returns the ssh command along with arguments
+*/
 char **getCreateSecureTunnelArgs(char *remoteHost, int localPort, int remotePort, char *remoteUser) {
     char lPort[256];
     int argumentCount = 9, i;
@@ -1494,6 +1544,12 @@ char **getCreateSecureTunnelArgs(char *remoteHost, int localPort, int remotePort
     return arguments;
 }
 
+/** streams stderr along with stdin and stdout
+* @param[in] arguments to be passed to execl command
+* @param[in] infp input file pointer
+* @param[in] outfp output file pointer
+* @return returns pid of the instantiated process
+*/
 pid_t popen2(const char **arguments, int *infp, int *outfp)
 {
     int p_stdin[2], p_stdout[2], p_stderr[2];
@@ -1547,6 +1603,12 @@ pid_t popen2(const char **arguments, int *infp, int *outfp)
     return pid;
 }
 
+/** starts SSH Tunnel
+* @param[in] specification service specification
+* @param[in] localPort denotes local port
+* @param[in] localaddr denotes local address
+* @return returns true if successful, otherwise false
+*/
 bool startTunnel(ServiceSpec *specification, int *localport, char **localaddr) {
     regex_t regex_success;
     regex_t regex_portInUse;
@@ -1630,6 +1692,12 @@ bool startTunnel(ServiceSpec *specification, int *localport, char **localaddr) {
     return false;
 }
 
+/** creates SSH Tunnel
+* @param[in] specification service specification
+* @param[in] localPort denotes local port
+* @param[in] localaddr denotes local address
+* @return returns true if successful, otherwise false
+*/
 bool createSecureTunnel(ServiceSpec *specification, int *localport, char **localaddr) {
     char *user = getSpecPropertyValue(specification, "__user");
     if(gCrypto->tunnelproc > 0) {

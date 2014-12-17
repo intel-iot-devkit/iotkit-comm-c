@@ -47,7 +47,7 @@ void clientMessageCallback(char *message, Context context) {
 }
 
 /** Callback function. Once the service is discovered this callback function will be invoked
-* @param queryDesc the query description object
+* @param queryDesc left for future purpose, currently unused
 * @param error_code the error code
 * @param commHandle the communication handle used to invoke the interfaces
  */

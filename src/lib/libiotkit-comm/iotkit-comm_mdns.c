@@ -1159,7 +1159,7 @@ static void DNSSD_API regReply(DNSServiceRef client,
 
 /** Advertise a service. Return an opaque object.
 * @param[in] specification service specification
-* @param[in] callback callback to be invoked upon successful service creation
+* @return returns true if successful, otherwise false
 */
 bool advertiseService(ServiceSpec *specification) {
     DNSServiceRef client;

@@ -112,6 +112,13 @@ void connectionLost(void *context, char *cause) {
     }
 }
 
+/**
+ * @name send a message
+ * @brief Used to send message to a client
+ * @param[in] client to be communicated
+ * @param[in] message to be published
+ * @param[in] context w.r.t topic the message required to be published
+ */
 int sendTo(void *client, char *message, Context context) {
     #if DEBUG
         printf("In sendTo\n");
@@ -223,6 +230,7 @@ int receive(void (*handler) (char *topic, Context context)) {
  * @name Create the MQTT client
  * @brief Create and initialize the mqtt plugin.
  * @param[in] servQuery is the service query being queried for
+ * @param[in] crypto authentication object
  * @return boolean, which specifies whether the connection is successfully established or not
  *
  * Establishes the connection with an MQTT broker.

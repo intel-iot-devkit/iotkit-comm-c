@@ -358,6 +358,7 @@ int receive(void (*handler) (char *topic, Context context)) {
  * @name Create the MQTT client
  * @brief Create and initialize the mqtt plugin.
  * @param[in] servQuery is the service query being queried for
+ * @param[in] crypto authentication object
  * @return boolean, which specifies whether the connection is successfully established or not
  *
  * Establishes the connection with an MQTT broker.

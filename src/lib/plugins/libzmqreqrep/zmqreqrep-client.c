@@ -37,6 +37,7 @@
 /** Creates the context object and requester socket. With the help of the ServiceQuery parameter, the requester socket
 establishes, connection to the address and port to initiate communication.
 * @param requestClientQuery an void pointer
+* @param crypto authentication object
 * @return The result code
 */
 int init(void *requestClientQuery, Crypto *crypto) {

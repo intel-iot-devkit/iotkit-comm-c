@@ -47,6 +47,14 @@ void connectionLost(void *context, char *cause) {
     }
 }
 
+/**
+ * @name Create and initialize the MQTT client
+ * @brief initializes the plugin.
+ * @param[in] publishServiceDesc is the service query being queried for
+ * @param[in] crypto authentication object
+ *
+ * Establishes the connection with an MQTT broker.
+ */
 int init(void *publishServiceDesc, Crypto *crypto) {
     ServiceSpec *serviceSpec = (ServiceSpec *) publishServiceDesc;
     int rc = 0;
@@ -115,6 +123,13 @@ int init(void *publishServiceDesc, Crypto *crypto) {
     return rc;
 }
 
+/**
+ * @name send a message
+ * @brief Used to send message to a client
+ * @param[in] client to be communicated
+ * @param[in] message to be published
+ * @param[in] context w.r.t topic the message required to be published
+ */
 int sendTo(void *client, char *message, Context context) {
     #if DEBUG
         printf("In sendTo\n");

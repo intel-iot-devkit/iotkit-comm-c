@@ -44,6 +44,7 @@ int msgnumber = 40; // iotkit-agent does not accept zero as sensor value; so ass
 /**
  * @name Callback to handle the communication
  * @brief Handles the communication with an MQTT broker once the connection is established.
+ * @param[in] handle left for future purpose, currently unused
  * @param[in] error_code specifies the error code any
  * @param[in] serviceHandle is the client object initialized with the required APIs
  *

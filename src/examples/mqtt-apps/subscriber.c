@@ -63,6 +63,7 @@ int serviceStarted = 0;
 /**
  * @name Callback to handle the communication
  * @brief Handles the communication with an MQTT broker once the connection is established.
+ * @param[in] handle left for future purpose, currently unused
  * @param[in] error_code specifies the error code is any
  * @param[in] serviceHandle is the client object initialized with the required APIs
  *
@@ -93,6 +94,13 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
     }
 }
 
+/**
+ * @name Callback to filter discovered services
+ * @brief Handles service filtering after discovery
+ * @param[in] srvQuery service query object
+ *
+ * Handles service filtering after discovery
+ */
 bool serviceFilter(ServiceQuery *srvQuery) {
     printf("Got into Service Filter\n");
     return true;

@@ -163,6 +163,8 @@ typedef struct _ServiceSpec {
 #define SSH_TUNNEL_ADDRESS_IN_USE_RE_STRING "bind: Address already in use";
 
 
+/** holds authentication details
+*/
 typedef struct _Crypto {
     char *user;
     char *host;

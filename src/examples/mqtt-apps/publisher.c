@@ -44,6 +44,7 @@ int msgnumber = 0;
 /**
  * @name Callback to handle the communication
  * @brief Handles the communication with an MQTT broker once the connection is established.
+ * @param[in] handle left for future purpose, currently unused
  * @param[in] error_code specifies the error code is any
  * @param[in] serviceHandle is the client object initialized with the required APIs
  *

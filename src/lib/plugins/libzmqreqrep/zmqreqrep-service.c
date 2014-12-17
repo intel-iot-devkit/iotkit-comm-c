@@ -35,6 +35,7 @@
 /** Creates the context object and responder socket. With the help of the ServiceSpec parameter, the responder
 socket binds, connection to the address and port to initiate communication.
 * @param responseServiceDesc an void pointer
+* @param crypto authentication object
 * @return The result code
 */
 int init(void *responseServiceDesc, Crypto *crypto) {
