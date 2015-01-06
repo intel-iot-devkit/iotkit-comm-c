@@ -56,6 +56,7 @@ int clientInstanceNumber = 0;
 
 char *interface = "iotkit-agent-client-interface"; // specifies the plugin interface json
 bool provides_secure_comm = true;
+bool communicates_via_proxy = true;
 
 void *handle = NULL;
 char *err = NULL;

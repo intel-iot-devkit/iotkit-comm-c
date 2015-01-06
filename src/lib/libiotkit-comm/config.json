@@ -9,11 +9,12 @@
             "serverFileSuffix": "service"
         }
     },
+    "unusedPortDetectAttempts": 3,
     "stateDirName": "iotkit-comm",
     "stateMapName": "state.json",
     "localaddr": "127.0.0.1",
-    "port_min": 3553,
-    "port_max": 3565,
+    "port_min": 1025,
+    "port_max": 65535,
     "auth": {
         "keyDirSuffix": "_credentials",
         "keyDirName": "iotkit-comm",

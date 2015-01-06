@@ -47,8 +47,8 @@ void subDiscoveryCallback(ServiceQuery *servQuery, int32_t error_code, CommHandl
 }
 
 int main(void) {
-    ServiceQuery *servQuery = (ServiceQuery *) parseServiceQuery("./temperatureServiceQueryZMQPUBSUB.json.json");
-    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceZMQPUBSUB.json.json");
+    ServiceQuery *servQuery = (ServiceQuery *) parseServiceQuery("./temperatureServiceQueryZMQPUBSUB1.json");
+    ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceZMQPUBSUB.json");
 
     if (serviceSpec) {
         if (servQuery && advertiseService(serviceSpec)) {

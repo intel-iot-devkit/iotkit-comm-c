@@ -82,6 +82,7 @@ typedef struct _ConfigFileData {
     AuthenticationState *localState;
     AuthenticationState *globalState;
 
+    int unusedPortDetectAttempts;
     char *stateDirName;
     char *stateMapName;
     char *localAddr;
@@ -119,6 +120,7 @@ typedef struct _Interfaces {
 typedef struct {
     char **interface; // specifies the filename for plugin-interface json file
     bool *provides_secure_comm;
+    bool *communicates_via_proxy;
 
     int (*init)(void *, void *); // initializes the plugin
 

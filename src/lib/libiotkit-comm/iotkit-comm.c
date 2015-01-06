@@ -30,6 +30,10 @@
  */
 
 #include "iotkit-comm.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
 
 #include "cJSON.h"
 #include "util.h"
@@ -388,6 +392,16 @@ bool parseConfigFile(char *config_file) {
             g_configData.serverFileSuffix = strdup(jitem->valuestring);
             #if DEBUG
                 printf("serverFileSuffix = %s\n", g_configData.serverFileSuffix);
+            #endif
+
+            jitem = cJSON_GetObjectItem(json, "unusedPortDetectAttempts");
+            if (!isJsonNumber(jitem)) {
+                handleParseConfigError();
+            }
+
+            g_configData.unusedPortDetectAttempts = jitem->valueint;
+            #if DEBUG
+                printf("unusedPortDetectAttempts = %d\n", g_configData.unusedPortDetectAttempts);
             #endif
 
             jitem = cJSON_GetObjectItem(json, "stateDirName");
@@ -861,6 +875,14 @@ CommHandle *loadCommPlugin(char *plugin_path) {
                 return NULL;
             }
 
+            dlerror();  /* Clear any existing error */
+            commHandle->communicates_via_proxy = (bool *) dlsym(handle, "communicates_via_proxy");
+            if (commHandle->communicates_via_proxy == NULL) {
+                bool *boolptr = (bool *)malloc(sizeof(bool));
+                *boolptr = false;
+                commHandle->communicates_via_proxy = boolptr;
+            }
+
             commHandle->handle = handle;
         }
 
@@ -983,7 +1005,7 @@ CommHandle *createClient(ServiceQuery *servQuery) {
     mustsecure = servQuery->type_params.mustsecure ? servQuery->type_params.mustsecure : getSpecPropertyValue(servQuery, "__mustsecure");
     if(mustsecure) {
         gCrypto = crypto_init();
-        if(gCrypto && *commHandle->provides_secure_comm == false) {
+        if(!gCrypto && *commHandle->provides_secure_comm == false) {
             // no credentials setup and plugin does not provide own security mechanism
             fprintf(stderr, "Cannot connect securely because credentials are not setup (a secure\n"
                                     "communication channel was requested either by the service or the client).\n"
@@ -1137,6 +1159,13 @@ CommHandle *loadService(ServiceSpec *specification) {
     if (loadCommInterfaces(commHandle) == false) {
         cleanUp(&commHandle);
         return NULL;
+    }
+
+    if(*(commHandle->communicates_via_proxy) == false) {
+        int unUsedPort = getUnusedPort(specification->type.protocol);
+        if(unUsedPort >= 0) {
+            specification->port = unUsedPort;
+        }
     }
 
     gCrypto = crypto_init();
@@ -1501,6 +1530,48 @@ int getRandomPort(int min_port, int max_port) {
     return (rand() % (max_port - min_port)) + min_port;
 }
 
+/** Returns for an unused port between a range
+* @param[in] protocol specifies the protocol
+* @return returns unused port if found; otherwise -1
+*/
+int getUnusedPort(char *protocol) {
+    int nextport = -1;
+    int i = 0;
+    int sockdesc;
+    struct sockaddr_in server_address;
+
+    if(!protocol || strcmp(protocol, "tcp") != 0) {
+        fprintf(stderr, "Can't find an unused port for protocol %s. Note: only the TCP protocol is supported.", protocol);
+        return -1;
+    }
+
+    while(i < g_configData.unusedPortDetectAttempts) {
+        nextport = getRandomPort(g_configData.portMin, g_configData.portMax);
+
+        sockdesc = socket(AF_INET, SOCK_STREAM, 0);
+        if(sockdesc >= 0) {
+            // initialize socket structure
+            bzero((char *) &server_address, sizeof(server_address));
+            server_address.sin_family = AF_INET;
+            server_address.sin_addr.s_addr = INADDR_ANY;
+            server_address.sin_port = htons(nextport);
+
+            if (bind(sockdesc, (struct sockaddr *) &server_address, sizeof(server_address)) == 0) {
+                close(sockdesc);
+                return nextport;
+            } else {
+                close(sockdesc);
+            }
+        }
+        i ++;
+    }
+
+    fprintf(stderr, "WARN: Could not find an unused port. "
+                        "Please provide port number in specification, or try again later.");
+
+    return -1;
+}
+
 /** frames SSH Tunnel command along with arguments
 * @param[in] remoteHost denotes remote hostname
 * @param[in] localPort denotes local port
@@ -1716,19 +1787,3 @@ bool createSecureTunnel(ServiceSpec *specification, int *localport, char **local
 
     return startTunnel(specification, localport, localaddr);
 }
-
-#if DEBUG
-int main(int argc, char *argv[]) {
-    ServiceSpec *specification = (ServiceSpec *)parseServiceSpec("../../examples/serviceSpecs/temperatureServiceMQTT.json");
-    CommHandle *commHandle = createClient(specification);
-
-    if (commHandle) {
-        Context context;
-        context.name = "topic";
-        context.value = "temperature";
-        commHandle->send("75 degrees", context);
-        commHandle->unsubscribe("temperature");
-        commHandle->subscribe("temperature");
-    }
-}
-#endif

@@ -55,6 +55,7 @@ MQTTClient_SSLOptions sslopts = MQTTClient_SSLOptions_initializer;
 
 char *interface = "service-interface"; // specifies the plugin interface json
 bool provides_secure_comm = true;
+bool communicates_via_proxy = true;
 
 int init(void *publishServiceDesc, Crypto *crypto);
 int sendTo(void *client, char *message, Context context);

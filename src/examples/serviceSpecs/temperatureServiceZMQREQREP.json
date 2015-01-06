@@ -4,7 +4,6 @@
         "name": "zmqreqrep",
         "protocol": "tcp"
     },
-    "port": 48569,
     "properties": {
         "dataType": "float",
         "unit": "F"

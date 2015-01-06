@@ -56,7 +56,7 @@ void pubServiceCallback(void *handle, int32_t error_code, CommHandle *serviceHan
             // clean the service specification object
             cleanUpService(&serviceSpec, &serviceHandle);
             exit(0);
-        } {
+        } else {
             puts("Interface lookup failed");
         }
     } else {

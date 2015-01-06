@@ -81,6 +81,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
 
         // clean the objects
         cleanUpService(&srvSpec, &commHandle);
+        exit(0);
     }
 }
 

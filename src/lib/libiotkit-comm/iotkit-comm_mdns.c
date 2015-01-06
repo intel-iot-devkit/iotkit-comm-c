@@ -184,13 +184,13 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             } else {
                 specification->address = NULL;
             }
-            // must have a port
+
             jitem = cJSON_GetObjectItem(json, "port");
             if (!jitem || !isJsonNumber(jitem)) {
-                cleanUpService(&specification, NULL);
-                handleParseError();
+                specification->port = 0; // may use a random port based upon plugin configuration
+            } else {
+                specification->port = jitem->valueint;
             }
-            specification->port = jitem->valueint;
             #if DEBUG
                 printf("port %d\n", specification->port);
             #endif
@@ -401,11 +401,16 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(child, "protocol");
             if (!isJsonString(jitem)) {
-                cleanUpService(&specification, NULL);
+                specification->type.protocol = strdup("tcp");
+            } else {
+                specification->type.protocol = strdup(jitem->valuestring);
+            }
+
+            if(strcmp(specification->type.protocol, "tcp") != 0) { // currently ONLY tcp is supported
+                fprintf(stderr, "Protocol %s is not yet supported.\n", specification->type.protocol);
                 handleParseError();
             }
 
-            specification->type.protocol = strdup(jitem->valuestring);
             #if DEBUG
                 printf("protocol %s\n", specification->type.protocol);
             #endif
@@ -1379,36 +1384,3 @@ void freeMDNSGlobals() {
         myaddresses = NULL;
     }
 }
-
-#if DEBUG
-void callback(void *handle, int32_t error_code, ServiceSpec *desc) {
-    printf("message error=%d error_string=%s\nservice status=%d service name=%s\n", 
-        error_code,
-        getLastError(),
-        desc ? desc->status : -1,
-        desc ? desc->service_name : "");
-}
-
-// Test code for advertisement
-void testAdvertise() {
-    ServiceSpec *specification = parseServiceSpec("../../examples/serviceSpecs/temperatureServiceMQTT.json");
-    if (specification)
-        advertiseServiceBlocking(specification, callback);
-
-    printf ("Done advertise\n");
-}
-
-// Test code for discover
-void testDiscover() {
-    ServiceQuery *query = parseServiceQuery("../../examples/serviceQueries/temperatureServiceQueryMQTT.json");
-    if (query)
-        discoverServicesBlocking(query, callback);
-    printf("Done discover\n");
-}
-
-int main(void) {
-    //testAdvertise();
-    testDiscover();
-}
-
-#endif
