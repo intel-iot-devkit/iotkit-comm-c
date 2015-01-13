@@ -4,6 +4,5 @@
     "name": "zmqpubsub",
     "protocol": "tcp"
   },
-  "port": 9999,
   "properties": {"dataType": "float", "unit": "F"}
 }

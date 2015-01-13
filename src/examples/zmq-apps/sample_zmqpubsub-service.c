@@ -32,6 +32,7 @@
 #include "util.h"
 
 ServiceSpec *serviceSpec = NULL;
+char *topic = NULL;
 
 /** Callback function. Once the service is advertised, this callback function will be invoked.
 * @param[in] handle left for future purpose, currently unused
@@ -46,8 +47,12 @@ void pubServiceCallback(void *handle, int32_t error_code, CommHandle *serviceHan
         publish = commInterfacesLookup(serviceHandle, "publish");
         if (publish != NULL) {
             Context context;
+            char message[256];
+            int temp[] = {70, 73, 64, 67, 71, 72, 78, 67, 66, 75};
             while(i < 10) { // Event Loop
-                (*publish)("vehicle: car",context);
+                sprintf(message, "%s: %d", topic, temp[i]);
+                printf("Publishing ... %s\n", message);
+                (*publish)(message,context);
                 sleep(2);
 
                 i ++;
@@ -71,6 +76,7 @@ int main(void) {
     serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceZMQPUBSUB.json");
 
     if (serviceSpec) {
+        topic = serviceSpec->service_name;
         advertiseServiceBlocking(serviceSpec, pubServiceCallback);
     }
 

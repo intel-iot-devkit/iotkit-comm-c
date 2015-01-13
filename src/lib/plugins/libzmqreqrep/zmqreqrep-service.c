@@ -85,13 +85,6 @@ int publish(char *message,Context context) {
     return -1;
 }
 
-int manageClient(void *client,Context context) {
-    #if DEBUG
-        printf ("In manageClient\n");
-    #endif
-    return -1;
-}
-
 /** Receive the message. The parameter in this function is used as a callback mechanism to pass the
 received message.
 * @param responseServiceHandler a callback handler which takes a client,message,context object as params

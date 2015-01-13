@@ -53,14 +53,11 @@ void clientMessageCallback(char *message, Context context) {
  */
 void subDiscoveryCallback(ServiceQuery *queryDesc, int32_t error_code, CommHandle *commHandle) {
 
-    int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
     if (commHandle != NULL) {
-        subscribe = commInterfacesLookup(commHandle, "subscribe");
         receive = commInterfacesLookup(commHandle, "receive");
-        if (subscribe != NULL && receive != NULL) {
+        if (receive != NULL) {
             while (1) { // Infinite Event Loop
-                (*subscribe)("mean_temp");
                 (*receive)(clientMessageCallback);
                  sleep(2);
             }

@@ -33,6 +33,8 @@
 #include "iotkit-comm.h"
 #include "util.h"
 
+char *topic = NULL;
+
 /** Callback function. Once the service is advertised this callback function will be invoked
 
 * @param servSpec left for future purpose, currently unused
@@ -49,7 +51,8 @@ void pubServiceCallback(ServiceSpec *servSpec, int32_t error_code, CommHandle *s
             while(1) {  // Infinite Event Loop
                 char addr[128];
                 double random = floor(rand() % 90 + 60);
-                sprintf(addr, "mytemp: %f",random);
+                sprintf(addr, "%s: %f",topic, random);
+                printf("Publishing ... %s\n", addr);
                 (*publish)(addr,context);
                 sleep(2);
             }
@@ -67,7 +70,10 @@ int main(void) {
 
     puts("Temperature sensor publishing its temperature data !!");
     ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperature-sensor-spec.json");
-    if (serviceSpec)
+    if (serviceSpec) {
+        topic = serviceSpec->service_name;
         advertiseServiceBlocking(serviceSpec, pubServiceCallback);
+    }
+
     return 0;
 }

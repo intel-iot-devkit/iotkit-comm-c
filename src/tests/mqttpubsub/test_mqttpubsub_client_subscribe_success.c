@@ -39,7 +39,8 @@ void message_callback(char *message, Context context) {
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     if (serviceQuery != NULL) {
-        serviceQuery->address = "localhost";
+        serviceQuery->service_name = strdup("/foo");
+        serviceQuery->address = strdup("localhost");
         serviceQuery->port = 1883;
         int result = init(serviceQuery, NULL);
         if (result == MQTTASYNC_SUCCESS) {

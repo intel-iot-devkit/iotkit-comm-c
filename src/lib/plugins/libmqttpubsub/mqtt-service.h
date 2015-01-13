@@ -57,9 +57,14 @@ char *interface = "service-interface"; // specifies the plugin interface json
 bool provides_secure_comm = true;
 bool communicates_via_proxy = true;
 
+/**
+ * Topic to publish or subscribe data to. This is the only topic
+ * the cloud supports.
+ */
+char *default_topic = NULL;
+
 int init(void *publishServiceDesc, Crypto *crypto);
 int sendTo(void *client, char *message, Context context);
 int publish(char *message,Context context);
-int manageClient(void *client,Context context);
 int receive(void (*publishServiceHandler)(void *client,char *message,Context context));
 int done();

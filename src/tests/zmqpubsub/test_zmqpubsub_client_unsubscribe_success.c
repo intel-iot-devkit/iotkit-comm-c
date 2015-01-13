@@ -33,7 +33,8 @@
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     if (serviceQuery != NULL) {
-        serviceQuery->address = "localhost";
+        serviceQuery->service_name = strdup("/foo");
+        serviceQuery->address = strdup("localhost");
         serviceQuery->port = 1234;
         init(serviceQuery, NULL);
         int result = unsubscribe("flower");

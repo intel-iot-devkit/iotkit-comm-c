@@ -58,6 +58,13 @@ int init(void *ClientServiceQuery, Crypto *crypto) {
     #if DEBUG
         printf("subscriber connected\n");
     #endif
+
+    #if DEBUG
+        printf("Subscribing to %s\n", serviceQuery->service_name);
+    #endif
+
+    subscribe(serviceQuery->service_name);
+
     return rc;
 }
 

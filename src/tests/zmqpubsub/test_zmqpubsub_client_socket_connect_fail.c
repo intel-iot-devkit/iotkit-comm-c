@@ -33,7 +33,8 @@
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));
     if (serviceQuery != NULL) {
-        serviceQuery->address = "invalidaddress";
+        serviceQuery->service_name = strdup("/foo");
+        serviceQuery->address = strdup("invalidaddress");
         serviceQuery->port = 100;
         int result = init(serviceQuery, NULL);
         done();

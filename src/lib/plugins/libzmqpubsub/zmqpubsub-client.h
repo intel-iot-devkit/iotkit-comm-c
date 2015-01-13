@@ -57,8 +57,6 @@ struct ZMQPubSubClient zmqContainer;
 
 int init(void *ClientServiceQuery, Crypto *crypto);
 int send(char *message,Context context);
-int subscribe(char *topic);
-int unsubscribe(char *topic);
 int receive(void (*subscribeClientHandler)(char *message, Context context));
 int done();
 

@@ -72,14 +72,7 @@ int serviceStarted = 0;
 void callback(void *handle, int32_t error_code, void *serviceHandle) {
     if(serviceHandle != NULL && !serviceStarted) {
         commHandle = (CommHandle *) serviceHandle;
-        int (**subscribe)() = NULL;
         int (**receive)(void (*)(char *, Context)) = NULL;
-
-        subscribe = commInterfacesLookup(commHandle, "subscribe");
-        if(subscribe == NULL) {
-            printf("Function \'subscribe\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
 
         receive = commInterfacesLookup(commHandle, "receive");
         if(receive == NULL) {
@@ -88,7 +81,6 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         }
 
         (*receive)(message_callback);
-        (*subscribe)(NULL);
 
         serviceStarted = 1;
         while(1) { // Infinite Event Loop

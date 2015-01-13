@@ -60,7 +60,6 @@ struct ZMQPubSubService zmqContainer;
 int init(void *publishServiceDesc, Crypto *crypto);
 int sendTo(void *client, char *message, Context context);
 int publish(char *message,Context context);
-int manageClient(void *client,Context context);
 int receive(void (*publishServiceHandler)(void *client,char *message,Context context));
 int done();
 

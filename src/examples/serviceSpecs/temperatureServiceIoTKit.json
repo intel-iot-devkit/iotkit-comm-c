@@ -1,15 +1,6 @@
 {
-    "name" : "/INTEL/NDG/temperature",
+    "name" : "temperature.v1.0/garage_sensor",
     "type" : {
-        "name": "iotkit-agent",
-        "protocol" : "tcp"
-    },
-    "address" : "127.0.0.1",
-    "port" : 1884,
-    "properties" : {
-        "dataType": "float"
-    },
-    "comm_params": {
-        "ssl": false
+        "name": "iotkit-agent"
     }
 }

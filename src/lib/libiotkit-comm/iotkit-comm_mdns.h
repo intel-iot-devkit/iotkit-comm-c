@@ -76,6 +76,7 @@ char **myaddresses = NULL;
 
 bool serviceQueryFilter(ServiceQuery *srvQry, char *fullname, uint16_t PortAsNumber, uint16_t txtLen, const unsigned char *txtRecord);
 char* serviceAddressFilter(ServiceQuery *srvQry, const char *hosttarget, const char *fullname, uint16_t portAsNumber);
+bool extractNameFromServiceRecord(char *fullservicename, char *servicename);
 bool isServiceLocal(const char *address);
 bool setMyAddresses(void);
 

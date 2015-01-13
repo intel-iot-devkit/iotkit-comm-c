@@ -98,13 +98,6 @@ int publish(char *message,Context context) {
     return rc;
 }
 
-int manageClient(void *client,Context context) {
-    #if DEBUG
-        printf("In manageClient\n");
-    #endif
-    return -1;
-}
-
 int receive(void (*publishServiceHandler) (void *client,char *message,Context context)) {
     #if DEBUG
         printf("In receive\n");

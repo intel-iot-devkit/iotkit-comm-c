@@ -67,8 +67,8 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
             return;
         }
 
-        context.name = "topic";
-        context.value = "/foo";
+        context.name = NULL; // use topic defined in service specification
+        context.value = NULL; // use topic defined in service specification
 
         while(i < 10) {  // Event Loop
             sprintf(msg, "This is a test message %d", msgnumber++);

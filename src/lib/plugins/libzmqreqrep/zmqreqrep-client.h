@@ -56,8 +56,6 @@ struct ZMQReqRepClient zmqContainer;
 
 int init(void *requestClientQuery, Crypto *crypto);
 int send(char *message, Context);
-int subscribe(char *topic);
-int unsubscribe(char *topic);
 int receive(void (*requestClientHandler)(char *message, Context context));
 int done();
 /** @} */ // end of zmqreqrepclient

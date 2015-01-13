@@ -74,20 +74,6 @@ int send(char *message,Context context) {
     return rc;
 }
 
-int subscribe(char *topic) {
-    #if DEBUG
-        printf("In subscribe\n");
-    #endif
-    return -1;
-}
-
-int unsubscribe(char *topic) {
-    #if DEBUG
-        printf("In unsubscribe\n");
-    #endif
-    return -1;
-}
-
 /** Receive the message. The parameter in this function is used as a callback mechanism to pass the
 received message.
 * @param requestClientHandler a callback handler which takes message and context object as params

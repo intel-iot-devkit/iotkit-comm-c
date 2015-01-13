@@ -166,11 +166,11 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(child, "protocol");
             if (!isJsonString(jitem)) {
-                cleanUpService(&specification, NULL);
-                handleParseError();
+                specification->type.protocol = strdup("tcp"); // default protocol type
+            } else {
+                specification->type.protocol = strdup(jitem->valuestring);
             }
 
-            specification->type.protocol = strdup(jitem->valuestring);
             #if DEBUG
                 printf("protocol %s\n", specification->type.protocol);
             #endif
@@ -197,32 +197,31 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
 
             jitem = cJSON_GetObjectItem(json, "properties");
             if (!isJsonObject(jitem)) {
-                cleanUpService(&specification, NULL);
-                handleParseError();
-            }
-
-            specification->numProperties = 0;
-            child = jitem->child;
-            while (child && specification->numProperties++ < MAX_PROPERTIES) {
-                child = child->next;
-            }
-            if (specification->numProperties) {
-                specification->properties = (Property **)malloc(sizeof(Property *) * specification->numProperties);
-                if (specification->properties != NULL) {
-                    i = 0;
-                    child = jitem->child;
-                    while (child && i < MAX_PROPERTIES) {
-                        specification->properties[i] = (Property *)malloc(sizeof(Property));
-                        if (specification->properties[i] != NULL) {
-                            specification->properties[i]->key = strdup(child->string);
-                            specification->properties[i]->value = strdup(child->valuestring);
-                            #if DEBUG
-                                printf("properties key=%s value=%s\n", specification->properties[i]->key,
-                                specification->properties[i]->value);
-                            #endif
+                specification->numProperties = 0;
+            } else {
+                specification->numProperties = 0;
+                child = jitem->child;
+                while (child && specification->numProperties++ < MAX_PROPERTIES) {
+                    child = child->next;
+                }
+                if (specification->numProperties) {
+                    specification->properties = (Property **)malloc(sizeof(Property *) * specification->numProperties);
+                    if (specification->properties != NULL) {
+                        i = 0;
+                        child = jitem->child;
+                        while (child && i < MAX_PROPERTIES) {
+                            specification->properties[i] = (Property *)malloc(sizeof(Property));
+                            if (specification->properties[i] != NULL) {
+                                specification->properties[i]->key = strdup(child->string);
+                                specification->properties[i]->value = strdup(child->valuestring);
+                                #if DEBUG
+                                    printf("properties key=%s value=%s\n", specification->properties[i]->key,
+                                    specification->properties[i]->value);
+                                #endif
+                            }
+                            i++;
+                            child = child->next;
                         }
-                        i++;
-                        child = child->next;
                     }
                 }
             }
@@ -291,14 +290,13 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
             if (isJsonObject(child)) {
                 jitem = cJSON_GetObjectItem(child, "mustsecure");
                 if (!jitem || (!isJsonBooleanFalse(jitem) && !isJsonBooleanTrue(jitem))) {
-                    cleanUpService(&specification, NULL);
-                    handleParseError();
-                }
-
-                if(isJsonBooleanTrue(jitem)) {
-                    specification->type_params.mustsecure = true;
-                } else {
                     specification->type_params.mustsecure = false;
+                } else {
+                    if(isJsonBooleanTrue(jitem)) {
+                        specification->type_params.mustsecure = true;
+                    } else {
+                        specification->type_params.mustsecure = false;
+                    }
                 }
 
                 #if DEBUG
@@ -416,30 +414,28 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
             #endif
 
             child = cJSON_GetObjectItem(json, "type_params");
-            if (!isJsonObject(child)) {
-                cleanUpService(&specification, NULL);
-                handleParseError();
-            }
+            if (isJsonObject(child)) {
+                jitem = cJSON_GetObjectItem(child, "mustsecure");
+                if (!jitem || (!isJsonBooleanFalse(jitem) && !isJsonBooleanTrue(jitem))) {
+                    specification->type_params.mustsecure = false;
+                } else {
+                    if(isJsonBooleanTrue(jitem)) {
+                        specification->type_params.mustsecure = true;
+                    } else {
+                        specification->type_params.mustsecure = false;
+                    }
+                }
 
-            jitem = cJSON_GetObjectItem(child, "mustsecure");
-            if (!jitem || (!isJsonBooleanFalse(jitem) && !isJsonBooleanTrue(jitem))) {
-                cleanUpService(&specification, NULL);
-                handleParseError();
-            }
-
-            if(isJsonBooleanTrue(jitem)) {
-                specification->type_params.mustsecure = true;
+                #if DEBUG
+                    if(specification->type_params.mustsecure) {
+                        printf("must secure parameter is TRUE\n");
+                    } else {
+                        printf("must secure parameter is FALSE\n");
+                    }
+                #endif
             } else {
                 specification->type_params.mustsecure = false;
             }
-
-            #if DEBUG
-                if(specification->type_params.mustsecure) {
-                    printf("must secure parameter is TRUE\n");
-                } else {
-                    printf("must secure parameter is FALSE\n");
-                }
-            #endif
 
 endParseSrvFile:
             cJSON_Delete(json);
@@ -621,8 +617,13 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
 
     query->address = filteredServiceAddress;
     query->port = PortAsNumber;
+    char servicename[256];
+    extractNameFromServiceRecord(fullservicename, servicename);
+    query->service_name = strdup(servicename);
     #if DEBUG
-        printf("\nquery->port: %d\n",query->port);
+        printf("query->address: %s\n",query->address);
+        printf("query->port: %d\n",query->port);
+        printf("query->service_name: %s\n",query->service_name);
     #endif
     discContext->callback(client, errorCode, createClient(query));
 }
@@ -749,6 +750,20 @@ void discoverServicesBlockingFiltered(ServiceQuery *queryDesc,
     }
 }
 
+bool extractNameFromServiceRecord(char *fullservicename, char *servicename) {
+    // searching for character '.' where the service name ends
+    char *end = strchr(fullservicename,'.');
+    strcpy(servicename, "");
+    if (end == NULL) {
+        fprintf (stderr, "extractNameFromServiceRecord:: Could not find service name in DNS Record\n");
+        return false;
+    }
+
+    strncpy(servicename, fullservicename, end - fullservicename);
+    *(servicename + (end - fullservicename)) = '\0';
+
+    return true;
+}
 
 /** Match the service name against user supplied service query by resolving regular expression (if any).
 * @param[in] srvQry service query
@@ -758,26 +773,20 @@ bool getServiceNameMatched(ServiceQuery *srvQry, char *fullservicename) {
     regex_t regex;
     int res;
     char msgbuf[100];
+    char servicename[256];
     #if DEBUG
         printf("\nFull Service name %s\n",fullservicename);
     #endif
-    // searching for character '.' where the service name ends
-    char *end = strchr(fullservicename,'.');
-    if (end == NULL) {
-        printf ("searched character NOT FOUND\n");
+
+    if (extractNameFromServiceRecord(fullservicename, servicename) == false) {
         return false;
     }
 
-    char servicename[256];
     int i = 0;
 
-    while (fullservicename != end) {
-        servicename[i++] = *fullservicename++;
-    }
-    servicename[i] = '\0';
-
     #if DEBUG
-        printf("\nReal Service name %s\n",servicename);
+        printf("Real Service name %s\n",servicename);
+        printf("Regular expression to be matched %s\n",srvQry->service_name);
     #endif
 
     /* Compile regular expression */

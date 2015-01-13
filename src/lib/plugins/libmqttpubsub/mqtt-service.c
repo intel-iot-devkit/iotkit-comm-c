@@ -60,24 +60,10 @@ int init(void *publishServiceDesc, Crypto *crypto) {
     int rc = 0;
     char uri[256];
 
-    if (isPresentPropertyInCommParams(serviceSpec, "ssl") == true && \
-        strcasecmp(getValueInCommParams(serviceSpec, "ssl"), "true") == 0) {
-        sprintf(uri, "ssl://%s:%d", serviceSpec->address, serviceSpec->port);
+    if(serviceSpec->port == 0)
+        serviceSpec->port = 1883;
 
-        conn_opts.ssl = &sslopts;
-
-        if (isPresentPropertyInCommParams(serviceSpec, "keyStore")) {
-            conn_opts.ssl->keyStore = getValueInCommParams(serviceSpec, "keyStore");
-        }
-        if (isPresentPropertyInCommParams(serviceSpec, "privateKey")) {
-            conn_opts.ssl->privateKey = getValueInCommParams(serviceSpec, "privateKey");
-        }
-        if (isPresentPropertyInCommParams(serviceSpec, "trustStore")) {
-            conn_opts.ssl->trustStore = getValueInCommParams(serviceSpec, "trustStore");
-        }
-
-        conn_opts.ssl->enableServerCertAuth = 0;
-    } else if(serviceSpec->type_params.mustsecure) {
+    if(serviceSpec->type_params.mustsecure) {
         if(crypto && crypto->host) {
             sprintf(uri, "ssl://%s:%d", crypto->host, crypto->mosquittoSecurePort);
             conn_opts.ssl = &sslopts;
@@ -120,6 +106,8 @@ int init(void *publishServiceDesc, Crypto *crypto) {
         exit(1);
     }
 
+    default_topic = serviceSpec->service_name;
+
     return rc;
 }
 
@@ -152,14 +140,17 @@ int publish(char *message,Context context) {
     if (context.name != NULL && context.value != NULL && strcmp(context.name, "topic") == 0) {
         topic = context.value;
     } else {
-        printf("Topic not available in the send command");
-        return MQTTCLIENT_NULL_PARAMETER;
+        topic = default_topic;
     }
 
     pubmsg.payload = message;
     pubmsg.payloadlen = strlen(message);
     pubmsg.qos = QOS;
     pubmsg.retained = 0;
+
+    #if DEBUG
+        printf("Message \'%s\' published on topic \'%s\'\n", message, topic);
+    #endif
 
     MQTTClient_publishMessage(client, topic, &pubmsg, &token);
 
@@ -175,13 +166,6 @@ int publish(char *message,Context context) {
     #endif
 
     return rc;
-}
-
-int manageClient(void *client,Context context) {
-    #if DEBUG
-        printf("In manageClient\n");
-    #endif
-    return -1;
 }
 
 int receive(void (*publishServiceHandler) (void *client,char *message,Context context)) {

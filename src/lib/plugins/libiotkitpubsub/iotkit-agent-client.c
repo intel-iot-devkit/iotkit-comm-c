@@ -160,6 +160,8 @@ void onConnect(void* context, MQTTAsync_successData* response) {
     #endif
 
     connected = 1;
+
+    subscribe(default_topic);
 }
 
 void connectionLost(void *context, char *cause) {
@@ -240,12 +242,12 @@ int send(char *message, Context context) {
     return rc;
 }
 
-/**
+/*
  * @name Subscribes to a topic
  * @brief Subscribes to a topic with an MQTT broker.
  * @param[in] topic needs to be subscribed to
  * @return boolean, which specifies whether successfully subscribed or not
- */
+*/
 int subscribe(char *topic) {
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
 
@@ -282,6 +284,8 @@ int done() {
 
     int rc = 0;
 
+    unsubscribe(default_topic);
+
     opts.onSuccess = onDisconnect;
     opts.context = client;
 
@@ -297,11 +301,11 @@ int done() {
     return rc;
 }
 
-/**
+/*
  * @name Unsubscribe a topic
  * @brief Discontinues the subscription to a topic.
  * @param[in] topic that has been previously subscribed to
- */
+*/
 int unsubscribe(char *topic) {
 
     #if DEBUG
@@ -369,11 +373,7 @@ int init(void *servQuery, Crypto *crypto) {
     int rc = 0;
     char uri[256];
 
-    if (serviceQuery->address != NULL) {
-        sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
-    } else {
-        sprintf(uri, "tcp://localhost:%d", serviceQuery->port);
-    }
+    strcpy(uri, "tcp://localhost:1884");
 
     // Default settings:
     int i = 0;
@@ -419,20 +419,4 @@ int init(void *servQuery, Crypto *crypto) {
     }
 
     return rc;
-}
-
-/**
- * @name Registers a sensor
- * @brief Registers a sensor with IoT Cloud through IoTKit Agent.
- * @param[in] sensorname is the name of the sensor on the device
- * @param[in] type denotes the datatype of the sensor values
- */
-void registerSensor(char *sensorname, char *type) {
-    char mesg[256];
-    Context context;
-    context.name = "topic";
-    context.value = "data";
-
-    sprintf(mesg, "{\"n\":%s,\"t\":%s}", sensorname,type);
-    send(mesg, context);
 }

@@ -47,28 +47,19 @@ void clientMessageCallback(char *message, Context context) {
 * @param commHandle the communication handle used to invoke the interfaces
 */
 void subDiscoveryCallback(void *handle, int32_t error_code, CommHandle *commHandle) {
-    int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
-    int (**unsubscribe)(char *);
     int i = 0, j = 0;
 
     if (commHandle != NULL) {
-        subscribe = commInterfacesLookup(commHandle, "subscribe");
         receive = commInterfacesLookup(commHandle, "receive");
-        unsubscribe = commInterfacesLookup(commHandle, "unsubscribe");
 
-        if (subscribe != NULL && receive != NULL && unsubscribe != NULL) {
+        if (receive != NULL) {
             while (j < 5) {  // Event Loop
                 i++;
                 if (i < 5) {
-                    (*subscribe)("vehicle");
                     (*receive)(clientMessageCallback);
-                } else {
-                    if (i == 5) {
-                        (*unsubscribe)("vehicle");
-                        puts("\nSuccessfully unsubscribed won't receive anymore messages on 'vehicle'\n");
-                    }
                 }
+
                 sleep(2);
 
                 j ++;

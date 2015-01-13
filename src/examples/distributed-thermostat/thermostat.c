@@ -42,6 +42,8 @@ int sampleCount = 0;
 // service instance to publish the latest mean temperature
 int (**mypublisher)(char *,Context context);
 
+char *topic = NULL;
+
 /** Callback function. To to be invoked when it receives any messages for the subscribed topic
 * @param message the message received from service/publisher
 * @param context a context object
@@ -61,7 +63,7 @@ void clientMessageCallback(char *message, Context context) {
     sprintf(addr, "%d", cumulativeMovingAverage);
     fprintf(stdout,"New average ambient temperature (cumulative) %s:\n",addr);
     char mean[256];
-    sprintf(mean, "mean_temp: %s", addr);
+    sprintf(mean, "%s: %s", topic, addr);
     // the master (thermostat) publishes the average temperature so others
     // can subscribe to it.
     if (mypublisher != NULL)
@@ -76,20 +78,18 @@ void clientMessageCallback(char *message, Context context) {
  */
 void subCallback(ServiceQuery *servQuery, int32_t error_code, CommHandle *commHandle) {
 
-    int (**subscribe)(char *);
     int (**receive)(void (*)(char *, Context));
     ServiceSpec *serviceSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/thermostat-spec.json");
     if (serviceSpec) {
         advertiseService(serviceSpec);
         CommHandle *serviceHandle = createService(NULL, serviceSpec);
         mypublisher = commInterfacesLookup(serviceHandle, "publish");
+        topic = serviceSpec->service_name;
     }
     if (commHandle != NULL) {
-        subscribe = commInterfacesLookup(commHandle, "subscribe");
         receive = commInterfacesLookup(commHandle, "receive");
-        if (subscribe != NULL && receive != NULL) {
+        if (receive != NULL) {
             while (1) {  // Infinite Event Loop
-                (*subscribe)("mytemp");
                 (*receive)(clientMessageCallback);
                 sleep(2);
             }

@@ -134,6 +134,10 @@ int send(char *message, Context context) {
 int subscribe(char *topic) {
     int rc = 0;
 
+    #if DEBUG
+        printf("Subscribing to topic \'%s\'\n", topic);
+    #endif
+
     if ((rc = MQTTClient_subscribe(client, topic, QOS)) != MQTTCLIENT_SUCCESS) {
         printf("Failed to subscribe, return code %d\n", rc);
         exit(-1);
@@ -270,5 +274,6 @@ int init(void *servQuery, Crypto *crypto) {
         exit(1);
     }
 
+    subscribe(serviceQuery->service_name);
     return rc;
 }

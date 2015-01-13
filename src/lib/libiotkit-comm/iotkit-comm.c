@@ -1161,7 +1161,7 @@ CommHandle *loadService(ServiceSpec *specification) {
         return NULL;
     }
 
-    if(*(commHandle->communicates_via_proxy) == false) {
+    if(*(commHandle->communicates_via_proxy) == false && specification->port == 0) {
         int unUsedPort = getUnusedPort(specification->type.protocol);
         if(unUsedPort >= 0) {
             specification->port = unUsedPort;

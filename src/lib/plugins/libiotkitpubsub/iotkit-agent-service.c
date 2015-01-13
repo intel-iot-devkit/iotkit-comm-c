@@ -87,6 +87,8 @@ void onConnect(void* context, MQTTAsync_successData* response) {
     #endif
 
     connected = 1;
+
+    registerSensor(sensorName, sensorType);
 }
 
 void connectionLost(void *context, char *cause) {
@@ -226,6 +228,44 @@ int receive(void (*handler) (char *topic, Context context)) {
     }
 #endif
 
+void parseServiceName(char *serviceName) {
+    int tokenSize = 0;
+    char *topic_name = serviceName;
+    char *needle = NULL;
+
+    if(strstr(topic_name, "/") == NULL) {
+        fprintf(stderr, "%s has an incorrect format. Correct format is [namespace]/sensorType/sensorName", topic_name);
+        exit(-1);
+    }
+
+    while((needle = strstr(topic_name, "/")) != NULL) {
+        tokenSize ++;
+        topic_name = needle + 1;
+    }
+
+    topic_name = serviceName;
+    while(tokenSize > 1) {
+        needle = strstr(topic_name, "/") + 1;
+        tokenSize --;
+        topic_name = needle;
+    }
+
+    if(tokenSize == 1 && needle != NULL) {
+        char *needle2 = strstr(topic_name, "/");
+        int sensorTypeSize = needle2 - needle;
+        sensorTypeSize += 1;
+        sensorType = (char *)malloc(sizeof(char) * sensorTypeSize);
+        strncpy(sensorType, topic_name, sensorTypeSize-1);
+
+        sensorName = (char *)malloc(sizeof(char) * strlen(needle2));
+        needle2 += 1;
+        strcpy(sensorName, needle2);
+
+        printf("Sensor Name is %s\n", sensorName);
+        printf("Sensor Type is %s\n", sensorType);
+    }
+}
+
 /**
  * @name Create the MQTT client
  * @brief Create and initialize the mqtt plugin.
@@ -240,6 +280,9 @@ int init(void *servQuery, Crypto *crypto) {
     MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
     int rc = 0;
     char uri[256];
+
+    if(serviceQuery->port == 0)
+        serviceQuery->port = 1884;
 
     if (serviceQuery->address != NULL) {
         sprintf(uri, "tcp://%s:%d", serviceQuery->address, serviceQuery->port);
@@ -256,6 +299,8 @@ int init(void *servQuery, Crypto *crypto) {
 
     char clientID[256];
     sprintf(clientID, "%s%d", CLIENTID, clientInstanceNumber++);
+
+    parseServiceName(serviceQuery->service_name);
 
     MQTTAsync_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
