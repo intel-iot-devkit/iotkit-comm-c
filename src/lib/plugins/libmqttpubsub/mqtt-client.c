@@ -212,26 +212,9 @@ int init(void *servQuery, Crypto *crypto) {
     int rc = 0;
     char uri[256];
 
-    if (isPresentPropertyInCommParams(serviceQuery, "ssl") == true && \
-        strcasecmp(getValueInCommParams(serviceQuery, "ssl"), "true") == 0) {
-        sprintf(uri, "ssl://%s:%d", serviceQuery->address, serviceQuery->port);
-
-        conn_opts.ssl = &sslopts;
-
-        if (isPresentPropertyInCommParams(serviceQuery, "keyStore")) {
-            conn_opts.ssl->keyStore = getValueInCommParams(serviceQuery, "keyStore");
-        }
-        if (isPresentPropertyInCommParams(serviceQuery, "privateKey")) {
-            conn_opts.ssl->privateKey = getValueInCommParams(serviceQuery, "privateKey");
-        }
-        if (isPresentPropertyInCommParams(serviceQuery, "trustStore")) {
-            conn_opts.ssl->trustStore = getValueInCommParams(serviceQuery, "trustStore");
-        }
-
-        conn_opts.ssl->enableServerCertAuth = 0;
-    } else if(serviceQuery->type_params.mustsecure) {
+    if(serviceQuery->type_params.mustsecure) {
         if(crypto && crypto->host) {
-            sprintf(uri, "ssl://%s:%d", crypto->host, crypto->mosquittoSecurePort);
+            sprintf(uri, "ssl://%s:%d", serviceQuery->address, crypto->mosquittoSecurePort);
             conn_opts.ssl = &sslopts;
             conn_opts.ssl->trustStore = strdup(crypto->cacert);
             conn_opts.ssl->privateKey = strdup(crypto->userkey);

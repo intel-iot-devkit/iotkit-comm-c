@@ -615,7 +615,10 @@ static void DNSSD_API discover_resolve_reply(DNSServiceRef client, const DNSServ
         }
     }
 
-    query->address = filteredServiceAddress;
+//    query->address = filteredServiceAddress;
+    if(hosttarget[strlen(hosttarget) - 1] == '.') { // remove the . character at the end of the hostname if present
+        query->address = strndup(hosttarget, strlen(hosttarget) - 1);
+    }
     query->port = PortAsNumber;
     char servicename[256];
     extractNameFromServiceRecord(fullservicename, servicename);
