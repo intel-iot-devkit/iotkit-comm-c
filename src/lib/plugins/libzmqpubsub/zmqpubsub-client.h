@@ -31,7 +31,7 @@
 #include "../inc/zhelpers.h"
 
 #ifndef DEBUG
-    #define DEBUG 0
+    #define DEBUG 1
 #endif
 
 #include "iotkit-comm.h"

@@ -243,7 +243,7 @@ void parseServiceName(char *serviceName) {
         topic_name = needle + 1;
     }
 
-    topic_name = serviceName;
+    topic_name = needle = serviceName;
     while(tokenSize > 1) {
         needle = strstr(topic_name, "/") + 1;
         tokenSize --;
@@ -256,6 +256,7 @@ void parseServiceName(char *serviceName) {
         sensorTypeSize += 1;
         sensorType = (char *)malloc(sizeof(char) * sensorTypeSize);
         strncpy(sensorType, topic_name, sensorTypeSize-1);
+        sensorType[sensorTypeSize-1] = '\0';
 
         sensorName = (char *)malloc(sizeof(char) * strlen(needle2));
         needle2 += 1;
@@ -350,6 +351,11 @@ void registerSensor(char *sensorname, char *type) {
     context.name = "topic";
     context.value = "data";
 
-    sprintf(mesg, "{\"n\":%s,\"t\":%s}", sensorname,type);
-    send(mesg, context);
+    sprintf(mesg, "{\"n\":\"%s\",\"t\":\"%s\"}", sensorname,type);
+
+    #if DEBUG
+        printf("Registering Sensor: %s\n", mesg);
+    #endif
+
+    publish(mesg, context);
 }

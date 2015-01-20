@@ -41,7 +41,7 @@
 #define TIMEOUT     10000L
 
 #ifndef DEBUG
-    #define DEBUG 0
+    #define DEBUG 1
 #endif
 
 volatile int toStop = 0;
@@ -62,7 +62,7 @@ bool communicates_via_proxy = true;
  * Topic to publish or subscribe data to. This is the only topic
  * the cloud supports.
  */
-char *default_topic = "data";
+char *subscribe_topic = "data";
 
 void *handle = NULL;
 char *err = NULL;

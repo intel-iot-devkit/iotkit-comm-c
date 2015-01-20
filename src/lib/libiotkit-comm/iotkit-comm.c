@@ -1002,8 +1002,9 @@ CommHandle *createClient(ServiceQuery *servQuery) {
         return NULL;
     }
 
-    mustsecure = servQuery->type_params.mustsecure ? servQuery->type_params.mustsecure : getSpecPropertyValue(servQuery, "__mustsecure");
-    if(mustsecure) {
+    mustsecure = servQuery->type_params.mustsecure ? strdup("true") : getSpecPropertyValue(servQuery, "__mustsecure");
+    gCrypto = NULL;
+    if(mustsecure && strcmp(mustsecure, "true") == 0) {
         gCrypto = crypto_init();
         if(!gCrypto && *commHandle->provides_secure_comm == false) {
             // no credentials setup and plugin does not provide own security mechanism
@@ -1168,8 +1169,9 @@ CommHandle *loadService(ServiceSpec *specification) {
         }
     }
 
-    gCrypto = crypto_init();
+    gCrypto = NULL;
     if(specification->type_params.mustsecure) {
+        gCrypto = crypto_init();
         // service wants clients to only connect securely
         if(gCrypto == NULL && *(commHandle->provides_secure_comm) == false) {
             fprintf(stderr, "Service expects clients to connect securely but credentials are not setup.\n"

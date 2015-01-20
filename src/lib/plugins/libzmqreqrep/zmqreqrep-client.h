@@ -32,7 +32,7 @@
 #include "iotkit-comm.h"
 
 #ifndef DEBUG
-    #define DEBUG 0
+    #define DEBUG 1
 #endif
 
 /** @defgroup zmqreqrepclient

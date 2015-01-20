@@ -84,7 +84,8 @@ void initSpecification(ServiceSpec *specification) {
     specification->properties = NULL;
     specification->advertise.locally = NULL;
     specification->advertise.cloud = NULL;
-
+    specification->type_params.mustsecure = false;
+    specification->type_params.deviceid = NULL;
     // initially set status to UNKNOWN
     specification->status = UNKNOWN;
 }
@@ -433,8 +434,17 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
                         printf("must secure parameter is FALSE\n");
                     }
                 #endif
-            } else {
-                specification->type_params.mustsecure = false;
+
+                jitem = cJSON_GetObjectItem(child, "deviceid");
+                if (jitem && isJsonString(jitem)) {
+                    specification->type_params.deviceid = strdup(jitem->valuestring);
+                }
+
+                #if DEBUG
+                    if(specification->type_params.deviceid) {
+                        printf("Target Device is %s\n", specification->type_params.deviceid);
+                    }
+                #endif
             }
 
 endParseSrvFile:
@@ -1265,9 +1275,9 @@ void advertiseServiceBlocking(ServiceSpec *specification,
     strcat(regtype, "._");
     strcat(regtype, specification->type.protocol);
 
+    TXTRecordCreate(&txtRecord, 0, NULL);
     if (specification->numProperties) {
         uint8_t txtLen, i = 0;
-        TXTRecordCreate(&txtRecord, 0, NULL);
         for (i = 0; i<specification->numProperties; i++) {
             txtLen = (uint8_t)strlen(specification->properties[i]->value);
             TXTRecordSetValue(&txtRecord, specification->properties[i]->key,

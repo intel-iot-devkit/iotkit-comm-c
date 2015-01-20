@@ -44,7 +44,7 @@
 #include <signal.h>
 
 #ifndef DEBUG
-    #define DEBUG 0
+    #define DEBUG 1
 #endif
 
 #define READ 0
@@ -157,6 +157,7 @@ typedef struct _ServiceSpec {
     } advertise;
     struct {
         bool mustsecure;
+        char *deviceid;
     } type_params;
 } ServiceSpec,ServiceQuery;
 

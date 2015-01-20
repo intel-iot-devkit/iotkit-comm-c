@@ -161,7 +161,7 @@ void onConnect(void* context, MQTTAsync_successData* response) {
 
     connected = 1;
 
-    subscribe(default_topic);
+    subscribe(subscribe_topic);
 }
 
 void connectionLost(void *context, char *cause) {
@@ -284,7 +284,7 @@ int done() {
 
     int rc = 0;
 
-    unsubscribe(default_topic);
+    unsubscribe(subscribe_topic);
 
     opts.onSuccess = onDisconnect;
     opts.context = client;
@@ -400,6 +400,12 @@ int init(void *servQuery, Crypto *crypto) {
     conn_opts.context = client;
     conn_opts.keepAliveInterval = 0;
     conn_opts.retryInterval = 0;
+
+    if(serviceQuery->type_params.deviceid) {
+        subscribe_topic = serviceQuery->type_params.deviceid; // subscribe to prescribed device
+    } else {
+        subscribe_topic = strdup("data"); // subscribe to own device
+    }
 
     if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
         printf("Failed to start connect, return code %d\n", rc);
