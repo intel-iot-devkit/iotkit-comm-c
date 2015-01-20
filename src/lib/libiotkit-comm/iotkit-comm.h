@@ -157,6 +157,7 @@ typedef struct _ServiceSpec {
     } advertise;
     struct {
         bool mustsecure;
+        char *deviceid;
     } type_params;
 } ServiceSpec,ServiceQuery;
 

@@ -70,7 +70,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         context.value = "data";
 
         while(i < 10) {  // Event Loop
-            sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
+            sprintf(msg, "{\"n\": \"garage_sensor\", \"v\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
             (*send)(msg, context);

@@ -88,6 +88,10 @@ int init(void *publishServiceDesc, Crypto *crypto) {
     // Default settings:
     sprintf(clientID, "%s_%d", CLIENTID, getpid());
 
+    #if DEBUG
+        printf("Going to connect %s\n",uri);
+    #endif
+
     MQTTClient_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     MQTTClient_setCallbacks(client, serviceSpec, connectionLost, NULL, NULL);
 
