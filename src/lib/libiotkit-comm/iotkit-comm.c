@@ -186,7 +186,9 @@ AuthenticationState *readAuthenticationState(char *config_file) {
     fp = fopen(config_file, "rb");
 
     if (fp == NULL) {
-        fprintf(stderr,"Error can't open file %s\n", config_file);
+        #if DEBUG
+            fprintf(stderr,"Error can't open file %s\n", config_file);
+        #endif
     } else {
         // TODO: export the local state
         fseek(fp, 0, SEEK_END);

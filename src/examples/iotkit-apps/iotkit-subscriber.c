@@ -113,7 +113,7 @@ int main(void) {
     query = (ServiceQuery *) parseServiceSpec("./serviceQueries/temperatureServiceQueryIoTKit.json");
 
     if (query) {
-        discoverServicesBlockingFiltered(query, serviceFilter, callback);
+        createClientForGivenService(query, callback);
     }
 
     return 0;

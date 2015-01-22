@@ -54,9 +54,10 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
     Context context;
     char msg[256];
     int i = 0;
+    CommHandle *commHandle = NULL;
 
     if(serviceHandle != NULL) {
-        CommHandle *commHandle = (CommHandle *) serviceHandle;
+        commHandle = (CommHandle *) serviceHandle;
 
         int (**send) (char *message,Context context);
 
@@ -76,13 +77,13 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
             (*send)(msg, context);
             sleep(2);
 
-            i++;
+            i ++;
         }
-
-        // clean the objects
-        cleanUpService(&srvSpec, &commHandle);
-        exit(0);
     }
+
+    // clean the objects
+    cleanUpService(&srvSpec, &commHandle);
+    exit(0);
 }
 
 /**

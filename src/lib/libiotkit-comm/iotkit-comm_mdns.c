@@ -704,11 +704,6 @@ void createClientForGivenService(ServiceQuery *queryDesc, void (*callback)(void 
         queryDesc->address = strdup(LOCAL_ADDRESS); // defaults to localhost
     }
 
-    if(queryDesc->port == 0) {
-        fprintf(stderr, "Error: Unknown Port information\n");
-        return;
-    }
-
     callback(NULL, 0, createClient(queryDesc));
 }
 

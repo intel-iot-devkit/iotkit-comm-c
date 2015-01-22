@@ -62,7 +62,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
         int (**send)(char *, Context context);
 
         send = commInterfacesLookup(commHandle, "publish");
-        if (send == NULL) {
+        if(send == NULL) {
             printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
             return;
         }
