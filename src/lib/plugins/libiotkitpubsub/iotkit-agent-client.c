@@ -164,6 +164,7 @@ void onConnect(void* context, MQTTAsync_successData* response) {
     #if DEBUG
         printf("Subscribing to topic: %s\n", subscribe_topic);
     #endif
+    subscribed = 0;
     subscribe(subscribe_topic);
 }
 
@@ -256,9 +257,11 @@ int subscribe(char *topic) {
 
     int rc = 0;
 
+printf("subscribe:: Topic is %s\n", topic);
     if(!topic) {
-        topic = "data";
+        topic = strdup("data");
     }
+printf("subscribe:: Topic is %s\n", topic);
 
     opts.onSuccess = onSubscribe;
     opts.onFailure = onSubscribeFailure;
