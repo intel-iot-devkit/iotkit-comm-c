@@ -272,10 +272,6 @@ printf("subscribe:: Topic is %s\n", topic);
         exit(-1);
     }
 
-    while (!subscribed) {
-        sleep(1); // waiting for subscribe
-    }
-
     return rc;
 }
 
@@ -333,10 +329,6 @@ int unsubscribe(char *topic) {
     if ((rc = MQTTAsync_unsubscribe(client, topic, &opts)) != MQTTASYNC_SUCCESS) {
         printf("Failed to unsubscribe, return code %d\n", rc);
         exit(-1);
-    }
-
-    while (subscribed) {
-        sleep(1); // waiting for subscribe
     }
 
     return rc;

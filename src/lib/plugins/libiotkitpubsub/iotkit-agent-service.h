@@ -41,7 +41,7 @@
 #define TIMEOUT     10000L
 
 #ifndef DEBUG
-    #define DEBUG 1
+    #define DEBUG 0
 #endif
 
 volatile int toStop = 0;
