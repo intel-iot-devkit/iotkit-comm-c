@@ -161,6 +161,9 @@ void onConnect(void* context, MQTTAsync_successData* response) {
 
     connected = 1;
 
+    #if DEBUG
+        printf("Subscribing to topic: %s\n", subscribe_topic);
+    #endif
     subscribe(subscribe_topic);
 }
 

@@ -73,6 +73,7 @@ MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 void (*msgArrhandler) (char *topic, Context context) = NULL;
 
 int init(void *serviceDesc, Crypto *crypto);
+int subscribe(char *topic);
 int send(char *message, Context context);
 int receive(void (*) (char *topic, Context context));
 int done();
