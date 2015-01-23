@@ -261,9 +261,6 @@ void parseServiceName(char *serviceName) {
         sensorName = (char *)malloc(sizeof(char) * strlen(needle2));
         needle2 += 1;
         strcpy(sensorName, needle2);
-
-        printf("Sensor Name is %s\n", sensorName);
-        printf("Sensor Type is %s\n", sensorType);
     }
 }
 

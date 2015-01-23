@@ -150,7 +150,9 @@ void deliveryComplete(void* context, MQTTAsync_token token) {
 }
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response) {
-    printf("Connect failed\n");
+    #if DEBUG
+        printf("Connect failed\n");
+    #endif
     finished = 1;
 }
 
@@ -257,11 +259,9 @@ int subscribe(char *topic) {
 
     int rc = 0;
 
-printf("subscribe:: Topic is %s\n", topic);
     if(!topic) {
         topic = strdup("data");
     }
-printf("subscribe:: Topic is %s\n", topic);
 
     opts.onSuccess = onSubscribe;
     opts.onFailure = onSubscribeFailure;

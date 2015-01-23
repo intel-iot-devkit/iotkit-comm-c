@@ -1029,13 +1029,13 @@ CommHandle *createClient(ServiceQuery *servQuery) {
             int localport = 0;
             char *localaddr = NULL;
             bool isTunnelCreated = false;
-            printf("Setting up secure communication chanel...\n");
+            printf("Info: Setting up secure communication chanel...\n");
 
             isTunnelCreated = createSecureTunnel(servQuery, &localport, &localaddr);
             if(isTunnelCreated == true) {
                 servQuery->address = localaddr;
                 servQuery->port = localport;
-                printf("Secure tunnel setup at %s:%d\n", servQuery->address, servQuery->port);
+                printf("Info: Secure tunnel setup at %s:%d\n", servQuery->address, servQuery->port);
             }
         }
     }

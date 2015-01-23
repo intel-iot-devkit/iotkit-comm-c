@@ -97,10 +97,6 @@ int main(void) {
 
     srvSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceIoTKit.json");
 
-    #if DEBUG
-        printf("status:%d:service_name:%s:address:%s:port:%d:name:%s:protocol:%s\n", srvSpec->status, srvSpec->service_name, srvSpec->address, srvSpec->port, srvSpec->type.name, srvSpec->type.protocol);
-    #endif
-
     if (srvSpec){
         advertiseServiceBlocking(srvSpec, callback);
     }
