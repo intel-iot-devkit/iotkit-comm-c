@@ -814,6 +814,9 @@ bool loadCommInterfaces(CommHandle *commHandle) {
             if (commHandle->interfaces[i] != NULL) {
                 commHandle->interfaces[i]->iname = g_funcSignatures[i]; // copy the function name
                 commHandle->interfaces[i]->iptr = dlsym(handle, g_funcSignatures[i]); // copy the function address - void pointer
+                #if DEBUG
+                    printf("Dynamic function load, %s\n", g_funcSignatures[i]);
+                #endif
                 if (!checkDLError()) {
                     while(i >= 0) { // freeing the dynamic memory
                         free(commHandle->interfaces[i]);
@@ -1150,6 +1153,9 @@ CommHandle *loadService(ServiceSpec *specification) {
         strcat(cwd_temp, *(commHandle->interface));
         strcat(cwd_temp, ".json");
 
+        #if DEBUG
+            printf("\ninterface file name %s\n",cwd_temp);
+        #endif
         if (fileExists(cwd_temp)) {
             if (!parsePluginInterfaces(cwd_temp)) {
                 freeFuncSignatures();
