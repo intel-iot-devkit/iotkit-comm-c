@@ -1,0 +1,8 @@
+{
+    "name" : "temperature.v1.0/garage_sensor",
+    "type" : {
+        "name": "enableiot"
+    },
+    "port": 34562,
+    "type_params": {"mustsecure": false}
+}

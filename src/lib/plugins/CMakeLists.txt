@@ -3,6 +3,7 @@ MESSAGE("Adding all the plugins directories")
 # add the sub-directories
 
 ADD_SUBDIRECTORY(libiotkitpubsub)
+ADD_SUBDIRECTORY(libenableiot)
 ADD_SUBDIRECTORY(libmqttpubsub)
 ADD_SUBDIRECTORY(libzmqpubsub)
 ADD_SUBDIRECTORY(libzmqreqrep)

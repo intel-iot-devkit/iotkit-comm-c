@@ -1,0 +1,7 @@
+{
+    "name" : "temperature.v1.0/garage_sensor",
+    "type" : {
+        "name": "enableiot"
+    },
+    "type_params": {"deviceid": "02-00-86-4b-b6-de"}
+}
