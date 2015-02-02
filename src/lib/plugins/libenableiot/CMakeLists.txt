@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES(
     ../../libiotkit-comm
     ../inc/
     ../../cJSON
-    ${STAGING_DIR_TARGET}/usr/include/iotkit-lib/
 )
 
 # set the shared library name

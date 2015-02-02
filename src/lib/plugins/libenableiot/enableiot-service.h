@@ -36,10 +36,10 @@
 
 #include "iotkit-comm.h"
 
-#include <authorization.h>
-#include <account_management.h>
-#include "device_management.h"
-#include "data_api.h"
+#include <iotkit-lib/authorization.h>
+#include <iotkit-lib/account_management.h>
+#include <iotkit-lib/device_management.h>
+#include <iotkit-lib/data_api.h>
 
 #ifndef DEBUG
     #define DEBUG 0

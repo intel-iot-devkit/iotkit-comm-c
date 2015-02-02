@@ -38,8 +38,8 @@
 #include "iotkit-comm.h"
 #include "util.h"
 
-#include <authorization.h>
-#include <data_api.h>
+#include <iotkit-lib/authorization.h>
+#include <iotkit-lib/data_api.h>
 
 #define CLIENTID    "IoTClient"
 #define QOS         0
