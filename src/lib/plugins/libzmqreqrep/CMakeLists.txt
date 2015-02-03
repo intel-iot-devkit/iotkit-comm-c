@@ -2,7 +2,7 @@
 MESSAGE("Building the zmq reqrep plugin")
 
 INCLUDE_DIRECTORIES(
-    ../../libiotkit-comm
+    ../../iotkit-comm
     ../inc/
 )
 

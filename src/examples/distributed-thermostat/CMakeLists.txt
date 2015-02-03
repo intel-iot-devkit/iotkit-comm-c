@@ -1,7 +1,7 @@
 
 INCLUDE_DIRECTORIES(
   ../../lib/cJSON
-  ../../lib/libiotkit-comm
+  ../../lib
 )
 
 # set the executable names
@@ -10,9 +10,9 @@ SET(SENSOR sensor)
 SET(THERMOSTAT thermostat)
 
 # set the source files list
-SET(DASHBOARD_LIST dashboard.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(SENSOR_LIST temperatureSensor.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(THERMOSTAT_LIST thermostat.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(DASHBOARD_LIST dashboard.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(SENSOR_LIST temperatureSensor.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(THERMOSTAT_LIST thermostat.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 # create the executables
 ADD_EXECUTABLE(${DASHBOARD} ${DASHBOARD_LIST})

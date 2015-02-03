@@ -29,7 +29,7 @@ This file tests whether ZMQ Responder socket fails while sending message.
 #include <stdio.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 int main(void) {
     ServiceSpec *serviceSpec = (ServiceSpec *)malloc(sizeof(ServiceSpec));

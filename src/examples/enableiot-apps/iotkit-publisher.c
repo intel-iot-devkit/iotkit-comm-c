@@ -31,8 +31,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "iotkit-comm.h"
-#include "util.h"
+#include "iotkit-comm/iotkit-comm.h"
+#include "iotkit-comm/util.h"
 
 #ifndef DEBUG
     #define DEBUG 0

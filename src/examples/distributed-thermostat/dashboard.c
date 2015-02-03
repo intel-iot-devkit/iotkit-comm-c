@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "iotkit-comm.h"
-#include "util.h"
+#include "iotkit-comm/iotkit-comm.h"
+#include "iotkit-comm/util.h"
 
 /** Callback function. To to be invoked when it receives any messages for the subscribed topic
 * @param message the message received from service/publisher

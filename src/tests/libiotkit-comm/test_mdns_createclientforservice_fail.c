@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 
 /** Callback function. Once the service is discovered this callback function will be invoked

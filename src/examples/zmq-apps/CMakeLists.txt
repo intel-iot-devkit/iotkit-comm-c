@@ -1,7 +1,7 @@
 
 INCLUDE_DIRECTORIES(
     ../../lib/cJSON
-    ../../lib/libiotkit-comm
+    ../../lib
 )
 
 # set the executable names
@@ -11,10 +11,10 @@ SET(ZMQ_REQ_CLIENT zmqreqclient)
 SET(ZMQ_REP_SERVICE zmqrepservice)
 
 # set the source files list
-SET(SUB_CLIENT_LIST sample_zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(PUB_SERVICE_LIST sample_zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(REQ_CLIENT_LIST sample_zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(REP_SERVICE_LIST sample_zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(SUB_CLIENT_LIST sample_zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(PUB_SERVICE_LIST sample_zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(REQ_CLIENT_LIST sample_zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(REP_SERVICE_LIST sample_zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 # create the executables
 ADD_EXECUTABLE(${ZMQ_SUB_CLIENT} ${SUB_CLIENT_LIST})

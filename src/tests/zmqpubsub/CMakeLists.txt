@@ -1,21 +1,21 @@
 
 INCLUDE_DIRECTORIES(
   ../../lib/cJSON
-  ../../lib/libiotkit-comm
+  ../../lib/iotkit-comm
   ../inc/
 )
 
 # set the source files list
-SET(ZMQPUBSUB_CLIENT_RECEIVE_FAIL test_zmqpubsub_client_receive_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_CLIENT_SOCKET_CONNECT_FAIL test_zmqpubsub_client_socket_connect_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_CLIENT_SOCKET_CONNECT_SUCCESS test_zmqpubsub_client_socket_connect_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_CLIENT_SUBSCRIBE_FAIL test_zmqpubsub_client_subscribe_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_CLIENT_SUBSCRIBE_SUCCESS test_zmqpubsub_client_subscribe_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_CLIENT_UNSUBSCRIBE_FAIL test_zmqpubsub_client_unsubscribe_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_CLIENT_UNSUBSCRIBE_SUCCESS test_zmqpubsub_client_unsubscribe_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_SERVICE_PUBLISH_FAIL test_zmqpubsub_service_publish_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_SERVICE_SOCKET_CONNECT_FAIL test_zmqpubsub_service_socket_connect_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQPUBSUB_SERVICE_SOCKET_CONNECT_SUCCESS test_zmqpubsub_service_socket_connect_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_RECEIVE_FAIL test_zmqpubsub_client_receive_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_SOCKET_CONNECT_FAIL test_zmqpubsub_client_socket_connect_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_SOCKET_CONNECT_SUCCESS test_zmqpubsub_client_socket_connect_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_SUBSCRIBE_FAIL test_zmqpubsub_client_subscribe_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_SUBSCRIBE_SUCCESS test_zmqpubsub_client_subscribe_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_UNSUBSCRIBE_FAIL test_zmqpubsub_client_unsubscribe_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_CLIENT_UNSUBSCRIBE_SUCCESS test_zmqpubsub_client_unsubscribe_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_SERVICE_PUBLISH_FAIL test_zmqpubsub_service_publish_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_SERVICE_SOCKET_CONNECT_FAIL test_zmqpubsub_service_socket_connect_fail.c ../../lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQPUBSUB_SERVICE_SOCKET_CONNECT_SUCCESS test_zmqpubsub_service_socket_connect_success.c ../../lib/plugins/libzmqpubsub/zmqpubsub-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 # create the executables
 ADD_EXECUTABLE(zmqpubsub_client_receive_fail ${ZMQPUBSUB_CLIENT_RECEIVE_FAIL})
