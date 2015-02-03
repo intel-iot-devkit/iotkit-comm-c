@@ -2,7 +2,7 @@
 MESSAGE("Building the enableiot plugin")
 
 INCLUDE_DIRECTORIES(
-    ../../libiotkit-comm
+    ../../iotkit-comm
     ../inc/
     ../../cJSON
 )

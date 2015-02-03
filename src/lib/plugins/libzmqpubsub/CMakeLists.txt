@@ -2,7 +2,7 @@
 MESSAGE("Building the zmq pubsub plugin")
 
 INCLUDE_DIRECTORIES(
-    ../../libiotkit-comm
+    ../../iotkit-comm
     ../inc/
 )
 

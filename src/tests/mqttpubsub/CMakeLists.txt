@@ -1,17 +1,17 @@
 
 INCLUDE_DIRECTORIES(
   ../../lib/cJSON
-  ../../lib/libiotkit-comm
+  ../../lib/iotkit-comm
   ../inc/
 )
 
 # set the source files list
-SET(MQTTPUBSUB_CLIENT_PUBLISH_SUCCESS test_mqttpubsub_client_publish_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(MQTTPUBSUB_CLIENT_PUBLISH_FAIL test_mqttpubsub_client_publish_fail.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(MQTTPUBSUB_CLIENT_CONNECT_SUCCESS test_mqttpubsub_client_connect_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(MQTTPUBSUB_CLIENT_SUBSCRIBE_FAIL test_mqttpubsub_client_subscribe_fail.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(MQTTPUBSUB_CLIENT_SUBSCRIBE_SUCCESS test_mqttpubsub_client_subscribe_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(MQTTPUBSUB_CLIENT_UNSUBSCRIBE_SUCCESS test_mqttpubsub_client_unsubscribe_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(MQTTPUBSUB_CLIENT_PUBLISH_SUCCESS test_mqttpubsub_client_publish_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(MQTTPUBSUB_CLIENT_PUBLISH_FAIL test_mqttpubsub_client_publish_fail.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(MQTTPUBSUB_CLIENT_CONNECT_SUCCESS test_mqttpubsub_client_connect_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(MQTTPUBSUB_CLIENT_SUBSCRIBE_FAIL test_mqttpubsub_client_subscribe_fail.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(MQTTPUBSUB_CLIENT_SUBSCRIBE_SUCCESS test_mqttpubsub_client_subscribe_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(MQTTPUBSUB_CLIENT_UNSUBSCRIBE_SUCCESS test_mqttpubsub_client_unsubscribe_success.c ../../lib/plugins/libmqttpubsub/mqtt-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 # create the executables
 ADD_EXECUTABLE(mqttpubsub_client_publish_success ${MQTTPUBSUB_CLIENT_PUBLISH_SUCCESS})

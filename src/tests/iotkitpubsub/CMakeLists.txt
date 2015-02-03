@@ -1,14 +1,14 @@
 
 INCLUDE_DIRECTORIES(
   ../../lib/cJSON
-  ../../lib/libiotkit-comm
+  ../../lib/iotkit-comm
   ../inc/
 )
 
 # set the source files list
-SET(IOTKITPUBSUB_CLIENT_PUBLISH_FAIL test_iotkitpubsub_client_publish_fail.c ../../lib/plugins/libiotkitpubsub/iotkit-agent-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(IOTKITPUBSUB_CLIENT_PUBLISH_SUCCESS test_iotkitpubsub_client_publish_success.c ../../lib/plugins/libiotkitpubsub/iotkit-agent-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(IOTKITPUBSUB_CLIENT_CONNECT_SUCCESS test_iotkitpubsub_client_connect_success.c ../../lib/plugins/libiotkitpubsub/iotkit-agent-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(IOTKITPUBSUB_CLIENT_PUBLISH_FAIL test_iotkitpubsub_client_publish_fail.c ../../lib/plugins/libiotkitpubsub/iotkit-agent-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(IOTKITPUBSUB_CLIENT_PUBLISH_SUCCESS test_iotkitpubsub_client_publish_success.c ../../lib/plugins/libiotkitpubsub/iotkit-agent-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(IOTKITPUBSUB_CLIENT_CONNECT_SUCCESS test_iotkitpubsub_client_connect_success.c ../../lib/plugins/libiotkitpubsub/iotkit-agent-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 # create the executables
 ADD_EXECUTABLE(iotkitpubsub_client_publish_fail ${IOTKITPUBSUB_CLIENT_PUBLISH_FAIL})

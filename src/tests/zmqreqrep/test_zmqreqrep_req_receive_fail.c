@@ -29,7 +29,7 @@ This file tests whether ZMQ Requester socket fails while sending message.
 #include <stdio.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 void handler(char *message,Context context) {
     if (message == NULL) {

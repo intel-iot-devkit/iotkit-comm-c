@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <MQTTAsync.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 bool receivedMessage = false;
 

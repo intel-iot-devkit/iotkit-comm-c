@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "iotkit-comm.h"
-#include "util.h"
+#include "iotkit-comm/iotkit-comm.h"
+#include "iotkit-comm/util.h"
 
 // maybe better to use a simple moving average, but then again,
 // this is just a demo of how to use iotkit-comm

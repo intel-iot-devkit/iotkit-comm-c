@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 int main(void) {
     ServiceQuery *serviceQuery = (ServiceQuery *)malloc(sizeof(ServiceQuery));

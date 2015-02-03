@@ -30,7 +30,7 @@ This file tests whether ZMQ Requester socket fails while sending message.
 #include <assert.h>
 #include <zmq.h>
 #include <zmq_utils.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 void handler(char *message,Context context) {
     printf("Received message: %s\n",message);

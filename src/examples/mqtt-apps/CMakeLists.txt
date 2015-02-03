@@ -1,15 +1,15 @@
 
 INCLUDE_DIRECTORIES(
     ../../lib/cJSON
-    ../../lib/libiotkit-comm
+    ../../lib
 )
 
 # set the executable names
 SET(MQTT_CLIENT_NAME "subscriber")
 SET(MQTT_SERVICE_NAME "publisher")
 
-SET(CLIENT_LIST subscriber.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(SERVICE_LIST publisher.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(CLIENT_LIST subscriber.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(SERVICE_LIST publisher.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 ADD_EXECUTABLE(${MQTT_CLIENT_NAME} ${CLIENT_LIST})
 ADD_EXECUTABLE(${MQTT_SERVICE_NAME} ${SERVICE_LIST})

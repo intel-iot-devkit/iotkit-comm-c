@@ -29,7 +29,7 @@
 #include <zmq.h>
 #include <zmq_utils.h>
 #include <signal.h>
-#include "../../lib/libiotkit-comm/iotkit-comm.h"
+#include "iotkit-comm.h"
 
 void handler() {
     puts("Didn't receive message");

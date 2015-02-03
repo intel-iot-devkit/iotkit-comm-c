@@ -1,22 +1,22 @@
 
 INCLUDE_DIRECTORIES(
   ../../lib/cJSON
-  ../../lib/libiotkit-comm
+  ../../lib/iotkit-comm
   ../inc/
 )
 
 # set the source files list
-SET(ZMQREQREP_REP_RECEIVE_FAIL test_zmqreqrep_rep_receive_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REP_RECEIVE_SUCCESS test_zmqreqrep_rep_receive_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REP_SENDTO_FAIL test_zmqreqrep_rep_sendTo_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REP_SENDTO_SUCCESS test_zmqreqrep_rep_sendTo_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REP_SOCKET_CONNECT_FAIL test_zmqreqrep_rep_socket_connect_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REP_SOCKET_CONNECT_SUCCESS test_zmqreqrep_rep_socket_connect_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REQ_RECEIVE_FAIL test_zmqreqrep_req_receive_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REQ_SEND_FAIL test_zmqreqrep_req_send_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REQ_SEND_SUCCESS test_zmqreqrep_req_send_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REQ_SOCKET_CONNECT_FAIL test_zmqreqrep_req_socket_connect_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
-SET(ZMQREQREP_REQ_SOCKET_CONNECT_SUCCESS test_zmqreqrep_req_socket_connect_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/libiotkit-comm/iotkit-comm.c ../../lib/libiotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REP_RECEIVE_FAIL test_zmqreqrep_rep_receive_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REP_RECEIVE_SUCCESS test_zmqreqrep_rep_receive_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REP_SENDTO_FAIL test_zmqreqrep_rep_sendTo_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REP_SENDTO_SUCCESS test_zmqreqrep_rep_sendTo_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REP_SOCKET_CONNECT_FAIL test_zmqreqrep_rep_socket_connect_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REP_SOCKET_CONNECT_SUCCESS test_zmqreqrep_rep_socket_connect_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-service.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REQ_RECEIVE_FAIL test_zmqreqrep_req_receive_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REQ_SEND_FAIL test_zmqreqrep_req_send_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REQ_SEND_SUCCESS test_zmqreqrep_req_send_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REQ_SOCKET_CONNECT_FAIL test_zmqreqrep_req_socket_connect_fail.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
+SET(ZMQREQREP_REQ_SOCKET_CONNECT_SUCCESS test_zmqreqrep_req_socket_connect_success.c ../../lib/plugins/libzmqreqrep/zmqreqrep-client.c ../../lib/cJSON/cJSON.c ../../lib/iotkit-comm/iotkit-comm.c ../../lib/iotkit-comm/iotkit-comm_mdns.c)
 
 # create the executables
 ADD_EXECUTABLE(zmqreqrep_rep_receive_fail ${ZMQREQREP_REP_RECEIVE_FAIL})
