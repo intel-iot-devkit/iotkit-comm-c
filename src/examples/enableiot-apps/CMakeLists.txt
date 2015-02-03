@@ -28,5 +28,5 @@ SET_TARGET_PROPERTIES(${ENABLEIOT_SERVICE_NAME} PROPERTIES LINKER_LANGUAGE C)
 # Link the shared library
 TARGET_LINK_LIBRARIES(${IOTKIT_CLIENT_NAME} paho-mqtt3as pthread dns_sd m dl)
 TARGET_LINK_LIBRARIES(${IOTKIT_SERVICE_NAME} paho-mqtt3as pthread dns_sd m dl)
-TARGET_LINK_LIBRARIES(${ENABLEIOT_CLIENT_NAME} iotkit-comm curl pthread dns_sd m dl)
-TARGET_LINK_LIBRARIES(${ENABLEIOT_SERVICE_NAME} iotkit-comm curl pthread dns_sd m dl)
+TARGET_LINK_LIBRARIES(${ENABLEIOT_CLIENT_NAME} curl pthread dns_sd m dl)
+TARGET_LINK_LIBRARIES(${ENABLEIOT_SERVICE_NAME} curl pthread dns_sd m dl)
