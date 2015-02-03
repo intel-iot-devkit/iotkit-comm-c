@@ -22,10 +22,10 @@
  */
 
 /**
-* @file iotkit-publisher.c
-* @brief Sample to demonstrate IoTKit publisher through iotkit-comm API.
+* @file enableiot-publisher.c
+* @brief Sample to demonstrate data publish through iotkit-comm API.
 *
-* Provides features to connect to an MQTT Broker and publish a topic.
+* Provides features to publish data to enableiot cloud
 */
 
 #include <stdio.h>
@@ -43,12 +43,12 @@ int msgnumber = 13; // iotkit-agent does not accept zero as sensor value; so ass
 
 /**
  * @name Callback to handle the communication
- * @brief Handles the communication with an MQTT broker once the connection is established.
+ * @brief Handles the communication with enableiot cloud once the connection is established.
  * @param[in] handle left for future purpose, currently unused
  * @param[in] error_code specifies the error code any
  * @param[in] serviceHandle is the client object initialized with the required APIs
  *
- * Handles the communication, such as publishing data to an MQTT broker once the connection is established.
+ * Handles the communication, such as publishing data once the connection is established.
  */
 void callback(void *handle, int32_t error_code, void *serviceHandle) {
     Context context;
@@ -166,9 +166,9 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
 
 /**
  * @name Starts the application
- * @brief Starts the application to publish for a topic
+ * @brief Starts the application to publish data
  *
- * Establishes the connection with an MQTT broker.
+ * Establishes the connection with enableiot cloud
  */
 int main(void) {
     puts("Sample program to publish data to IoT Cloud !!");

@@ -22,10 +22,10 @@
  */
 
 /**
-* @file iotkit-subscriber.c
-* @brief Sample to demonstrate IoTKit subscriber through iotkit-comm API.
+* @file enableiot-subscriber.c
+* @brief Sample to demonstrate data subscribe through iotkit-comm API.
 *
-* Provides features to connect to an MQTT Broker and subscribe to a topic.
+* Provides features to connect and subscribe to data.
 */
 
 #include <stdio.h>
@@ -40,11 +40,11 @@ int i = 0;
 
 /**
  * @name Message handler
- * @brief Callback invoked upon receiving a message from an MQTT broker.
- * @param[in] message received from an MQTT broker
+ * @brief Callback invoked upon receiving a message from enableiot cloud MQTT broker.
+ * @param[in] message received from MQTT broker
  * @param[in] context with the topic information
  *
- * Callback invoked upon receiving a message from an MQTT broker.
+ * Callback invoked upon receiving a message from enableiot cloud MQTT broker.
  */
 void message_callback(char *message, Context context) {
     printf("Message received:%s\n", message);
@@ -62,12 +62,12 @@ int serviceStarted = 0;
 
 /**
  * @name Callback to handle the communication
- * @brief Handles the communication with an MQTT broker once the connection is established.
+ * @brief Handles the communication with enableiot cloud MQTT broker once the connection is established.
  * @param[in] handle left for future purpose, currently unused
  * @param[in] error_code specifies the error code is any
  * @param[in] serviceHandle is the client object initialized with the required APIs
  *
- * Handles the communication with an MQTT broker once the connection is established.
+ * Handles the communication with enableiot cloud MQTT broker once the connection is established.
  */
 void callback(void *handle, int32_t error_code, void *serviceHandle) {
     if(serviceHandle != NULL && !serviceStarted) {

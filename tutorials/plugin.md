@@ -8,8 +8,8 @@ c) Learn more.
 <B> About communication plugins </B>
 
 A communication plugin abstracts away the details of how messages are sent (or received), allowing developers to focus
-on the contents of messages. These plugins provide functions like send and sendTo. The major difference is how the
-send and sendTo are implemented: In one plugin, the underlying protocol might be MQTT, while in another plugin zeromq
+on the contents of messages. These plugins provide functions like send and receive. The major difference is how the
+send and receive are implemented: In one plugin, the underlying protocol might be MQTT, while in another plugin zeromq
 sockets might be used. This gives developers the flexibility to switch the underlying communication protocol
 (e.g. MQTT or zeromq) with minor code changes and without the need to learn the details of these underlying protocols.
 

@@ -2,8 +2,7 @@
 To publish data to the cloud and later subscribe to it, you will need to:
 
 1) Create a cloud account. <BR>
-2) Create a profile for your device. <BR>
-3) Connect your device to its profile in the cloud. <BR>
+2) Add device in your cloud account. <BR>
 4) Publish data from your device. <BR>
 5) Subscribe to data. <BR>
 
@@ -13,93 +12,117 @@ Go to Intel's enableiot cloud site [https://dashboard.us.enableiot.com] and foll
 Once an account is created, an activation key will be available in the account details section which we will be using
 shortly.
 
-<B> Create a profile for your device </B>
+<B> Add device in your cloud account </B>
 
-Creating a profile involves:
+Adding a device involves:
 
 a) Getting your device's ID <BR>
 b) Using the ID to register your device with the cloud
 
 <B> Getting your device's ID </B>
 
-You can get the device id by running the following in an device terminal:
+You can get the device id by running the following command in device terminal:
 
-$ cd /usr/lib/node_modules/iotkit-agent <BR>
-$ node iotkit-admin.js device-id <BR>
+$ iotkit-admin device-id <BR>
 
-<B> Using the ID to register your device with the cloud </B>
+<B> Use the ID to register your device with the cloud </B>
 
-When you log in to your account, the first page you see is the dashboard. Click on 'devices' devices; then, click on
+When you log in to your account, the first page you see is the dashboard. Click on 'Devices' menu option; then, click on
 the 'Add New Device' button. Enter appropriate details about your device; if you do not have a gateway id or don't
-know what that means, just enter the device ID in this field. Once you have saved the profile, proceed to the next
-step: Connecting your device to this profile.
+know what that means, just enter the device ID in this field.
+Once the device is added click on 'Account' menu option and note the 'Activation Code'. Proceed to the next
+step: Activate your device in the cloud .
 
-<B> Connect your device to its profile in the cloud </B>
+<B> Activate your device in the cloud </B>
 
 Before you connect your device, you should first test if it can reach the cloud:
 
-$ cd /usr/lib/node_modules/iotkit-agent <BR>
-$ node iotkit-admin.js test <BR>
+$ iotkit-admin test <BR>
 
 If there are no errors, do the following:
 
-$ cd /usr/lib/node_modules/iotkit-agent <BR>
-$ node iotkit-admin.js activate [your-activation-key] <BR>
+$ iotkit-admin activate [your-activation-key] <BR>
 
-If there are no errors, your device is connected and ready to publish data.
+If there are no errors, your device is activated and ready to publish data.
 
 <B> Publish data from your device </B>
 
-This section assumes that you know how to write a client application using iotkit-comm. If not, please go through the client
+This section assumes that you know how to write a server application using iotkit-comm. If not, please go through the server
 tutorial first.
 
-Create a service query for the cloud (temperatureServiceIoTKit.json):
+Create a service specification for the cloud (temperatureServiceIoTKit.json):
 
     {
-        "name" : "enableiot_cloud",
+        "name" : "temperature.v1.0/garage_sensor",
         "type" : {
-            "name": "iotkit",
-            "protocol" : "tcp"
-         },
-        "address" : "127.0.0.1",
-        "port" : 1884
+            "name": "iotkit-agent"
+        },
+        "port" : 1884,
+        "type_params": {"mustsecure": false}
     }
 
+
 Write the code to publish data:
+
+    #include <stdio.h>
+    #include <stdbool.h>
+    #include <sys/types.h>
+    #include "iotkit-comm/iotkit-comm.h"
+    #include "iotkit-comm/util.h"
+
+    ServiceSpec *srvSpec = NULL;
+    int msgnumber = 40;
 
     void callback(void *handle, int32_t error_code, void *serviceHandle)
     {
         Context context;
         char msg[256];
+        int i = 0;
+        CommHandle *commHandle = NULL;
 
-        if(serviceHandle != NULL){
-            CommHandle *commHandle = (CommHandle *)serviceHandle;
+        if(serviceHandle != NULL)
+        {
+            commHandle = (CommHandle *) serviceHandle;
 
-            int (**send)(char *message,Context context);
+            int (**send) (char *message,Context context);
 
-            send = commInterfacesLookup(commHandle, "send");
-            if(send == NULL){
-                printf("Function \'send\' is not available; please verify the Plugin documentation !!\n");
+            send = commInterfacesLookup(commHandle, "publish");
+            if(send == NULL)
+            {
+                printf("Function \'publish\' is not available; please verify the Plugin documentation !!\n");
+                return;
             }
-
 
             context.name = "topic";
             context.value = "data";
 
-            while(1){
-                sprintf(msg, "{\"n\": \"garage\", \"v\": %d}", msgnumber++);
+            while(i < 10) {  // Event Loop
+                sprintf(msg, "{\"n\": \"garage_sensor\", \"v\": %d}", msgnumber++);
                 printf("Publishing msg:%s\n", msg);
 
                 (*send)(msg, context);
                 sleep(2);
+
+                i ++;
             }
         }
+
+        // clean the objects
+        cleanUpService(&srvSpec, &commHandle);
+        exit(0);
     }
 
-    ServiceSpec *srvSpec = (ServiceSpec *) parseServiceSpec("./temperatureServiceIoTKit.json");
+    int main(void)
+    {
+        puts("Sample program to publish data to IoT Cloud !!");
 
-    if (srvSpec){
-        createClientForGivenService(srvSpec, callback);
+        srvSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceIoTKit.json");
+
+        if (srvSpec){
+            advertiseServiceBlocking(srvSpec, callback);
+        }
+
+        return 0;
     }
 
 
@@ -118,49 +141,78 @@ only topic supported by the cloud.
 This section assumes that you know how to write a client application using iotkit-comm. If not, please go through the client
 tutorial first.
 
-Create a service query for the cloud (temperatureServiceIoTKit.json):
+Create a service query for the cloud (temperatureServiceQueryIoTKit.json):
 
     {
-        "name" : "enableiot_cloud",
+        "name" : "temperature.v1.0/garage_sensor",
         "type" : {
-            "name": "iotkit",
-            "protocol" : "tcp"
+            "name": "iotkit-agent"
         },
-        "address" : "127.0.0.1",
-        "port" : 1884
+        "type_params": {"deviceid": "<<device ID>>"}
     }
+
 
 Write the code to subscribe to the data:
 
-    void callback(void *handle, int32_t error_code, void *serviceHandle)
-    {
-        if(serviceHandle != NULL && !serviceStarted){
-            CommHandle *commHandle = (CommHandle *) serviceHandle;
-            int (**subscribe)() = NULL;
-            int (**receive)(void (*)(char *, Context)) = NULL;
+    #include <stdio.h>
+    #include <stdbool.h>
+    #include <sys/types.h>
+    #include "iotkit-comm/iotkit-comm.h"
+    #include "iotkit-comm/util.h"
 
-            subscribe = commInterfacesLookup(commHandle, "subscribe");
-            if(subscribe == NULL){
-                printf("Function \'subscribe\' is not available; please verify the Plugin documentation !!\n");
-            }
+    ServiceQuery *query = NULL;
+    CommHandle *commHandle = NULL;
+    int i = 0;
 
-            receive = commInterfacesLookup(commHandle, "receive"); //(int (*)(void (*)(char *, Context)))
-            if(receive == NULL){
-                printf("Function \'receive\' is not available; please verify the Plugin documentation !!\n");
-            }
+    void message_callback(char *message, Context context) {
+        printf("Message received:%s\n", message);
 
-            (*receive)(message_callback);
-            (*subscribe)();
+        i ++;
 
-            serviceStarted = 1;
+        if(i >= 3) {
+            // clean the objects
+            cleanUpService(&query, &commHandle);
+            exit(0);
         }
     }
 
-    ServiceQuery *query = (ServiceQuery *) parseServiceSpec("./temperatureServiceIoTKit.json");
+    int serviceStarted = 0;
 
-    if (query){
-        createClientForGivenService(query, callback);
+    void callback(void *handle, int32_t error_code, void *serviceHandle) {
+        if(serviceHandle != NULL && !serviceStarted) {
+            commHandle = (CommHandle *) serviceHandle;
+            int (**receive)(void (*)(char *, Context)) = NULL;
+
+            receive = commInterfacesLookup(commHandle, "receive");
+            if(receive == NULL) {
+                printf("Function \'receive\' is not available; please verify the Plugin documentation !!\n");
+                return;
+            }
+
+            (*receive)(message_callback);
+
+            serviceStarted = 1;
+            while(1) { // Infinite Event Loop
+                sleep(1);
+            }
+        }
     }
 
-To receive data you must first subscribe to it. Note that subscribe does not take a topic as argument. This is
-because the only supported topic, for now, is "data" and so it is assumed by default.
+    bool serviceFilter(ServiceQuery *srvQuery) {
+        printf("Got into Service Filter\n");
+        return true;
+    }
+
+    int main(void) {
+
+        puts("Sample program to test the IoT Cloud subscribe plugin !!");
+        query = (ServiceQuery *) parseServiceQuery("./temperatureServiceQueryIoTKit.json");
+
+        if (query) {
+            createClientForGivenService(query, callback);
+        }
+
+        return 0;
+    }
+
+To receive data you must first subscribe to it. Note that it subscribes to the device ID specified in the query json.

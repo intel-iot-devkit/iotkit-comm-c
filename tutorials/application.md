@@ -273,6 +273,15 @@ Here's the service query used to find the thermostat (in thermostat-query.json):
 
 The full commented source code for the dashboard is available here.
 
+<B> Compiling the example </B>
+
+To compile the distributed-thermostat sample application go into the directory /usr/share/iotkit-comm/examples/c/distributed-thermostat/
+and run the following commands:
+
+$ cc -o dashboard dashboard.c -liotkit-comm -ldns_sd -ldl -lm <BR>
+$ cc -o sensor temperatureSensor.c -liotkit-comm -ldns_sd -ldl -lm <BR>
+$ cc -o thermostat thermostat.c -liotkit-comm -ldns_sd -ldl -lm <BR>
+
 <B> Running the example </B>
 
 To run the distributed-thermostat sample application go into the directory /usr/share/iotkit-comm/examples/c/
