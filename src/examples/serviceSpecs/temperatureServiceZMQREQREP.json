@@ -8,8 +8,5 @@
         "dataType": "float",
         "unit": "F"
     },
-    "advertise": {
-        "locally": true,
-        "cloud": false
-    }
+    "type_params": {"mustsecure": true }
 }
