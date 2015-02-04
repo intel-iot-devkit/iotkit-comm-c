@@ -9,6 +9,8 @@ comes in two flavors: C and node.js. This documentation focuses on the C version
 
 <B> How to read this documentation </B>
 
+&ensp;&ensp;&bull;  For tutorials on how to use the API, the entry point is the 'Tutorials' section (we suggest starting with the ['Start Here'](@ref start-here.md) tutorial).<BR>
+
 &ensp;&ensp;&bull;  For browsing the library and plugins:<BR>
 
 &ensp;&ensp;    1) iotkit-comm<BR>
@@ -17,7 +19,6 @@ comes in two flavors: C and node.js. This documentation focuses on the C version
 &ensp;&ensp;    4) mqttpubsub<BR>
 &ensp;&ensp;    5) zmqpubsub<BR>
 &ensp;&ensp;    6) zmqreqrep<BR><BR>
-&ensp;&ensp;&bull;  For tutorials on how to use the API, the entry point is the 'Tutorials' section (we suggest starting with the ['Start Here'](@ref start-here.md) tutorial).<BR>
 
 <I>Note: For the purposes of this documentation, a module is a logical grouping of functions and variables. Please be aware
 that this is the <B> logical structure of the documentation only</B> and not iotkit-comm codebase.</I>

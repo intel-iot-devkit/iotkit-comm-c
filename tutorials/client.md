@@ -1,9 +1,9 @@
 
-Writing a client using iotkit-comm requires three fundamental steps:
-    1) Write a service query. <BR>
-    2) Create a client that queries for the service. <BR>
-    3) Compile the client. <BR>
-    4) Run the client. <BR>
+Writing a client using iotkit-comm requires three fundamental steps: <BR>
+    1) Write a service query <BR>
+    2) Create a client that queries for the service <BR>
+    3) Compile the client <BR>
+    4) Run the client <BR>
 
 <B> Write a service query </B>
 
@@ -24,57 +24,57 @@ tutorial. It is assumed that the service query is written into file client-query
 
 Now here's the source code for the client (place in file zmqreqrep-client.c):
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <sys/types.h>
-#include "iotkit-comm/iotkit-comm.h"
-#include "iotkit-comm/util.h"
+    #include <stdio.h>
+    #include <stdbool.h>
+    #include <sys/types.h>
+    #include "iotkit-comm/iotkit-comm.h"
+    #include "iotkit-comm/util.h"
 
-ServiceQuery *query = NULL;
+    ServiceQuery *query = NULL;
 
-void reqMessageCallback(char *message, Context context) {
-    fprintf(stderr,"Message received in Client: %s\n", message);
-}
+    void reqMessageCallback(char *message, Context context) {
+        fprintf(stderr,"Message received in Client: %s\n", message);
+    }
 
-void reqDiscoveryCallback(void *handle, int32_t error_code, CommHandle *commHandle) {
-    if (commHandle != NULL) {
-        int (**send)(char *, Context context);
-        int (**receive)(void (*)(char *, Context));
-        Context context;
-        int i = 0;
+    void reqDiscoveryCallback(void *handle, int32_t error_code, CommHandle *commHandle) {
+        if (commHandle != NULL) {
+            int (**send)(char *, Context context);
+            int (**receive)(void (*)(char *, Context));
+            Context context;
+            int i = 0;
 
-        send = commInterfacesLookup(commHandle, "send");
-        receive = commInterfacesLookup(commHandle, "receive");
-        if (send != NULL && receive != NULL) {
-            while (i < 9) { // Event Loop
-                (*send)("toys",context);
-                (*receive)(reqMessageCallback);
-                sleep(2);
+            send = commInterfacesLookup(commHandle, "send");
+            receive = commInterfacesLookup(commHandle, "receive");
+            if (send != NULL && receive != NULL) {
+                while (i < 9) { // Event Loop
+                    (*send)("toys",context);
+                    (*receive)(reqMessageCallback);
+                    sleep(2);
 
-                i ++;
+                    i ++;
+                }
+
+                // clean the service query object
+                cleanUpService(&query, &commHandle);
+                exit(0);
+            } else {
+                puts("Interface lookup failed");
             }
-
-            // clean the service query object
-            cleanUpService(&query, &commHandle);
-            exit(0);
         } else {
-            puts("Interface lookup failed");
+            puts("\nComm Handle is NULL\n");
         }
-    } else {
-        puts("\nComm Handle is NULL\n");
-    }
-}
-
-int main(void) {
-    puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
-    query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQREQREP.json");
-
-    if (query) {
-        discoverServicesBlocking(query, reqDiscoveryCallback);
     }
 
-    return 0;
-}
+    int main(void) {
+        puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
+        query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryZMQREQREP.json");
+
+        if (query) {
+            discoverServicesBlocking(query, reqDiscoveryCallback);
+        }
+
+        return 0;
+    }
 
 Notice that the client does not need to know the IP address of the service or even how to communicate with it. Instead,
 the service query takes care of such details. For example, this client specifies the name of the service and the

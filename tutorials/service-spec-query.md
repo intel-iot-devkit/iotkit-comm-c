@@ -4,13 +4,13 @@ distributed applications. A distributed application written using iotkit-comm is
 
 When creating a service, the developer:
 
-1) Writes a service specification. <BR>
-2) Requests the iotkit-comm library to create a service based on that specification. <BR>
+1) Writes a service specification <BR>
+2) Requests the iotkit-comm library to create a service based on that specification <BR>
 
 When creating a client, the developer:
 
-1) Writes a service query. <BR>
-2) Requests iotkit-comm to find and connect to a service whose attributes match that query. <BR>
+1) Writes a service query <BR>
+2) Requests iotkit-comm to find and connect to a service whose attributes match that query <BR>
 
 Service specifications and queries look similar. The fundamental difference is that a service query is used
 by clients whereas a service specification is used by services: a specification is used to initialize a service while a
@@ -85,7 +85,7 @@ above attributes:
 
 a) name (<I>compulsory</I>): can be specified as a regular expression <BR>
 b) type (<I>compulsory</I>) <BR>
-    &ensp; &bull; name (<I>compulsory</I>): the higher level communication protocol the service uses. This allows the client to find
+    &ensp;&bull; name (<I>compulsory</I>): the higher level communication protocol the service uses. This allows the client to find
         only those services with which it can communicate. For example, a zmq subscriber will find only zmq
         publishers if it specifies zmqpubsub in the type.name field of the query (see zeromq pub/sub sockets). <BR>
     &ensp; &bull; protocol (<I>compulsory</I>): the transport layer protocol (only tcp is supported) <BR>

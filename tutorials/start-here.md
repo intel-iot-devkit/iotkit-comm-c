@@ -1,18 +1,12 @@
 To start working with the iotkit-comm library, you will need to:
 
-1. Install it.
-2. Run a sample program (optional).
-3. Learn more (optional).
+1. Install it
+2. Run a sample program (optional)
+3. Learn more (optional)
 
 <B> Install it </B>
 
-Edison comes with iotkit-comm preinstalled. So no explicit installation is required on Edison.
-For other platforms please follow below instructions:
-1) Download the source code
-2) Create a build folder (ex: mkdir build)
-3) Execute cmake command (ex: cmake <<project folder>>/src/)
-4) Execute make command (ex: make)
-5) Install (ex: make install)
+No installation is reequired on the Intel<sup>&reg;</sup> Edison device <i>(support for other platforms coming soon)</i>.
 
 <B> Run a sample program </B>
 

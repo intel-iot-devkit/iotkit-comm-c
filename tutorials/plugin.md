@@ -1,9 +1,9 @@
 
 At the moment, iotkit-comm supports only communication plugins. Thus the following topics will be specific to these plugins:
 
-a) About communication plugins. <BR>
-b) How communication plugins are instantiated. <BR>
-c) Learn more.
+a) About communication plugins <BR>
+b) How communication plugins are instantiated <BR>
+c) Learn more
 
 <B> About communication plugins </B>
 
@@ -42,7 +42,7 @@ to connect to a service providing temperature readings; this is the service quer
         "type" : {
             "name": "zmqpubsub",
             "protocol" : "tcp"
-            }
+        }
     }
 
 The above query says that this client is looking for a service which uses the zmqpubsub communication plugin. The

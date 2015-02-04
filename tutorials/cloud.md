@@ -1,10 +1,11 @@
 
 To publish data to the cloud and later subscribe to it, you will need to:
 
-1) Create a cloud account. <BR>
-2) Add device in your cloud account. <BR>
-4) Publish data from your device. <BR>
-5) Subscribe to data. <BR>
+1) Create a cloud account <BR>
+2) Add device in your cloud account <BR>
+3) Activate your device in the cloud <BR>
+4) Publish data from your device <BR>
+5) Subscribe to data <BR>
 
 <B> Create a cloud account </B>
 
@@ -17,9 +18,9 @@ shortly.
 Adding a device involves:
 
 a) Getting your device's ID <BR>
-b) Using the ID to register your device with the cloud
+b) Use the ID to register your device with the cloud
 
-<B> Getting your device's ID </B>
+<B> Get your device's ID </B>
 
 You can get the device id by running the following command in device terminal:
 

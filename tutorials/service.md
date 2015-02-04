@@ -1,10 +1,10 @@
 
 Writing a service using iotkit-comm requires three fundamental steps:
 
-1) Write a service specification. <BR>
-2) Create a service based on that specification. <BR>
-3) Compile the service. <BR>
-4) Run the service. <BR>
+1) Write a service specification <BR>
+2) Create a service based on that specification <BR>
+3) Compile the service <BR>
+4) Run the service <BR>
 
 <B> Write a service specification </B>
 
@@ -26,58 +26,58 @@ for the service we will be writing (place in file server-spec.json):
 
 Now here's the source code for the service itself (place in file zmqreqrep-service.c):
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <sys/types.h>
-#include "iotkit-comm/iotkit-comm.h"
-#include "iotkit-comm/util.h"
+    #include <stdio.h>
+    #include <stdbool.h>
+    #include <sys/types.h>
+    #include "iotkit-comm/iotkit-comm.h"
+    #include "iotkit-comm/util.h"
 
-ServiceSpec *serviceSpec = NULL;
+    ServiceSpec *serviceSpec = NULL;
 
-void repMessageCallback(void *client, char *message, Context context) {
-    fprintf(stderr,"Message received in Server: %s\n", message);
-}
+    void repMessageCallback(void *client, char *message, Context context) {
+        fprintf(stderr,"Message received in Server: %s\n", message);
+    }
 
-void repAdvertiseCallback(void *handle, int32_t error_code,CommHandle *serviceHandle) {
-    if (serviceHandle != NULL) {
-        void *client = NULL;
-        Context context;
-        void (**sendTo)(void *, char *, Context context);
-        int (**receive)(void (*)(void *, char *, Context context));
-        int i = 0;
+    void repAdvertiseCallback(void *handle, int32_t error_code,CommHandle *serviceHandle) {
+        if (serviceHandle != NULL) {
+            void *client = NULL;
+            Context context;
+            void (**sendTo)(void *, char *, Context context);
+            int (**receive)(void (*)(void *, char *, Context context));
+            int i = 0;
 
-        sendTo = commInterfacesLookup(serviceHandle, "sendTo");
-        receive = commInterfacesLookup(serviceHandle, "receive");
-        if (sendTo != NULL && receive != NULL) {
-            while(i < 10) {  // Event Loop
-                (*sendTo)(client,"train bike car",context);
-                (*receive)(repMessageCallback);
-                sleep(2);
+            sendTo = commInterfacesLookup(serviceHandle, "sendTo");
+            receive = commInterfacesLookup(serviceHandle, "receive");
+            if (sendTo != NULL && receive != NULL) {
+                while(i < 10) {  // Event Loop
+                    (*sendTo)(client,"train bike car",context);
+                    (*receive)(repMessageCallback);
+                    sleep(2);
 
-                i ++;
+                    i ++;
+                }
+
+                // clean the service specification object
+                cleanUpService(&serviceSpec, &serviceHandle);
+                exit(0);
+            } else {
+                puts("Interface lookup failed");
             }
-
-            // clean the service specification object
-            cleanUpService(&serviceSpec, &serviceHandle);
-            exit(0);
         } else {
-            puts("Interface lookup failed");
+            puts("\nComm Handle is NULL\n");
         }
-    } else {
-        puts("\nComm Handle is NULL\n");
-    }
-}
-
-int main(void) {
-    puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
-    serviceSpec = (ServiceSpec *) parseServiceSpec("./server-spec.json");
-
-    if (serviceSpec) {
-        advertiseServiceBlocking(serviceSpec, repAdvertiseCallback);
     }
 
-    return 0;
-}
+    int main(void) {
+        puts("Sample program to test the iotkit-comm ZMQ req/rep plugin !!");
+        serviceSpec = (ServiceSpec *) parseServiceSpec("./server-spec.json");
+
+        if (serviceSpec) {
+            advertiseServiceBlocking(serviceSpec, repAdvertiseCallback);
+        }
+
+        return 0;
+    }
 
 Notice that the service does not need to worry about how messages will be delivered, it only needs to worry about the
 contents of those messages. Specifying zmqreqrep in the type.name field of the specification is enough to let iotkit-comm
