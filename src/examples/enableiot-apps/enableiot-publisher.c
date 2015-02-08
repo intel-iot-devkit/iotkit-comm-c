@@ -59,91 +59,13 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
     if(serviceHandle != NULL) {
         commHandle = (CommHandle *) serviceHandle;
 
-        int (**send) (char *message,Context context);
-        char * (**signIn)(char *username, char *passwd);
-        char * (**createAccount)(char *accname);
-        char * (**createDevice)(char *deviceid, char *gatewayid, char *devicename);
-        char * (**activateDevice)();
-        char * (**registerSensor)();
+        int (**publish) (char *message,Context context);
 
-        send = commInterfacesLookup(commHandle, "publish");
-        if(send == NULL) {
+        publish = commInterfacesLookup(commHandle, "publish");
+        if(publish == NULL) {
             fprintf(stderr, "Function \'publish\' is not available; please verify the Plugin documentation !!\n");
             return;
         }
-
-        signIn = commInterfacesLookup(commHandle, "signIn");
-        if(signIn == NULL) {
-            fprintf(stderr, "Function \'signIn\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
-
-        createAccount = commInterfacesLookup(commHandle, "createAccount");
-        if(createAccount == NULL) {
-            fprintf(stderr, "Function \'createAccount\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
-
-        createDevice = commInterfacesLookup(commHandle, "createDevice");
-        if(createDevice == NULL) {
-            fprintf(stderr, "Function \'createDevice\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
-
-        activateDevice = commInterfacesLookup(commHandle, "activateDevice");
-        if(activateDevice == NULL) {
-            fprintf(stderr, "Function \'activateDevice\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
-
-        registerSensor = commInterfacesLookup(commHandle, "registerSensor");
-        if(registerSensor == NULL) {
-            fprintf(stderr, "Function \'registerSensor\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
-
-        char *result;
-
-        // Please provide enableiot credentials
-        result = (*signIn)(strdup("<<username>>"), strdup("<<password>>"));
-        if(result) {
-            printf("signIn Result: %s\n", result);
-        } else {
-            printf("Device is already active. Retrieval of Authentication Token is not required\n");
-        }
-
-        // Please provide a valid account name
-        result = (*createAccount)("temptest");
-        if(result) {
-        printf("createAccount Result: %s\n", result);
-        } else {
-            printf("Device is already active. Creation of Account is not required\n");
-        }
-
-        // Please provide enableiot credentials
-        result = (*signIn)(strdup("<<username>>"), strdup("<<password>>"));
-        if(result) {
-        printf("signIn Result: %s\n", result);
-        } else {
-            printf("Device is already active. Retrieval of Authentication Token is not required\n");
-        }
-
-        // Please provide device ID, gateway ID and device Name
-        result = (*createDevice)(strdup("<<device ID>>"), strdup("<<gateway ID>>"), strdup("<<device name>>"));
-        if(result) {
-            printf("createDevice Result: %s\n", result);
-        } else {
-            printf("Device is already active. Creation of Device is not required\n");
-        }
-        result = (*activateDevice)();
-        if(result) {
-            printf("activateDevice Result: %s\n", result);
-        } else {
-            printf("Device is already active.\n");
-        }
-        (*registerSensor)();
-        sleep(2); // make sure the component is written into filesystem
-        printf("registered the Sensor \n");
 
         context.name = "topic";
         context.value = "data";
@@ -152,7 +74,7 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
             sprintf(msg, "{\"name\": \"garage_sensor\", \"value\": %d}", msgnumber++);
             printf("Publishing msg:%s\n", msg);
 
-            (*send)(msg, context);
+            (*publish)(msg, context);
             sleep(2);
 
             i ++;

@@ -4,5 +4,5 @@
         "name": "enableiot"
     },
     "port": 34562,
-    "type_params": {"mustsecure": false}
+    "type_params": {"deviceid":"02-00-86-4b-b6-de", "activationCode":"2sdf34sfeE"}
 }

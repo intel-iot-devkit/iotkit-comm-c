@@ -86,6 +86,8 @@ void initSpecification(ServiceSpec *specification) {
     specification->advertise.cloud = NULL;
     specification->type_params.mustsecure = false;
     specification->type_params.deviceid = NULL;
+    specification->type_params.activationCode = NULL;
+    specification->type_params.subscribeToDevice = NULL;
     // initially set status to UNKNOWN
     specification->status = UNKNOWN;
 }
@@ -307,8 +309,28 @@ ServiceSpec *parseServiceSpec(char *service_desc_file) {
                         printf("must secure parameter is FALSE\n");
                     }
                 #endif
-            } else {
-                specification->type_params.mustsecure = false;
+
+                jitem = cJSON_GetObjectItem(child, "deviceid");
+                if (jitem && isJsonString(jitem)) {
+                    specification->type_params.deviceid = strdup(jitem->valuestring);
+                }
+
+                #if DEBUG
+                    if(specification->type_params.deviceid) {
+                        printf("Target Device is %s\n", specification->type_params.deviceid);
+                    }
+                #endif
+
+                jitem = cJSON_GetObjectItem(child, "activationCode");
+                if (jitem && isJsonString(jitem)) {
+                    specification->type_params.activationCode = strdup(jitem->valuestring);
+                }
+
+                #if DEBUG
+                    if(specification->type_params.activationCode) {
+                        printf("Device Activation Code is %s\n", specification->type_params.activationCode);
+                    }
+                #endif
             }
 
 endParseSrvFile:
@@ -443,6 +465,28 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
                 #if DEBUG
                     if(specification->type_params.deviceid) {
                         printf("Target Device is %s\n", specification->type_params.deviceid);
+                    }
+                #endif
+
+                jitem = cJSON_GetObjectItem(child, "activationCode");
+                if (jitem && isJsonString(jitem)) {
+                    specification->type_params.activationCode = strdup(jitem->valuestring);
+                }
+
+                #if DEBUG
+                    if(specification->type_params.activationCode) {
+                        printf("Device Activation Code is %s\n", specification->type_params.activationCode);
+                    }
+                #endif
+
+                jitem = cJSON_GetObjectItem(child, "subscribeto");
+                if (jitem && isJsonString(jitem)) {
+                    specification->type_params.subscribeToDevice = strdup(jitem->valuestring);
+                }
+
+                #if DEBUG
+                    if(specification->type_params.subscribeToDevice) {
+                        printf("Subscribe to Device: %s\n", specification->type_params.subscribeToDevice);
                     }
                 #endif
             }

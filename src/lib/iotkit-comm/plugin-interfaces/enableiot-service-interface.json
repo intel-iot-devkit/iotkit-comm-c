@@ -1,3 +1,3 @@
 {
-    "functions": ["signIn", "createAccount", "createDevice", "activateDevice", "registerSensor", "publish", "receive", "done"]
+    "functions": ["publish", "receive", "done"]
 }

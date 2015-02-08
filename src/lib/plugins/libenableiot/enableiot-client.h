@@ -61,6 +61,8 @@ char *interface = "enableiot-client-interface"; // specifies the plugin interfac
 bool provides_secure_comm = true;
 bool communicates_via_proxy = true;
 
+char *deviceID = NULL;
+char *activationCode = NULL;
 char *address = NULL;
 int port = 0;
 char *username = NULL; // aka device ID
@@ -84,9 +86,5 @@ MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 void (*msgArrhandler) (char *topic, Context context) = NULL;
 
 int init(void *serviceDesc, Crypto *crypto);
-int subscribe();
-int publish(char *message,Context context);
 int receive(void (*) (char *topic, Context context));
-//char *signIn(char *username, char *passwd);
-//char *retrieve(char *sensorName, char *deviceID, long long from, long long to);
 int done();

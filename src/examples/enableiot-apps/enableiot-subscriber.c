@@ -73,8 +73,6 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
     if(serviceHandle != NULL && !serviceStarted) {
         commHandle = (CommHandle *) serviceHandle;
         char *response = NULL;
-//        char * (**retrieve)(char *sensorName, char *deviceID, long long from, long long to) = NULL;
-//        char * (**signIn)(char *username, char *passwd) = NULL;
         int (**receive)(void (*)(char *, Context)) = NULL;
 
         receive = commInterfacesLookup(commHandle, "receive");
@@ -83,23 +81,6 @@ void callback(void *handle, int32_t error_code, void *serviceHandle) {
             return;
         }
 
-        /*retrieve = commInterfacesLookup(commHandle, "retrieve");
-        if(retrieve == NULL) {
-            printf("Function \'receive\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }
-
-        signIn = commInterfacesLookup(commHandle, "signIn");
-        if(signIn == NULL) {
-            printf("Function \'signIn\' is not available; please verify the Plugin documentation !!\n");
-            return;
-        }*/
-
-
-        // read the user credentials from console
-//        response = (*signIn)("username@server.com", "password");
-//        response = (*retrieve)("garage_sensor", "02-00-86-4b-b6-de", 0, 0);
-//        printf("Data Retrieved is: %s\n", response);
         (*receive)(message_callback);
 
         while(1) { // Infinite Event Loop

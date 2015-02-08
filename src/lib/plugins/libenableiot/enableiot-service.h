@@ -50,14 +50,11 @@ bool provides_secure_comm = true;
 bool communicates_via_proxy = true;
 
 char *deviceID = NULL;
-char *data_account_name = NULL; // data account name
+char *activationCode = NULL;
 char *sensorName = NULL;
 char *sensorType = NULL;
 
 int init(void *serviceDesc, Crypto *crypto);
-char *signIn(char *username, char *passwd);
-char *createAccount(char *accname);
-char *createDevice(char *deviceid, char *gatewayid, char *devicename);
 char *activateDevice();
 char *registerSensor();
 int publish(char *message,Context context);

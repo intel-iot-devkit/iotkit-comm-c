@@ -199,61 +199,6 @@ void connectionLost(void *context, char *cause) {
     }
 }
 
-/**
- * @name Publish a message
- * @brief Used to send message to a broker.
- * @param[in] message to be published
- * @param[in] context w.r.t topic the message required to be published
- * @return boolean, specifies whether the message is successfully published or not
- */
-int publish(char *message, Context context) {
-
-    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-    MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
-
-    int rc = 0;
-    char *topic;
-
-    if (context.name != NULL && context.value != NULL && strcmp(context.name, "topic") == 0) {
-        topic = context.value;
-    }
-    else {
-        printf("Topic not available in the send command\n");
-        return MQTTASYNC_NULL_PARAMETER;
-    }
-
-    unsigned long i;
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-
-    #if DEBUG
-        printf("start seconds : %ld\n",tv.tv_sec);
-    #endif
-
-    opts.onSuccess = onSend;
-    opts.onFailure = onSendFailure;
-    opts.context = client;
-    pubmsg.payload = message;
-    pubmsg.payloadlen = strlen(message);
-    pubmsg.qos = QOS;
-    pubmsg.retained = 0;
-    usleep(100);
-
-    if ((rc = MQTTAsync_sendMessage(client, topic, &pubmsg, &opts))     \
-            != MQTTASYNC_SUCCESS) {
-        printf("Failed to start sendMessage, return code %d\n", rc);
-        exit(-1);
-    }
-
-    gettimeofday(&tv,NULL);
-
-    #if DEBUG
-        printf("end seconds : %ld\n",tv.tv_sec);
-    #endif
-
-    return rc;
-}
-
 /*
  * @name Subscribes to a topic
  * @brief Subscribes to a topic with an MQTT broker.
@@ -511,47 +456,6 @@ long long getCurrentTimeInMillis() {
     return currentTimeInMills;
 }
 
-/**
- * @name retrieve a sensor data
- * @brief Registers the client's callback to be invoked on receiving a message from MQTT broker.
- * @param handler to be registered as a callback
- */
-char *retrieve(char *sensorName, char *deviceID, long long from, long long to) {
-    char *response = NULL;
-    RetrieveData *retrieveObj;
-    char *sensorID = getSensorComponentId(strdup(sensorName));
-    long long fromTimestamp = 0, toTimestamp = 0;
-
-    #if DEBUG
-        printf("Invoked enableiot-client: retrieve()\n");
-    #endif
-
-    if(from > 0) {
-        fromTimestamp = from;
-    }
-
-    if(to <= 0) {
-        toTimestamp = getCurrentTimeInMillis();
-    } else {
-        toTimestamp = to;
-    }
-
-    retrieveObj = createRetrieveDataObject(fromTimestamp, toTimestamp);
-
-    if(deviceID) {
-        addDeviceId(retrieveObj, strdup(deviceID));
-    }
-
-    if(sensorID) {
-        addSensorId(retrieveObj, strdup(sensorID));
-    }
-
-    response = retrieveData(retrieveObj);
-
-    return response;
-}
-
-
 void parseServiceName(char *serviceName) {
     int tokenSize = 0;
     char *topic_name = serviceName;
@@ -588,6 +492,35 @@ void parseServiceName(char *serviceName) {
     }
 }
 
+char *activateDevice() {
+    bool isActivated = false;
+
+    iotkit_init();
+
+    isActivated = isDeviceActivated(); // if device is already active; no need to activate again
+
+    if(!isActivated) {
+        if(!activationCode) {
+            fprintf(stderr, "activation Code cannot be NULL\n");
+            return NULL;
+        }
+
+        if(!deviceID) {
+            fprintf(stderr, "device ID cannot be NULL\n");
+            return NULL;
+        }
+
+        char *response = NULL;
+        response = activateADevice2(activationCode, deviceID);
+
+        iotkit_cleanup();
+        return response;
+    }
+
+    iotkit_cleanup();
+    return NULL;
+}
+
 /**
  * @name Initialization
  * @brief Create and initialize the plugin.
@@ -604,19 +537,15 @@ int init(void *servQuery, Crypto *crypto) {
 
     ServiceQuery *serviceQuery = (ServiceQuery *) servQuery;
 
-    iotkit_init();
-
+    activationCode = serviceQuery->type_params.activationCode;
+    deviceID = serviceQuery->type_params.deviceid;
     address = serviceQuery->address;
     port = serviceQuery->port;
     parseServiceName(serviceQuery->service_name);
 
-    targetDeviceId = serviceQuery->type_params.deviceid;
+    targetDeviceId = serviceQuery->type_params.subscribeToDevice;
+
+    activateDevice();
 
     return 0;
-}
-
-char *signIn(char *username, char *passwd) {
-    char *response = NULL;
-    response = getUserJwtToken(username, passwd);
-    return response;
 }
