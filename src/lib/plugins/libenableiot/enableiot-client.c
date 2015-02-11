@@ -172,7 +172,7 @@ char *retrieve(char *sensorName, char *deviceID, long long from, long long to) {
         addSensorId(retrieveObj, strdup(sensorID));
     }
 
-    response = retrieveData(retrieveObj);
+    response = retrieveData2(retrieveObj);
 
     return response;
 }
