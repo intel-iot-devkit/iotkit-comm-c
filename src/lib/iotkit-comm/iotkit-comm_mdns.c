@@ -88,6 +88,7 @@ void initSpecification(ServiceSpec *specification) {
     specification->type_params.deviceid = NULL;
     specification->type_params.activationCode = NULL;
     specification->type_params.subscribeToDevice = NULL;
+    specification->type_params.frequencyInterval = 0;
     // initially set status to UNKNOWN
     specification->status = UNKNOWN;
 }
@@ -488,6 +489,15 @@ ServiceQuery *parseServiceQuery(char *service_desc_file) {
                     if(specification->type_params.subscribeToDevice) {
                         printf("Subscribe to Device: %s\n", specification->type_params.subscribeToDevice);
                     }
+                #endif
+
+                jitem = cJSON_GetObjectItem(child, "frequencyInterval");
+                if (jitem && isJsonNumber(jitem)) {
+                    specification->type_params.frequencyInterval = jitem->valueint;
+                }
+
+                #if DEBUG
+                    printf("Interval Frequency to retrieve data : %d\n", specification->type_params.frequencyInterval);
                 #endif
             }
 

@@ -3,5 +3,5 @@
     "type" : {
         "name": "enableiot"
     },
-    "type_params": {"deviceid": "02-00-86-81-77-00", "activationCode":"2sdf34sfeE", "subscribeto": "02-00-86-4b-b6-de"}
+    "type_params": {"deviceid": "02-00-86-81-77-00", "activationCode":"2sdf34sfeE", "subscribeto": "02-00-86-4b-b6-de", "frequencyInterval": 5}
 }

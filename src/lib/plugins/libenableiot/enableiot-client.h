@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
-#include <MQTTAsync.h>
 #include <cJSON.h>
 
 #include "iotkit-comm.h"
@@ -41,21 +40,9 @@
 #include <iotkit-lib/authorization.h>
 #include <iotkit-lib/data_api.h>
 
-#define CLIENTID    "IoTClient"
-#define QOS         0
-#define TIMEOUT     10000L
-
 #ifndef DEBUG
     #define DEBUG 0
 #endif
-
-volatile int toStop = 0;
-volatile int finished = 0;
-volatile int subscribed = 0;
-volatile int connected = 0;
-volatile int sent = 0;
-
-int clientInstanceNumber = 0;
 
 char *interface = "enableiot-client-interface"; // specifies the plugin interface json
 bool provides_secure_comm = true;
@@ -71,17 +58,7 @@ char *data_account_id = NULL; // data account ID
 char *sensorName = NULL;
 char *sensorType = NULL;
 char *targetDeviceId = NULL;
-
-/**
- * Topic to ubscribe data
- */
-char subscribe_topic[256];
-
-void *handle = NULL;
-char *err = NULL;
-
-MQTTAsync client;
-MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
+int frequencyInterval;
 
 void (*msgArrhandler) (char *topic, Context context) = NULL;
 

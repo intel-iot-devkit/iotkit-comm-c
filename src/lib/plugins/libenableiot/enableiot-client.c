@@ -30,198 +30,6 @@
 
 #include "enableiot-client.h"
 
-void handleSignal(int sig) {
-    #if DEBUG
-        printf("got interruption signal");
-    #endif
-
-    toStop = 1;
-}
-
-int messageArrived(void *ctx, char *topicName, int topicLen, MQTTAsync_message *message) {
-    int i;
-    char* payloadptr;
-    char *payloadmsg;
-    Context context;
-
-    #if DEBUG
-        printf("Message arrived\n");
-        printf("topic: %s\n", topicName);
-        printf("message:");
-
-        payloadptr = message->payload;
-        for(i = 0; i<message->payloadlen; i++) {
-            putchar(*payloadptr++);
-        }
-        putchar('\n');
-    #endif
-
-    payloadmsg = (char *)malloc(message->payloadlen+1);
-    if (payloadmsg != NULL) {
-        strncpy(payloadmsg, message->payload, message->payloadlen);
-        payloadmsg[message->payloadlen] = '\0';
-    }
-
-    context.name = "topic";
-    context.value = strdup(topicName);
-    if (msgArrhandler != NULL) {
-        msgArrhandler(payloadmsg, context);
-    } else {
-        printf("error: Receive Handler not set\n");
-    }
-
-    MQTTAsync_freeMessage(&message);
-    MQTTAsync_free(topicName);
-    if (payloadmsg != NULL) {
-        free(payloadmsg);
-        payloadmsg = NULL;
-    }
-    if (context.value != NULL) {
-        free(context.value);
-        context.value = NULL;
-    }
-    return 1;
-}
-
-void onSubscribe(void* context, MQTTAsync_successData* response) {
-    #if DEBUG
-        printf("Subscribe succeeded\n");
-    #endif
-}
-
-void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
-    #if DEBUG
-        printf("Subscribe failed\n");
-    #endif
-
-    finished = 1;
-}
-
-void onUnSubscribe(void* context, MQTTAsync_successData* response) {
-    #if DEBUG
-        printf("UnSubscribe succeeded\n");
-    #endif
-}
-
-void onUnSubscribeFailure(void* context, MQTTAsync_failureData* response) {
-    #if DEBUG
-        printf("UnSubscribe failed\n");
-    #endif
-}
-
-void onDisconnect(void* context, MQTTAsync_successData* response) {
-    #if DEBUG
-        printf("Successful disconnection\n");
-    #endif
-
-    finished = 1;
-}
-
-void onSendFailure(void* context, MQTTAsync_failureData* response) {
-    #if DEBUG
-        printf("onSendFailure: message with token value %d delivery failed\n", response->token);
-    #endif
-}
-
-void onSend(void* context, MQTTAsync_successData* response) {
-    static last_send = 0;
-
-    if (response->token - last_send != 1) {
-        printf("Error in onSend, token value %d, last_send %d\n", response->token, last_send);
-    }
-
-    last_send++;
-
-    if ((response->token % 1000) == 0) {
-        printf("onSend: message with token value %d delivery confirmed\n", response->token);
-    }
-}
-
-void deliveryComplete(void* context, MQTTAsync_token token) {
-    sent++;
-    if ((sent % 1000) == 0) {
-        printf("deliveryComplete: message with token value %d delivery confirmed\n", token);
-    }
-    if (sent != token) {
-        printf("Error, sent %d != token %d\n", sent, token);
-    }
-}
-
-void onConnectFailure(void* context, MQTTAsync_failureData* response) {
-    #if DEBUG
-        printf("Connect failed, code: %d\n", response->code);
-        if(response->message) {
-            printf("Connect failed, message: %s\n", response->message);
-        }
-    #endif
-    finished = 1;
-}
-
-void onConnect(void* context, MQTTAsync_successData* response) {
-    #if DEBUG
-        printf("Connected\n");
-    #endif
-
-    connected = 1;
-
-    #if DEBUG
-        printf("Subscribing to topic: %s\n", subscribe_topic);
-    #endif
-    subscribe();
-}
-
-void connectionLost(void *context, char *cause) {
-    MQTTAsync client2 = (MQTTAsync)context;
-//    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
-    MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
-    int rc;
-
-    #if DEBUG
-        printf("\nConnection lost\n");
-        printf("     cause: %s\n", cause);
-        printf("Reconnecting\n");
-    #endif
-
-    conn_opts.ssl = &sslopts;
-    conn_opts.username = username;
-    conn_opts.password = password;
-    conn_opts.ssl->enableServerCertAuth = 0;
-
-    conn_opts.cleansession = 1;
-    conn_opts.onSuccess = onConnect;
-    conn_opts.onFailure = onConnectFailure;
-    conn_opts.context = client2;
-    conn_opts.keepAliveInterval = 300; // 5 minutes
-    conn_opts.retryInterval = 0;
-    if ((rc = MQTTAsync_connect(client2, &conn_opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to start connect, return code %d\n", rc);
-        finished = 1;
-    }
-}
-
-/*
- * @name Subscribes to a topic
- * @brief Subscribes to a topic with an MQTT broker.
- * @param[in] topic needs to be subscribed to
- * @return boolean, which specifies whether successfully subscribed or not
-*/
-int subscribe() {
-    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-
-    int rc = 0;
-
-    opts.onSuccess = onSubscribe;
-    opts.onFailure = onSubscribeFailure;
-    opts.context = client;
-
-    if ((rc = MQTTAsync_subscribe(client, strdup(subscribe_topic), QOS, &opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to subscribe, return code %d\n", rc);
-        exit(-1);
-    }
-
-    return rc;
-}
-
 /**
  * @name Cleanup the MQTT client
  * @brief Used to close the connections and for cleanup activities.
@@ -232,54 +40,9 @@ int done() {
         printf("Invoked done()\n");
     #endif
 
-    MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
-
-    int rc = 0;
-
-    unsubscribe();
-
-    opts.onSuccess = onDisconnect;
-    opts.context = client;
-
-    if ((rc = MQTTAsync_disconnect(client, &opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to start disconnect, return code %d\n", rc);
-        exit(-1);
-    }
-    finished = 1;
-    toStop = 0;
-
-    MQTTAsync_destroy(&client);
-
     iotkit_cleanup();
 
-    return rc;
-}
-
-/*
- * @name Unsubscribe a topic
- * @brief Discontinues the subscription to a topic.
- * @param[in] topic that has been previously subscribed to
-*/
-int unsubscribe() {
-
-    #if DEBUG
-        printf("Invoked MQTT: unsubscribe()\n");
-    #endif
-
-    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-
-    opts.onSuccess = onUnSubscribe;
-    opts.onFailure = onUnSubscribeFailure;
-    opts.context = client;
-
-    int rc = 0;
-
-    if ((rc = MQTTAsync_unsubscribe(client, subscribe_topic, &opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to unsubscribe, return code %d\n", rc);
-        exit(-1);
-    }
-
-    return rc;
+    return 0;
 }
 
 void initializeDeviceCredentials() {
@@ -355,11 +118,64 @@ endParseStateConfig:
     }
 }
 
-#if DEBUG
-    void handleTrace(enum MQTTASYNC_TRACE_LEVELS level, char* message) {
-        printf("%s\n", message);
+long long getCurrentTimeInMillis() {
+    long elapsedtime = -1L;
+    long long currentTimeInMills;
+
+    time(&elapsedtime);
+
+    currentTimeInMills = (long long)elapsedtime * 1000L;
+
+    #if DEBUG
+        printf("Current Time in Millis is %lld\n", currentTimeInMills);
+    #endif
+
+    return currentTimeInMills;
+}
+
+/**
+ * @name retrieve a sensor data
+ * @brief Registers the client's callback to be invoked on receiving a message from MQTT broker.
+ * @param handler to be registered as a callback
+ */
+char *retrieve(char *sensorName, char *deviceID, long long from, long long to) {
+    char *response = NULL;
+    RetrieveData *retrieveObj;
+    char *sensorID = getSensorComponentId(strdup(sensorName));
+    long long fromTimestamp = 0, toTimestamp = 0;
+
+    #if DEBUG
+        printf("Invoked enableiot-client: retrieve()\n");
+    #endif
+
+    if(from > 0) {
+        fromTimestamp = from;
     }
-#endif
+
+    if(to <= 0) {
+        toTimestamp = getCurrentTimeInMillis();
+    } else {
+        toTimestamp = to;
+    }
+
+    retrieveObj = createRetrieveDataObject(fromTimestamp, toTimestamp);
+
+    #if DEBUG
+        printf("Retrieve data between %lld till %lld\n", retrieveObj->fromMillis, retrieveObj->toMillis);
+    #endif
+
+    if(deviceID) {
+        addDeviceId(retrieveObj, strdup(deviceID));
+    }
+
+    if(sensorID) {
+        addSensorId(retrieveObj, strdup(sensorID));
+    }
+
+    response = retrieveData(retrieveObj);
+
+    return response;
+}
 
 /**
  * @name Subscribe to a topic
@@ -370,90 +186,33 @@ int receive(void (*handler) (char *topic, Context context)) {
     int rc = 0;
     char uri[256];
     int i = 0;
-    MQTTAsync_token token;
-    MQTTAsync_SSLOptions sslopts = MQTTAsync_SSLOptions_initializer;
-
-    #if DEBUG
-        printf("Invoked enableiot-client: receive()\n");
-    #endif
+    long long currentTimeInMills;
+    long long previousTimeInMills;
+    Context context;
+    char *response;
 
     initializeDeviceCredentials();
 
-    address = strdup("broker.us.enableiot.com");
-    port = 8883;
+    context.name = NULL;
+    context.value = NULL;
 
-    sprintf(uri, "ssl://%s:%d", address, port);
-    #if DEBUG
-        printf("MQTT URI is: %s\n", uri);
-    #endif
-    conn_opts.ssl = &sslopts;
-    conn_opts.username = username;
-    conn_opts.password = password;
+    currentTimeInMills = previousTimeInMills = 0;
 
-    conn_opts.ssl->enableServerCertAuth = 0;
+    while(1) {
+        if(currentTimeInMills == 0) {
+            currentTimeInMills = getCurrentTimeInMillis();
+            previousTimeInMills = currentTimeInMills - (frequencyInterval * 1000);
+        } else {
+            previousTimeInMills = currentTimeInMills + 1;
+            currentTimeInMills = getCurrentTimeInMillis();
+        }
 
-    char clientID[256];
-    sprintf(clientID, "%s%d", CLIENTID, clientInstanceNumber++);
-
-    MQTTAsync_create(&client, uri, clientID, MQTTCLIENT_PERSISTENCE_DEFAULT, NULL);
-
-    #if DEBUG
-        MQTTAsync_setTraceCallback(handleTrace);
-        MQTTAsync_setTraceLevel(MQTTASYNC_TRACE_ERROR);
-    #endif
-
-    MQTTAsync_setCallbacks(client, client, connectionLost, messageArrived, deliveryComplete);
-
-    conn_opts.cleansession = 1;
-    conn_opts.onSuccess = onConnect;
-    conn_opts.onFailure = onConnectFailure;
-    conn_opts.context = client;
-    conn_opts.keepAliveInterval = 300; // 5 minutes
-    conn_opts.retryInterval = 0;
-
-    strcpy(subscribe_topic, "server/metric/");
-    if(data_account_id) {
-        strcat(subscribe_topic, data_account_id);
-        strcat(subscribe_topic, "/");
+        response = retrieve(sensorName, targetDeviceId, previousTimeInMills, currentTimeInMills);
+        handler(response, context);
+        sleep(frequencyInterval);
     }
-
-    if(targetDeviceId) {
-        strcat(subscribe_topic, targetDeviceId); // subscribe to prescribed device
-    } else {
-        strcat(subscribe_topic, username); // subscribe to own device
-    }
-
-    if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
-        printf("Failed to start connect, return code %d\n", rc);
-        exit(1);
-    }
-
-    #if DEBUG
-        printf("Waiting for connect\n");
-    #endif
-
-    while (connected == 0 && finished == 0 && toStop == 0) {
-        #if DEBUG
-            printf("Waiting for connect: %d %d %d\n", connected, finished, toStop);
-        #endif
-
-        sleep(1);
-    }
-
-    msgArrhandler = handler;
 
     return 1;
-}
-
-long long getCurrentTimeInMillis() {
-    long elapsedtime = -1L;
-    long long currentTimeInMills;
-
-    time(&elapsedtime);
-
-    currentTimeInMills = (long long)elapsedtime * 1000L;
-
-    return currentTimeInMills;
 }
 
 void parseServiceName(char *serviceName) {
@@ -495,8 +254,6 @@ void parseServiceName(char *serviceName) {
 char *activateDevice() {
     bool isActivated = false;
 
-    iotkit_init();
-
     isActivated = isDeviceActivated(); // if device is already active; no need to activate again
 
     if(!isActivated) {
@@ -513,11 +270,9 @@ char *activateDevice() {
         char *response = NULL;
         response = activateADevice2(activationCode, deviceID);
 
-        iotkit_cleanup();
         return response;
     }
 
-    iotkit_cleanup();
     return NULL;
 }
 
@@ -544,6 +299,13 @@ int init(void *servQuery, Crypto *crypto) {
     parseServiceName(serviceQuery->service_name);
 
     targetDeviceId = serviceQuery->type_params.subscribeToDevice;
+    frequencyInterval = serviceQuery->type_params.frequencyInterval;
+
+    if(frequencyInterval <= 0) {
+        frequencyInterval = 5; //default 5 seconds
+    }
+
+    iotkit_init();
 
     activateDevice();
 

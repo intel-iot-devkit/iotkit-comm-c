@@ -160,6 +160,7 @@ typedef struct _ServiceSpec {
         char *deviceid;
         char *activationCode;
         char *subscribeToDevice;
+        int frequencyInterval;
     } type_params;
 } ServiceSpec,ServiceQuery;
 
