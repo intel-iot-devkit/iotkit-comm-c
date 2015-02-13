@@ -118,19 +118,12 @@ endParseStateConfig:
     }
 }
 
-long long getCurrentTimeInMillis() {
+long getCurrentTimeInSeconds() {
     long elapsedtime = -1L;
-    long long currentTimeInMills;
 
     time(&elapsedtime);
 
-    currentTimeInMills = (long long)elapsedtime * 1000L;
-
-    #if DEBUG
-        printf("Current Time in Millis is %lld\n", currentTimeInMills);
-    #endif
-
-    return currentTimeInMills;
+    return elapsedtime;
 }
 
 /**
@@ -138,11 +131,11 @@ long long getCurrentTimeInMillis() {
  * @brief Registers the client's callback to be invoked on receiving a message from MQTT broker.
  * @param handler to be registered as a callback
  */
-char *retrieve(char *sensorName, char *deviceID, long long from, long long to) {
+char *retrieve(char *sensorName, char *deviceID, long from, long to) {
     char *response = NULL;
     RetrieveData *retrieveObj;
     char *sensorID = getSensorComponentId(strdup(sensorName));
-    long long fromTimestamp = 0, toTimestamp = 0;
+    long fromTimestamp = 0, toTimestamp = 0;
 
     #if DEBUG
         printf("Invoked enableiot-client: retrieve()\n");
@@ -153,7 +146,7 @@ char *retrieve(char *sensorName, char *deviceID, long long from, long long to) {
     }
 
     if(to <= 0) {
-        toTimestamp = getCurrentTimeInMillis();
+        toTimestamp = getCurrentTimeInSeconds();
     } else {
         toTimestamp = to;
     }
@@ -186,8 +179,8 @@ int receive(void (*handler) (char *topic, Context context)) {
     int rc = 0;
     char uri[256];
     int i = 0;
-    long long currentTimeInMills;
-    long long previousTimeInMills;
+    long currentTime;
+    long previousTime;
     Context context;
     char *response;
 
@@ -196,18 +189,18 @@ int receive(void (*handler) (char *topic, Context context)) {
     context.name = NULL;
     context.value = NULL;
 
-    currentTimeInMills = previousTimeInMills = 0;
+    currentTime = previousTime = 0;
 
     while(1) {
-        if(currentTimeInMills == 0) {
-            currentTimeInMills = getCurrentTimeInMillis();
-            previousTimeInMills = currentTimeInMills - (frequencyInterval * 1000);
+        if(currentTime == 0) {
+            currentTime = getCurrentTimeInSeconds();
+            previousTime = currentTime - (frequencyInterval * 1000);
         } else {
-            previousTimeInMills = currentTimeInMills + 1;
-            currentTimeInMills = getCurrentTimeInMillis();
+            previousTime = currentTime + 1;
+            currentTime = getCurrentTimeInSeconds();
         }
 
-        response = retrieve(sensorName, targetDeviceId, previousTimeInMills, currentTimeInMills);
+        response = retrieve(sensorName, targetDeviceId, previousTime, currentTime);
         handler(response, context);
         sleep(frequencyInterval);
     }
