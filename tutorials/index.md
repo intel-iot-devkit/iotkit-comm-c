@@ -14,11 +14,10 @@ comes in two flavors: C and node.js. This documentation focuses on the C version
 &ensp;&ensp;&bull;  For browsing the library and plugins:<BR>
 
 &ensp;&ensp;    1) iotkit-comm<BR>
-&ensp;&ensp;    2) iotkitpubsub<BR>
-&ensp;&ensp;    3) enableiot<BR>
-&ensp;&ensp;    4) mqttpubsub<BR>
-&ensp;&ensp;    5) zmqpubsub<BR>
-&ensp;&ensp;    6) zmqreqrep<BR><BR>
+&ensp;&ensp;    2) enableiot<BR>
+&ensp;&ensp;    3) mqttpubsub<BR>
+&ensp;&ensp;    4) zmqpubsub<BR>
+&ensp;&ensp;    5) zmqreqrep<BR><BR>
 
 <I>Note: For the purposes of this documentation, a module is a logical grouping of functions and variables. Please be aware
 that this is the <B> logical structure of the documentation only</B> and not iotkit-comm codebase.</I>
