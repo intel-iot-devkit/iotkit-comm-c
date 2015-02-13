@@ -40,12 +40,12 @@
  */
 int publish(char *message, Context context) {
     cJSON *json = NULL, *jitem = NULL;
-    char *name, *latitude, *longitude, *height;
+    char *name;
     char valuestr[256];
     char *out;
     int value;
 
-    name = latitude = longitude = height = NULL;
+    name = NULL;
 
     json = cJSON_Parse(message);
 
@@ -88,31 +88,7 @@ int publish(char *message, Context context) {
             printf("component value = %d\n", value);
         #endif
 
-        jitem = cJSON_GetObjectItem(json, "latitude");
-        if (jitem && isJsonString(jitem)) {
-            latitude = strdup(jitem->valuestring);
-            #if DEBUG
-                printf("latitude value = %s\n", latitude);
-            #endif
-        }
-
-        jitem = cJSON_GetObjectItem(json, "longitude");
-        if (jitem && isJsonString(jitem)) {
-            longitude = strdup(jitem->valuestring);
-            #if DEBUG
-                printf("longitude value = %s\n", longitude);
-            #endif
-        }
-
-        jitem = cJSON_GetObjectItem(json, "height");
-        if (jitem && isJsonString(jitem)) {
-            height = strdup(jitem->valuestring);
-            #if DEBUG
-                printf("height value = %s\n", height);
-            #endif
-        }
-
-        submitData(name, valuestr, latitude, longitude, height);
+        submitData(name, valuestr);
 
 endParseStateConfig:
         cJSON_Delete(json);
