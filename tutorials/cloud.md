@@ -1,67 +1,30 @@
-
-To publish data to the cloud and later subscribe to it, you will need to:
+Publishing and subscribing to data from the cloud requires that you:
 
 1) Create a cloud account <BR>
-2) Add device in your cloud account <BR>
-3) Activate your device in the cloud <BR>
-4) Publish data from your device <BR>
-5) Subscribe to data <BR>
+2) Publish data <BR>
+3) View the published data <BR>
+4) Subscribe to the data <BR>
+5) Troubleshoot (if necessary) <BR>
 
 <B> Create a cloud account </B>
 
 Go to Intel's enableiot cloud site [https://dashboard.us.enableiot.com] and follow instructions to create an account.
-Once an account is created, an activation key will be available in the account details section which we will be using
-shortly.
+Once an account is created, an activation key will be available in the account details section. Record this
+activation key; note that it will *expire* in less than *one hour*. If your activation key has expired,
+you can always create a new one by clicking on the adjacent 'refresh' button.
 
-<B> Add device in your cloud account </B>
+<B> Publish data </B>
 
-Adding a device involves:
-
-a) Getting your device's ID <BR>
-b) Use the ID to register your device with the cloud
-
-<B> Get your device's ID </B>
-
-You can get the device id by running the following command in device terminal:
-
-$ iotkit-admin device-id <BR>
-
-<B> Use the ID to register your device with the cloud </B>
-
-When you log in to your account, the first page you see is the dashboard. Click on 'Devices' menu option; then, click on
-the 'Add New Device' button. Enter appropriate details about your device; if you do not have a gateway id or don't
-know what that means, just enter the device ID in this field.
-Once the device is added click on 'Account' menu option and note the 'Activation Code'. Proceed to the next
-step: Activate your device in the cloud .
-
-<B> Activate your device in the cloud </B>
-
-Before you connect your device, you should first test if it can reach the cloud:
-
-$ iotkit-admin test <BR>
-
-If there are no errors, do the following:
-
-$ iotkit-admin activate [your-activation-key] <BR>
-
-If there are no errors, your device is activated and ready to publish data.
-
-<B> Publish data from your device </B>
-
-This section assumes that you know how to write a server application using iotkit-comm. If not, please go through the server
-tutorial first.
-
-Create a service specification for the cloud (temperatureServiceIoTKit.json):
+Create a service specification for your sensor (garage-sensor-spec.json):
 
     {
         "name" : "temperature.v1.0/garage_sensor",
         "type" : {
-            "name": "iotkit-agent"
+            "name": "enableiot"
         },
-        "port" : 1884,
-        "type_params": {"mustsecure": false}
+        "port": 34562,
+        "type_params": {"deviceid":"EdisonInGarage", "activationCode":"<<YOUR DEVICE ACTIVATION CODE>>"}
     }
-
 
 Write the code to publish data:
 
@@ -72,25 +35,22 @@ Write the code to publish data:
     #include "iotkit-comm/util.h"
 
     ServiceSpec *srvSpec = NULL;
-    int msgnumber = 40;
+    int msgnumber = 13; // sensor value
 
-    void callback(void *handle, int32_t error_code, void *serviceHandle)
-    {
+    void callback(void *handle, int32_t error_code, void *serviceHandle) {
         Context context;
         char msg[256];
         int i = 0;
         CommHandle *commHandle = NULL;
 
-        if(serviceHandle != NULL)
-        {
+        if(serviceHandle != NULL) {
             commHandle = (CommHandle *) serviceHandle;
 
-            int (**send) (char *message,Context context);
+            int (**publish) (char *message,Context context);
 
-            send = commInterfacesLookup(commHandle, "publish");
-            if(send == NULL)
-            {
-                printf("Function \'publish\' is not available; please verify the Plugin documentation !!\n");
+            publish = commInterfacesLookup(commHandle, "publish");
+            if(publish == NULL) {
+                fprintf(stderr, "Function \'publish\' is not available; please verify the Plugin documentation !!\n");
                 return;
             }
 
@@ -98,10 +58,10 @@ Write the code to publish data:
             context.value = "data";
 
             while(i < 10) {  // Event Loop
-                sprintf(msg, "{\"n\": \"garage_sensor\", \"v\": %d}", msgnumber++);
+                sprintf(msg, "{\"name\": \"garage_sensor\", \"value\": %d}", msgnumber++);
                 printf("Publishing msg:%s\n", msg);
 
-                (*send)(msg, context);
+                (*publish)(msg, context);
                 sleep(2);
 
                 i ++;
@@ -113,11 +73,10 @@ Write the code to publish data:
         exit(0);
     }
 
-    int main(void)
-    {
+    int main(void) {
         puts("Sample program to publish data to IoT Cloud !!");
 
-        srvSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceIoTKit.json");
+        srvSpec = (ServiceSpec *) parseServiceSpec("./serviceSpecs/temperatureServiceEnableIot.json");
 
         if (srvSpec){
             advertiseServiceBlocking(srvSpec, callback);
@@ -127,33 +86,34 @@ Write the code to publish data:
     }
 
 
-Note above, that data can only be published using sensors. The cloud supports two types of sensors by default
-temperature (temperature.v1.0) and humidity (humidity.v1.0). You may create other types by going to the account
-details account details page; then, clicking on the 'Catalog' tab; and then finally, clicking on the 'Add a New
-Catalog Item' button.
+It is important to know that data can only be published using sensors. The cloud supports two types of sensors by
+default: temperature (temperature.v1.0) and humidity (humidity.v1.0). You may create other types by going to the
+account details page; then, clicking on the 'Catalog' tab; and then finally, clicking on the 'Add a New
+Catalog Item' button. These need to be specified as the second-last path element in the 'name' field of
+the specification. The last path element is the friendly name of the sensor, e.g. 'garage_sensor'.
+As soon as the service is started, the sensor 'garage_sensor' is registered with the cloud and data
+can be published as necessary.
 
-After you've registered the sensor you can publish a reading or observation by using 'send' interface of
-CommHandle *commHandle. Make sure the observation is a valid JSON object that contains both the n (name) and v
-(value) fields. Also, note that the topic under which the observation is published is "data". This is currently the
-only topic supported by the cloud.
+<B> View the published data </B>
+
+Go to Intel's enableiot cloud site [https://dashboard.us.enableiot.com], login, click on the "Menu" button,
+and click "Charts". Then, select your device and sensor-type to see a graph of your published data vs.
+time.
 
 <B> Subscribe to data </B>
 
-This section assumes that you know how to write a client application using iotkit-comm. If not, please go through the client
-tutorial first.
-
-Create a service query for the cloud (temperatureServiceQueryIoTKit.json):
+To receive data published by the sample 'garage_sensor' service running on 'EdisonInGarage', create a
+service query ('garage-sensor-query.json'):
 
     {
         "name" : "temperature.v1.0/garage_sensor",
         "type" : {
-            "name": "iotkit-agent"
+            "name": "enableiot"
         },
-        "type_params": {"deviceid": "<<device ID>>"}
+        "type_params": {"deviceid": "EdisonInGarage", "activationCode":"<<YOUR DEVICE ACTIVATION CODE>>", "subscribeto": "EdisonInGarage", "frequencyInterval": 5}
     }
 
-
-Write the code to subscribe to the data:
+Then, write the code to subscribe to the data:
 
     #include <stdio.h>
     #include <stdbool.h>
@@ -182,6 +142,7 @@ Write the code to subscribe to the data:
     void callback(void *handle, int32_t error_code, void *serviceHandle) {
         if(serviceHandle != NULL && !serviceStarted) {
             commHandle = (CommHandle *) serviceHandle;
+            char *response = NULL;
             int (**receive)(void (*)(char *, Context)) = NULL;
 
             receive = commInterfacesLookup(commHandle, "receive");
@@ -192,7 +153,6 @@ Write the code to subscribe to the data:
 
             (*receive)(message_callback);
 
-            serviceStarted = 1;
             while(1) { // Infinite Event Loop
                 sleep(1);
             }
@@ -207,7 +167,7 @@ Write the code to subscribe to the data:
     int main(void) {
 
         puts("Sample program to test the IoT Cloud subscribe plugin !!");
-        query = (ServiceQuery *) parseServiceQuery("./temperatureServiceQueryIoTKit.json");
+        query = (ServiceQuery *) parseServiceQuery("./serviceQueries/temperatureServiceQueryEnableIot.json");
 
         if (query) {
             createClientForGivenService(query, callback);
@@ -216,4 +176,15 @@ Write the code to subscribe to the data:
         return 0;
     }
 
-To receive data you must first subscribe to it. Note that it subscribes to the device ID specified in the query json.
+
+<B> Troubleshooting </B>
+
+Some of the most common issues stem from not being connected to the network. We suggest running the following
+command on your Edison to ensure that you are connected to the cloud:
+
+    curl www.intel.com/edison
+
+If this command hangs or fails with an error, it means the Edison is not connected to the Internet.
+
+NOTE: please ensure that the activation key has not expired; you can always create a new one as described in the
+'Create a cloud account' section above.
